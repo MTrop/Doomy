@@ -5,6 +5,8 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyMain;
+import net.mtrop.doomy.struct.Common;
 
 /**
  * A command that prints the version and exits.
@@ -22,7 +24,7 @@ public class VersionCommand extends Object implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, InputStream in)
 	{
-		
+		Common.splash(out, DoomyMain.VERSION);
 		return ERROR_NONE;
 	}
 
