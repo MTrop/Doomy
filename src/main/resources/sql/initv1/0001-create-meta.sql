@@ -1,0 +1,5 @@
+CREATE TABLE Meta (
+	name TEXT NOT NULL,
+	value TEXT NULL,
+	PRIMARY KEY (name)
+)

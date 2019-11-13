@@ -1,0 +1,359 @@
+Doomy
+=====
+
+Depends:
+	Black Rook JSON
+	Black Rook SQL
+	SQLite
+	DoomStruct ?
+
+Filesystem
+----------
+
+/ [config-folder]
+	doomy.db			The database.
+	/ download			Permanent storage for downloaded WADs.
+	/ presets			Contains presets.
+		/ [hash]		A single preset data, created on engine execution (saves/demos/shots).
+	/ temp				Cleared on program startup and after engine execution (extracted data for engine call).
+	
+SQL Layout
+----------
+
+CREATE TABLE Meta (
+	name TEXT NOT NULL,
+	value TEXT NULL,
+	PRIMARY KEY (name)
+);
+INSERT INTO Meta (name, value) VALUES
+	('table.version', '1')
+	;
+
+CREATE TABLE Config (
+	id INTEGER,
+	name TEXT NOT NULL,
+	value TEXT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
+);
+INSERT INTO Config (name, value) VALUES
+	('idgames.api.url',              'https://www.doomworld.com/idgames/api/api.php'),
+	('idgames.mirror.base.url',      'http://gamers.org/pub/idgames/'),
+	('idgames.timeout.millis',       '10000'),
+	('wadarchive.api.url',           'https://www.wad-archive.com/api/latest/'),
+	('wadarchive.wadseeker.api.url', 'https://www.wad-archive.com/wadseeker/'),
+	('wadarchive.timeout.millis',    '10000')
+	;
+
+CREATE TABLE Engines (
+	id INTEGER,
+	name TEXT NOT NULL,
+	templateSource TEXT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
+);
+
+CREATE TABLE EngineSettings (
+	engineId INTEGER 
+	name TEXT NOT NULL,
+	value TEXT NULL,
+	PRIMARY KEY (engineId, name),
+	FOREIGN KEY (engineId) 
+		REFERENCES Engines(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
+);
+-- exe.path: filepath					// Engine executable path.
+-- dosbox.path: filepath				// [OPT] If present (and not empty), starts DOSBox, mounts temp, and calls the EXE via it.
+-- setup.exe.name: filename				// [OPT] If present, "engine setup" will run this executable in the engine's parent directory.
+-- server.exe.name: filename			// [OPT] If present, "run --server" will run this executable in the engine's parent directory.
+-- work.dir: path						// [OPT] If NOT present (or empty), set to either DOSBox dir or the EXE parent.
+-- switch.iwad: string					// [OPT] If present (and not empty), this engine requires an IWAD and this is the switch for loading it.
+-- switch.file: string					// The switch to use for loading PWAD data (might be "-merge" if Chocolate Doom).
+-- switch.dehacked: string				// [OPT] The switch to use for loading DeHackEd patches (blank for unsupported).
+-- switch.dehlump: string				// [OPT] The switch to use for loading DeHackEd lumps (blank for unsupported).
+-- switch.save.dir: string				// [OPT] If present (and not empty), this switch is used to map to preset directories for saves.
+-- switch.screenshots.dir: string		// [OPT] If present (and not empty), this switch is used to map to preset directories for screenshots.
+-- regex.screenshots: string			// [OPT] If present (and not empty), this regex pattern is used to find screenshot files in the Engine Dir to move to the preset folder on exit, or preset to Engine dir.
+-- regex.demos: string					// [OPT] If present (and not empty), this regex pattern is used to find demo files in the Engine Dir to move to the preset folder on exit, or preset to Engine dir.
+-- regex.saves: string					// [OPT] If present (and not empty), this regex pattern is used to find savegame files in the Engine Dir to move to the preset folder on exit, or preset to Engine dir.
+-- cmdline: string						// [OPT] If present (and not empty), this command line is appended (but before the as-is passed-in options).
+
+CREATE TABLE IWADs (
+	id INTEGER,
+	name TEXT NOT NULL,
+	path TEXT NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
+);
+
+CREATE TABLE WADs (
+	id INTEGER,
+	name TEXT NOT NULL,
+	path TEXT NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
+);
+
+CREATE TABLE WADData (
+	wadId INTEGER NOT NULL,
+	name TEXT NOT NULL,
+	value TEXT NULL,
+	PRIMARY KEY (wadId, name),
+	FOREIGN KEY (wadId) 
+		REFERENCES WADs(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
+);
+
+CREATE TABLE WADSources (
+	wadId INTEGER NOT NULL,
+	url TEXT NOT NULL,
+	UNIQUE (wadId),
+	FOREIGN KEY (wadId) 
+		REFERENCES WADs(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
+);
+
+CREATE TABLE WADDepenencies (
+	wadId INTEGER NOT NULL,
+	needsWadId INTEGER NOT NULL,
+	UNIQUE (wadId, needsWadId),
+	FOREIGN KEY (wadId) 
+		REFERENCES WADs(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE,
+	FOREIGN KEY (needsWadId) 
+		REFERENCES WADs(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
+);
+
+CREATE TABLE Preset (
+	id INTEGER,
+	hash TEXT NOT NULL,
+	name TEXT NULL,
+	engineName TEXT NOT NULL,
+	iwadName TEXT NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (hash),
+	UNIQUE (name),
+	FOREIGN KEY (engineName) 
+		REFERENCES Engines(name)
+			ON DELETE NO ACTION
+			ON UPDATE CASCADE,
+	FOREIGN KEY (iwadName) 
+		REFERENCES IWADs(name)
+			ON DELETE NO ACTION
+			ON UPDATE CASCADE
+);
+
+CREATE TABLE PresetItem (
+	id INTEGER,
+	presetId INTEGER NOT NULL,
+	wadId INTEGER NOT NULL,
+	sort INTEGER NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (presetId, wadId),
+	FOREIGN KEY (presetId) 
+		REFERENCES Preset(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
+);
+
+..............................................................................
+
+CREATE TABLE EngineTemplates (
+	id INTEGER,
+	name TEXT NOT NULL,
+	PRIMARY KEY (id)
+);
+
+CREATE TABLE EngineTemplateSettings (
+	engineTemplateId INTEGER,
+	name TEXT NOT NULL,
+	value TEXT NULL,
+	PRIMARY KEY (engineTemplateId, name),
+	FOREIGN KEY (engineTemplateId) 
+		REFERENCES EngineTemplates(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
+);
+
+..............................................................................
+
+
+Command Line
+------------
+
+doomy										Print version splash and basic help.
+	version									Print version splash and terminate.
+	help									Print all of this help and terminate.
+	config									Print this subsection's help and terminate.
+		list								Print Doomy's settings.
+		get [name]							Prints the value of a Doomy setting called [name].
+		set [name] [value]					Sets the value of a Doomy setting called [name] to [value].
+		--expert-mode						Open a simple SQL shell for browsing/altering the config.
+	engine									Print this subsection's help and terminate.
+		setup								Runs the engine's setup/settings program (if present).
+		add [name] [template]   			Create a new engine profile named [name] by copying a template named [template].
+		remove [name]		   				Remove an engine template named [name] (and confirm).
+			--quiet, -q							...but skip confirm.
+		list								List all stored engine profiles.
+			templates						List all engine profile templates.
+		config [name]
+			list							Print engine profile [name]'s settings.
+				[phrase]						...that contain [phrase].
+			get [setting]					Prints the value of setting called [setting] on the engine profile named [name].
+			set [setting] [value]			Sets the value of setting called [setting] to [value] on the engine profile named [name].
+		template
+			add [name] 						Create a new engine profile template named [name].
+				[template]						...by copying a template named [template].
+			remove [name] 					Remove the engine profile template named [name] (and confirm).
+				--quiet, -q						...but skip confirm.
+	iwad									Print this subsection's help and terminate.
+		list								List all known IWADs.
+			[phrase]							...that contain [phrase].
+		add [name] [path]					Add an IWAD by name [name] and its path at [path].
+		remove [name]						Remove an IWAD by name.
+		rename [name1] [name2]				Changes an alias from IWAD [name1] to [name2].
+		get [name]							Print the path of the IWAD named [name].
+		set [name] [path]					Change the path of the IWAD named [name] to [path].
+		scan [path]							Adds all IWADs in directory [path] (can be WAD/PK3/IPK3/IPK7). Filename becomes [name].
+			--recurse, -r						...and search recursively from [path].
+			--prefix, -p [string]				...and prepend [string] to each WAD entry name.
+			--force-add-existing				...and update the names of known paths (otherwise, this does not add existing).
+	wad										Print this subsection's help and terminate.
+		list								List cached/downloaded WADs.
+			[phrase]							...that contains [phrase] (wildcard is *).
+		add [name] [path]					Add a WAD alias for a WAD named [name] for [path] (can be a zip archive).
+		remove [name]						Remove a WAD alias for a WAD named [name] for [path].
+			--downloaded, -d					...and also remove the downloaded WAD.
+		rename [name1] [name2]				Changes an alias from WAD [name1] to [name2].
+		get [name]							Print the path of the WAD named [name].
+		set [name] [path]					Change the path of the WAD named [name] to [path].
+		scan [path]							Adds all WADs in directory [path] (can be WAD/PK3/PK7/ZIPs). Filename becomes [name].
+			--recurse, -r						...and search recursively from [path].
+			--prefix, -p [string]				...and prepend [string] to each WAD entry name.
+			--force-add-existing				...and update the names of known paths (otherwise, this does not add existing).
+		source								Print this subsection's help and terminate.
+			list							List all URL sources.
+				[phrase]						...whose WAD name contains [phrase].
+			get [name]						Prints the URL source of a downloaded WAD named [name].
+			set [name] [url]				Sets the URL source of a downloaded WAD named [name] to [url].
+		text								Dumps the WAD's text entry, if any (searches same directory for FILENAME.TXT or inside archive).
+		download [name] [url]				Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].
+		redownload 
+			[name]							Redownload a downloaded WAD named [name].
+			--all							Redownload everything.
+		dependency 
+			list [name]						Lists all dependencies of WAD [name].
+			add [name1] [name2]				Sets a dependency of WAD [name1] to WAD [name2] (will be loaded automatically, and before [name1]).
+			remove [name1] [name2]			Removes a dependency of WAD [name1], specifically, [name2].
+			clear [name]					Removes all dependencies of WAD [name].
+	preset									Print this subsection's help and terminate. 
+		list								List all presets.
+			[phrase]							...whose name/hash contains [phrase].
+		name [hash] [name]					Sets name [name] on a preset with hash [hash].
+		create [engine]						Create preset, but don't run engine.
+			--wads, -w [wads...]				...with these WADs/Zips (by name, dependency-expanded).
+			--iwad, -i [name]					...with IWAD name [name] (may not be required if specified in engine settings).
+		remove								Print this subsection's help and terminate.
+			[name]							Remove preset named [name] (takes precedence, must confirm).
+				--quiet, -q						...but skip confirm.
+			[hash]							Remove preset by hash [hash] (must be full, must confirm).
+				--quiet, -q						...but skip confirm.
+		info								Print this subsection's help and terminate.
+			[name]							Get preset named [name] and list info (takes precedence).
+			[hash]							Get preset hash [hash] and list info (can be starting partial, if unique enough).
+		run 								Print this subsection's help and terminate.
+			[name]							Run preset named [name] (takes precedence).
+			[hash]							Run preset hash [hash] (can be starting partial, if unique enough).
+			--								Send args verbatim after this token.
+	run [engine]							Run engine [engine]
+		--server								...but use the server EXE, if specified.
+		--wads, -w [wads...]					...with these WADs/Zips (by name, dependency-expanded) (they are unzipped and added via -file and -deh).
+		--iwad, -i [name]						...with IWAD name [name] (may not be required if specified in engine settings).
+		--preset, -p [name]						...and assign the created preset [name].
+		--spawn, -s								...and do not wait for its completion.
+		--dry-command							...or instead, print the full command line and do not execute.
+		--									Send args verbatim after this token.
+	idgames									Print this subsection's help and terminate.
+		ping								Ping service.
+		about								Display API "About."
+		comic								Return a Doom Comic quote (yes, it's a real call).
+		search 								Print this subsection's help and terminate.
+			id [id]							Search for file with ID [id] (not standardized!).
+				--name, -n [name]			Specify new name, if downloaded.
+				--download, -d [result]		Download the file at result position [result].
+				--text, -t [result]			Print text file of result [result].
+			file [phrase]					Searches for filename named [phrase], return best matches up to amount.
+				--name, -n [name]			Specify new name, if downloaded.
+				--limit, -l [amount]		Set max results to [amount].
+				--download, -d [result]		Download the file at result position [result].
+				--text, -t [result]			Print text file of result [result].
+			title [phrase]					Searches for title containing [phrase], return best matches up to amount.
+				--name, -n [name]			Specify new name, if downloaded.
+				--limit, -l [amount]		Set max results to [amount].
+				--download, -d [result]		Download the file at result position [result].
+				--text, -t [result]			Print text file of result [result].
+			author [phrase]					Searches for author containing [phrase], return best matches up to amount.
+				--name, -n [name]			Specify new name, if downloaded.
+				--limit, -l [amount]		Set max results to [amount].
+				--download, -d [result]		Download the file at result position [result].
+				--text, -t [result]			Print text file of result [result].
+			text [phrase]					Searches for author containing [phrase], return best matches up to amount.
+				--name, -n [name]			Specify new name, if downloaded.
+				--limit, -l [amount]		Set max results to [amount].
+				--download, -d [result]		Download the file at result position [result].
+				--text, -t [result]			Print text file of result [result].
+	wadarchive								Print this subsection's help and terminate.
+		md5 [hash]							List results from MD5 file hash [hash].
+			--download, -d [result]			Download the found file from link [result].
+			--name, -n [name]				Specify new alias, if downloaded.
+		sha1 [hash]							List results from SHA1 file hash [hash].
+			--download, -d [result]			Download the found file from link [result].
+			--name, -n [name]				Specify new alias, if downloaded.
+		file [name]							List results from file [name].
+			--download, -d [result]			Download the found file from link [result].
+			--name, -n [name]				Specify new alias, if downloaded.
+
+..............................................................................
+
+final class IdGamesDriver {
+	...
+}
+
+final class WadArchiveDriver {
+	...
+}
+
+final class ConfigDriver {
+	private SQLConnection connection;
+	...
+}
+
+final class AsyncDriver {
+	...
+}
+
+enum Response {
+	SUCCESS,
+	...
+}
+
+abstract class DoomyCommand {
+	Response process(PrintStream out, PrintStream err, InputStream in, Deque<String> args);
+}
+
+class DoomyCommandFactory {
+	public static DoomyCommand parseCommand(Deque<String> args) {
+		...
+	}
+}
+
+main (String... args) {
+	Linked
+}
+

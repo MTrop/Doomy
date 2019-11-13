@@ -1,0 +1,139 @@
+package net.mtrop.doomy.managers;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.SQLException;
+
+import com.blackrook.sql.SQLConnection;
+import com.blackrook.sql.SQLConnector;
+
+import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.DoomySetupException;
+import net.mtrop.doomy.struct.FileUtils;
+import net.mtrop.doomy.struct.IOUtils;
+
+/**
+ * Database manager singleton.
+ * @author Matthew Tropiano
+ */
+public final class DatabaseManager
+{
+	// Singleton instance.
+	private static DatabaseManager INSTANCE;
+	// Creation mutex.
+	private static Object CREATE_MUTEX = new Object();
+
+	// Query resources.
+	private static String[] INIT_QUERIES = {
+		"sql/initv1/0001-create-meta.sql",
+		"sql/initv1/0002-create-config.sql",
+		"sql/initv1/0003-create-engines.sql",
+		"sql/initv1/0004-create-enginesettings.sql",
+		"sql/initv1/0005-create-iwads.sql",
+		"sql/initv1/0006-create-wads.sql",
+		"sql/initv1/0007-create-waddata.sql",
+		"sql/initv1/0008-create-wadsources.sql",
+		"sql/initv1/0009-create-waddependencies.sql",
+		"sql/initv1/0010-create-preset.sql",
+		"sql/initv1/0011-create-presetitem.sql",
+		"sql/initv1/0012-insert-meta-defaults.sql",
+		"sql/initv1/0013-insert-config-defaults.sql",
+		"sql/initv1/0014-create-enginetemplates.sql",
+		"sql/initv1/0015-create-enginetemplatessettings.sql"
+	};
+
+	// Initializes/creates the connector.
+	private static SQLConnector createConnector(File databaseFile)
+	{
+		return new SQLConnector("org.sqlite.JDBC", "jdbc:sqlite:" + databaseFile.getPath().replaceAll("\\+", "/"));	
+	}
+
+	// Initializes/creates the database.
+	private static void initDatabaseFile(File databaseFile)
+	{
+		if (!FileUtils.createPathForFile(databaseFile))
+			throw new DoomySetupException("Could not create database: " + databaseFile.toString());
+		
+		try 
+		{
+			createConnector(databaseFile).getConnectionAnd((conn)->
+			{
+				for (String resource : INIT_QUERIES)
+				{
+					try (InputStream in = IOUtils.openResource(resource))
+					{
+						conn.getUpdateResult(IOUtils.getTextualContents(in, "UTF-8"));
+					} 
+					catch (IOException e) 
+					{
+						throw new DoomySetupException("Internal error: Could not open resource: " + resource, e);
+					}
+				}
+			});
+		} 
+		catch (SQLException e) 
+		{
+			throw new DoomySetupException("Internal error!", e);
+		}
+		
+	}
+
+	/**
+	 * @return true if the database exists, false if not.
+	 */
+	public static boolean databaseExists()
+	{
+		return (new File(DoomyEnvironment.getDatabasePath())).exists();
+	}
+	
+	/**
+	 * Initializes/Returns the singleton database instance.
+	 * @return the single database manager.
+	 * @throws DoomySetupException if the database could not be set up.
+	 */
+	public static DatabaseManager get()
+	{
+		if (INSTANCE == null)
+		{
+			synchronized (CREATE_MUTEX)
+			{
+				if (INSTANCE != null)
+					return INSTANCE;
+				else
+				{
+					File dbFile = null;
+					try {
+						dbFile = new File(DoomyEnvironment.getDatabasePath());
+						if (!dbFile.exists())
+							initDatabaseFile(dbFile);
+						return INSTANCE = new DatabaseManager(dbFile);
+					} catch (SQLException e) {
+						if (dbFile.exists())
+							dbFile.delete();
+						throw new DoomySetupException("Could not set up database: " + e.getMessage(), e);
+					}
+				}
+			}
+		}
+		return INSTANCE;
+	}
+	
+	/** Open database connection. */
+	private SQLConnection connection;
+	
+	private DatabaseManager(File databaseFile) throws SQLException
+	{
+		SQLConnector connector = createConnector(databaseFile);
+		this.connection = connector.getConnection();
+	}
+	
+	/**
+	 * @return the open connection.
+	 */
+	SQLConnection getConnection() 
+	{
+		return connection;
+	}
+	
+}

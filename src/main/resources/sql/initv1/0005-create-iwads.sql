@@ -1,0 +1,7 @@
+CREATE TABLE IWADs (
+	id INTEGER,
+	name TEXT NOT NULL,
+	path TEXT NOT NULL,
+	PRIMARY KEY (id),
+	UNIQUE (name)
+)

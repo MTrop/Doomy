@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE project>
+<!-- ====================================================================== 
+     Doom Struct Build File    
+     Matt Tropiano                                                                
+     ====================================================================== -->
+<project name="build" default="compile">
+
+	<description>Doom Struct</description>
+
+	<property file="build.properties" />
+
+	<!-- Dependencies -->
+	
+	<property name="dev.base" value=".." />
+	<property name="S" value="${path.separator}" />
+	<property name="shell.dir" value="shell" />
+	<property name="dist.dir" value="dist" />
+
+	<!-- Project Libs -->
+	
+	<property name="json.lib.version" value="1.0.0" />
+	<property name="json.tag" value="${json.lib.version}-RELEASE" />
+	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
+	<property name="json.jar" value="${json.project}.jar" />
+	<property name="json.jar.src" value="${json.project}-sources.jar" />
+	<property name="sql.lib.version" value="1.0.0" />
+	<property name="sql.tag" value="${sql.lib.version}-RELEASE" />
+	<property name="sql.project" value="blackrook-sql-${sql.lib.version}" />	
+	<property name="sql.jar" value="${sql.project}.jar" />
+	<property name="sql.jar.src" value="${sql.project}-sources.jar" />
+	<property name="sqlite.lib.version" value="1.0.0" />
+	<property name="sql.project" value="blackrook-sql-${sql.lib.version}" />	
+	<property name="sql.jar" value="${sql.project}.jar" />
+	<property name="sql.jar.src" value="${sql.project}-sources.jar" />
+
+	<!-- Project Info -->
+	
+	<property name="project.archive" value="doomtools" />
+	<property name="project.javadoc.title" value="DoomTools" />
+	<property name="project.classpath" value="${dev.base}/${doom.jar}"/>
+	<property name="project.compiler.bootclasspath" value="" />
+	<property name="project.testclass" value=""/>
+	<property name="project.testclass.main" value=""/>
+	<property name="project.javadoc.packages" value="
+		"
+	/>
+	
+	<import file="build-shell.xml" />
+	<import file="build-dependencies.xml" />
+	<import file="build-import.xml" />
+	
+	<!-- Versions -->
+
+	<property name="doomy.version" value="${build.version}" />
+
+	<target name="clean.versions">
+		<delete dir="${build.versions.dir}" includeemptydirs="true" casesensitive="false" /> 
+	</target>
+
+	<target name="init.versions" depends="clean.versions">
+		<mkdir dir="${build.versions.dir}" />
+		<echo file="${build.versions.dir}/doomy.version" message="${doomy.version}" />
+	</target>
+
+
+	<!-- Filenames -->
+	
+	<property name="build.versions.dir" value="${build.dir}/versions" />
+	<property name="zip.dist.filename" value="${project.archive}-${build.version}.zip" />
+	<property name="tar.dist.filename" value="${project.archive}-${build.version}.tar.gz" />
+
+	<target name="clean.dist">
+		<delete dir="${dist.dir}" includeemptydirs="true" casesensitive="false" /> 
+	</target>
+
+	<target name="init.dist" depends="clean.dist">
+		<mkdir dir="${dist.dir}" />
+	</target>
+
+	<target name="javadoc" depends="init.docs" description="Builds the documentation.">
+        <javadoc access="protected" 
+        	additionalparam="-J-Xmx512m  " author="true" 
+        	classpath="${project.classpath}${path.separator}${bin.dir}" 
+        	doctitle="${project.javadoc.title}" 
+        	sourcepath="${src.dir}" 
+        	packagenames="${project.javadoc.packages}"
+        	destdir="${docs.dir}" 
+        	splitindex="true" 
+        	use="true" 
+        	version="true" 
+        	nodeprecated="false" 
+        	nodeprecatedlist="false" 
+        	noindex="false" 
+        	nonavbar="false" 
+        	notree="false"
+    		>
+            <link href="https://docs.oracle.com/en/java/javase/11/docs/api/"/>
+        </javadoc>
+    </target>	
+
+	<target name="jar.one" depends="compile, init.versions">
+		<copy file="${dependencies.dir}/${doom.jar}" tofile="${jar.dir}/${jar.filename}" />
+		<copy todir="${bin.dir}/net/mtrop/doom/tools">
+			<fileset dir="${build.versions.dir}" includes="*.version" />
+		</copy>
+		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
+	</target>
+
+	<!-- Dependencies -->
+	
+	<target name="dependency.json">
+		<github-dl repository="BlackRookSoftware/JSON" tag="${json.tag}" file="${json.jar}" dest="${dependencies.dir}" />
+		<github-dl repository="BlackRookSoftware/JSON" tag="${json.tag}" file="${json.jar.src}" dest="${dependencies.dir}" />
+	</target>
+	<target name="dependency.sql">
+		<github-dl repository="BlackRookSoftware/SQL" tag="${sql.tag}" file="${sql.jar}" dest="${dependencies.dir}" />
+		<github-dl repository="BlackRookSoftware/SQL" tag="${sql.tag}" file="${sql.jar.src}" dest="${dependencies.dir}" />
+	</target>
+	<target name="dependency.sqlite">
+		<maven-jar-dl group-path="org/xerial" artifact="sqlite-jdbc" version="3.21.0.1" />
+		<maven-jar-sources-dl group-path="org/xerial" artifact="sqlite-jdbc" version="3.21.0.1" />
+	</target>
+	
+	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.sql, dependency.sqlite, dependency.properties" description="Downloads and compiles the dependencies.">
+	</target>
+
+	<!-- Scripts -->
+
+	<target name="scripts" description="Creates application shell scripts.">
+		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
+		<shell-bash name="doomy" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
+	</target>
+
+	<!-- Shells -->
+
+	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
+		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
+			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
+			<zipfileset dir="${build.dir}/shell/cmd" />
+			<zipfileset refid="fileset.documents" prefix="docs" />
+			<zipfileset dir="docs" prefix="docs" />
+		</zip>
+	</target>
+
+	<target name="dist.bash" depends="init.jar, jar.one, scripts, init.dist">
+		<tar destfile="${dist.dir}/${tar.dist.filename}" compression="gzip">
+			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
+			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
+			<tarfileset refid="fileset.documents" prefix="docs" />
+			<tarfileset dir="docs" prefix="docs" />
+		</tar>
+	</target>
+
+	<target name="dist" depends="dist.bash, dist.cmd" description="Zips together the application and shell scripts.">
+	</target>
+
+	<!-- Deployments -->
+
+	<target name="deploy.cmd" if="deploy.dir" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
+		<delete dir="${deploy.dir}" failonerror="false" />
+		<mkdir dir="${deploy.dir}" />
+		<unzip src="${dist.dir}/${zip.dist.filename}" dest="${deploy.dir}" />
+	</target>
+
+	<target name="deploy.bash" if="deploy.dir" depends="dist.bash" description="Deploys the Bash distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
+		<delete dir="${deploy.dir}" failonerror="false" />
+		<mkdir dir="${deploy.dir}" />
+		<unzip src="${dist.dir}/${tar.dist.filename}" dest="${deploy.dir}" />
+	</target>
+	
+</project>
