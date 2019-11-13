@@ -4,9 +4,9 @@ Copyright (c) 2019 Matt Tropiano
 
 ### Required Libraries
 
-[Black Rook SQL](https://github.com/BlackRookSoftware/SQL) 1.0.0+
-[Black Rook JSON](https://github.com/BlackRookSoftware/JSON) 1.0.0+
-[SQLite JDBC](https://github.com/xerial/sqlite-jdbc) 3.21.0.1+
+[Black Rook SQL](https://github.com/BlackRookSoftware/SQL) 1.0.0+  
+[Black Rook JSON](https://github.com/BlackRookSoftware/JSON) 1.0.0+  
+[SQLite JDBC](https://github.com/xerial/sqlite-jdbc) 3.21.0.1+  
 
 ### Required Modules
 
@@ -22,7 +22,7 @@ The `master` branch contains stable code. Until a release is cut, the `master` b
 
 ### Introduction
 
-A bunch of command-line utilities for Doom stuff. This time, they're useful.
+A command-line based (at the moment) Doom engine game launcher.
 
 ### Why?
 
@@ -34,11 +34,11 @@ To download dependencies for this project, type (`build.properties` will also be
 
 	ant dependencies
 
-To compile this library with Apache Ant, type:
+To compile this program with Apache Ant, type:
 
 	ant compile
 
-To make Maven-compatible JARs of this library (placed in the *build/jar* directory), type:
+To make Maven-compatible JARs of this program (placed in the *build/jar* directory), type:
 
 	ant jar
 
