@@ -101,7 +101,7 @@
 
 	<target name="jar.one" depends="compile, init.versions">
 		<copy file="${dependencies.dir}/${doom.jar}" tofile="${jar.dir}/${jar.filename}" />
-		<copy todir="${bin.dir}/net/mtrop/doom/tools">
+		<copy todir="${bin.dir}/net/mtrop/doomy">
 			<fileset dir="${build.versions.dir}" includes="*.version" />
 		</copy>
 		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />

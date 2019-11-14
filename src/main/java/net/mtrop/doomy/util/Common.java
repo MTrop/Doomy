@@ -1,14 +1,16 @@
-package net.mtrop.doomy.struct;
+package net.mtrop.doomy.util;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.struct.ObjectUtils;
 
 /**
  * Common class.
@@ -32,7 +34,7 @@ public final class Common
 			return VERSION_MAP.get(name);
 		
 		String out = null;
-		try (InputStream in = openResource("net/mtrop/doom/tools/" + name + ".version")) {
+		try (InputStream in = openResource("net/mtrop/doomy/" + name + ".version")) {
 			if (in != null)
 				VERSION_MAP.put(name, out = getTextualContents(in, "UTF-8").trim());
 		} catch (IOException e) {
@@ -136,7 +138,7 @@ public final class Common
 			out.println("        list                             Print Doomy's settings.");
 			out.println("        get [name]                       Prints the value of a Doomy setting called [name].");
 			out.println("        set [name] [value]               Sets the value of a Doomy setting called [name] to [value].");
-			out.println("        --expert-mode                    Open a simple SQL shell for browsing/altering the config.");
+			out.println("        expert-mode                      Open a simple SQL shell for browsing/altering the config.");
 		}
 		if (commandName == null || DoomyCommand.ENGINE.equalsIgnoreCase(commandName))
 		{
@@ -282,6 +284,37 @@ public final class Common
 			out.println("            --download, -d [result]      Download the found file from link [result].");
 			out.println("            --name, -n [name]            Specify new alias, if downloaded.");
 		}
+	}
+	
+	/**
+	 * Checks if the next argument matches the target, and if so, removes it.
+	 * @param arguments the queue of arguments.
+	 * @param target the target argument value.
+	 * @return true on match, false if not.
+	 */
+	public static boolean matchArgument(Deque<String> arguments, String target)
+	{
+		if (!currentArgument(arguments, target))
+			return false;
+		
+		arguments.pop();
+		return true;
+	}
+	
+	/**
+	 * Checks if the next argument matches the target.
+	 * @param arguments the queue of arguments.
+	 * @param target the target argument value.
+	 * @return true on match, false if not.
+	 */
+	public static boolean currentArgument(Deque<String> arguments, String target)
+	{
+		if (arguments.isEmpty())
+			return false;
+		if (!arguments.peek().equalsIgnoreCase(target))
+			return false;
+		
+		return true;
 	}
 	
 }

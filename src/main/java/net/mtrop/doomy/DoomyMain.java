@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import net.mtrop.doomy.DoomyCommand.BadArgumentException;
 import net.mtrop.doomy.DoomyCommand.BadCommandException;
 import net.mtrop.doomy.managers.DatabaseManager;
-import net.mtrop.doomy.struct.Common;
+import net.mtrop.doomy.util.Common;
 
 /**
  * Main class for Doomy.
@@ -17,7 +17,6 @@ public final class DoomyMain
 {
 	public static final String VERSION = Common.getVersionString("doomy");
 
-	private static final int ERROR_NONE = 0;
 	private static final int ERROR_BAD_COMMAND = 1;
 	private static final int ERROR_BAD_ARGUMENT = 2;
 
@@ -34,14 +33,6 @@ public final class DoomyMain
 
 		Deque<String> arguments = new LinkedList<String>(Arrays.asList(args));
 
-		if (arguments.isEmpty())
-		{
-			Common.splash(System.out, VERSION);
-			Common.usage(System.out);
-			System.exit(ERROR_NONE);
-			return;
-		}
-		
 		DoomyCommand command;
 		try {
 			command = DoomyCommand.getCommand(arguments);

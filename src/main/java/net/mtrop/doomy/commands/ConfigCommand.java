@@ -6,24 +6,30 @@ import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyMain;
+import net.mtrop.doomy.util.Common;
 
 /**
- * A command that prints the version and exits.
+ * A command that prints the help output and exits.
  * @author Matthew Tropiano
  */
-public class VersionCommand implements DoomyCommand
+public class ConfigCommand implements DoomyCommand
 {
+	private String badCommand;
 
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
 	{
-		// Do nothing.
+		badCommand = !args.isEmpty() ? args.pop() : null;
 	}
 
 	@Override
 	public int call(PrintStream out, PrintStream err, InputStream in)
 	{
-		out.println(DoomyMain.VERSION);
+		if (badCommand != null)
+			err.println("ERROR: Unknown command: " + badCommand);
+			
+		Common.splash(out, DoomyMain.VERSION);
+		Common.help(out, CONFIG);
 		return ERROR_NONE;
 	}
 

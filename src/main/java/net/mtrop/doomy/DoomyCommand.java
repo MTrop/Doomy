@@ -4,6 +4,12 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Deque;
 
+import net.mtrop.doomy.commands.ConfigCommand;
+import net.mtrop.doomy.commands.HelpCommand;
+import net.mtrop.doomy.commands.UsageCommand;
+import net.mtrop.doomy.commands.VersionCommand;
+import net.mtrop.doomy.util.Common;
+
 /**
  * Commands factory for Doomy.
  */
@@ -23,6 +29,10 @@ public interface DoomyCommand
 	static final String RUN = "run";
 	static final String IDGAMES = "idgames";
 	static final String WADARCHIVE = "wadarchive";
+	static final String LIST = "list";
+	static final String GET = "get";
+	static final String SET = "set";
+	static final String EXPERT_MODE = "expert-mode";
 
 	/**
 	 * Thrown if a bad/unexpected argument is parsed on command initialize.
@@ -57,8 +67,43 @@ public interface DoomyCommand
 	 */
 	static DoomyCommand getCommand(Deque<String> args) throws BadCommandException
 	{
-		// TODO: Finish this!
-		throw new BadCommandException("I didn't finish this stuff");
+		if (args.isEmpty())
+		{
+			return new UsageCommand();
+		}
+		else if (Common.matchArgument(args, VERSION))
+		{
+			return new VersionCommand();
+		}
+		else if (Common.matchArgument(args, HELP))
+		{
+			return new HelpCommand();
+		}
+		else if (Common.matchArgument(args, CONFIG))
+		{
+			if (Common.matchArgument(args, LIST))
+			{
+				// TODO: Finish this.
+			}
+			else if (Common.matchArgument(args, GET))
+			{
+				// TODO: Finish this.
+			}
+			else if (Common.matchArgument(args, SET))
+			{
+				// TODO: Finish this.
+			}
+			else if (Common.matchArgument(args, EXPERT_MODE))
+			{
+				// TODO: Finish this.
+			}
+			else
+			{
+				return new ConfigCommand();
+			}
+		}
+
+		return new UsageCommand();
 	}
 
 	/**
