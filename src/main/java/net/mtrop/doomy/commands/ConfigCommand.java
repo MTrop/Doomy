@@ -9,7 +9,7 @@ import net.mtrop.doomy.DoomyMain;
 import net.mtrop.doomy.util.Common;
 
 /**
- * A command that prints the help output and exits.
+ * A command that prints the config help output and exits.
  * @author Matthew Tropiano
  */
 public class ConfigCommand implements DoomyCommand

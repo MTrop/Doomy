@@ -51,6 +51,10 @@ public final class DoomyMain
 			System.err.println("ERROR: " + e.getMessage());
 			System.exit(ERROR_BAD_ARGUMENT);
 			return;
+		} catch (Exception e) {
+			System.err.println("ERROR: " + e.getMessage());
+			System.exit(ERROR_BAD_ARGUMENT);
+			return;
 		}
 		
 		System.exit(retval);

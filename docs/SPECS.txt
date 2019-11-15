@@ -187,137 +187,138 @@ CREATE TABLE EngineTemplateSettings (
 Command Line
 ------------
 
-doomy										Print version splash and basic help.
-	version									Print version splash and terminate.
-	help									Print all of this help and terminate.
-	config									Print this subsection's help and terminate.
-		list								Print Doomy's settings.
-		get [name]							Prints the value of a Doomy setting called [name].
-		set [name] [value]					Sets the value of a Doomy setting called [name] to [value].
-		expert-mode							Open a simple SQL shell for browsing/altering the config.
-	engine									Print this subsection's help and terminate.
-		setup								Runs the engine's setup/settings program (if present).
-		add [name] [template]   			Create a new engine profile named [name] by copying a template named [template].
-		remove [name]		   				Remove an engine template named [name] (and confirm).
-			--quiet, -q							...but skip confirm.
-		list								List all stored engine profiles.
-			templates						List all engine profile templates.
-		config [name]
-			list							Print engine profile [name]'s settings.
-				[phrase]						...that contain [phrase].
-			get [setting]					Prints the value of setting called [setting] on the engine profile named [name].
-			set [setting] [value]			Sets the value of setting called [setting] to [value] on the engine profile named [name].
-		template
-			add [name] 						Create a new engine profile template named [name].
-				[template]						...by copying a template named [template].
-			remove [name] 					Remove the engine profile template named [name] (and confirm).
-				--quiet, -q						...but skip confirm.
-	iwad									Print this subsection's help and terminate.
-		list								List all known IWADs.
-			[phrase]							...that contain [phrase].
-		add [name] [path]					Add an IWAD by name [name] and its path at [path].
-		remove [name]						Remove an IWAD by name.
-		rename [name1] [name2]				Changes an alias from IWAD [name1] to [name2].
-		get [name]							Print the path of the IWAD named [name].
-		set [name] [path]					Change the path of the IWAD named [name] to [path].
-		scan [path]							Adds all IWADs in directory [path] (can be WAD/PK3/IPK3/IPK7). Filename becomes [name].
-			--recurse, -r						...and search recursively from [path].
-			--prefix, -p [string]				...and prepend [string] to each WAD entry name.
-			--force-add-existing				...and update the names of known paths (otherwise, this does not add existing).
-	wad										Print this subsection's help and terminate.
-		list								List cached/downloaded WADs.
-			[phrase]							...that contains [phrase] (wildcard is *).
-		add [name] [path]					Add a WAD alias for a WAD named [name] for [path] (can be a zip archive).
-		remove [name]						Remove a WAD alias for a WAD named [name] for [path].
-			--downloaded, -d					...and also remove the downloaded WAD.
-		rename [name1] [name2]				Changes an alias from WAD [name1] to [name2].
-		get [name]							Print the path of the WAD named [name].
-		set [name] [path]					Change the path of the WAD named [name] to [path].
-		scan [path]							Adds all WADs in directory [path] (can be WAD/PK3/PK7/ZIPs). Filename becomes [name].
-			--recurse, -r						...and search recursively from [path].
-			--prefix, -p [string]				...and prepend [string] to each WAD entry name.
-			--force-add-existing				...and update the names of known paths (otherwise, this does not add existing).
-		source								Print this subsection's help and terminate.
-			list							List all URL sources.
-				[phrase]						...whose WAD name contains [phrase].
-			get [name]						Prints the URL source of a downloaded WAD named [name].
-			set [name] [url]				Sets the URL source of a downloaded WAD named [name] to [url].
-		text								Dumps the WAD's text entry, if any (searches same directory for FILENAME.TXT or inside archive).
-		download [name] [url]				Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].
-		redownload 
-			[name]							Redownload a downloaded WAD named [name].
-			--all							Redownload everything.
-		dependency 
-			list [name]						Lists all dependencies of WAD [name].
-			add [name1] [name2]				Sets a dependency of WAD [name1] to WAD [name2] (will be loaded automatically, and before [name1]).
-			remove [name1] [name2]			Removes a dependency of WAD [name1], specifically, [name2].
-			clear [name]					Removes all dependencies of WAD [name].
-	preset									Print this subsection's help and terminate. 
-		list								List all presets.
-			[phrase]							...whose name/hash contains [phrase].
-		name [hash] [name]					Sets name [name] on a preset with hash [hash].
-		create [engine]						Create preset, but don't run engine.
-			--wads, -w [wads...]				...with these WADs/Zips (by name, dependency-expanded).
-			--iwad, -i [name]					...with IWAD name [name] (may not be required if specified in engine settings).
-		remove								Print this subsection's help and terminate.
-			[name]							Remove preset named [name] (takes precedence, must confirm).
-				--quiet, -q						...but skip confirm.
-			[hash]							Remove preset by hash [hash] (must be full, must confirm).
-				--quiet, -q						...but skip confirm.
-		info								Print this subsection's help and terminate.
-			[name]							Get preset named [name] and list info (takes precedence).
-			[hash]							Get preset hash [hash] and list info (can be starting partial, if unique enough).
-		run 								Print this subsection's help and terminate.
-			[name]							Run preset named [name] (takes precedence).
-			[hash]							Run preset hash [hash] (can be starting partial, if unique enough).
-			--								Send args verbatim after this token.
-	run [engine]							Run engine [engine]
-		--server								...but use the server EXE, if specified.
-		--wads, -w [wads...]					...with these WADs/Zips (by name, dependency-expanded) (they are unzipped and added via -file and -deh).
-		--iwad, -i [name]						...with IWAD name [name] (may not be required if specified in engine settings).
-		--preset, -p [name]						...and assign the created preset [name].
-		--spawn, -s								...and do not wait for its completion.
-		--dry-command							...or instead, print the full command line and do not execute.
-		--									Send args verbatim after this token.
-	idgames									Print this subsection's help and terminate.
-		ping								Ping service.
-		about								Display API "About."
-		comic								Return a Doom Comic quote (yes, it's a real call).
-		search 								Print this subsection's help and terminate.
-			id [id]							Search for file with ID [id] (not standardized!).
-				--name, -n [name]			Specify new name, if downloaded.
-				--download, -d [result]		Download the file at result position [result].
-				--text, -t [result]			Print text file of result [result].
-			file [phrase]					Searches for filename named [phrase], return best matches up to amount.
-				--name, -n [name]			Specify new name, if downloaded.
-				--limit, -l [amount]		Set max results to [amount].
-				--download, -d [result]		Download the file at result position [result].
-				--text, -t [result]			Print text file of result [result].
-			title [phrase]					Searches for title containing [phrase], return best matches up to amount.
-				--name, -n [name]			Specify new name, if downloaded.
-				--limit, -l [amount]		Set max results to [amount].
-				--download, -d [result]		Download the file at result position [result].
-				--text, -t [result]			Print text file of result [result].
-			author [phrase]					Searches for author containing [phrase], return best matches up to amount.
-				--name, -n [name]			Specify new name, if downloaded.
-				--limit, -l [amount]		Set max results to [amount].
-				--download, -d [result]		Download the file at result position [result].
-				--text, -t [result]			Print text file of result [result].
-			text [phrase]					Searches for author containing [phrase], return best matches up to amount.
-				--name, -n [name]			Specify new name, if downloaded.
-				--limit, -l [amount]		Set max results to [amount].
-				--download, -d [result]		Download the file at result position [result].
-				--text, -t [result]			Print text file of result [result].
-	wadarchive								Print this subsection's help and terminate.
-		md5 [hash]							List results from MD5 file hash [hash].
-			--download, -d [result]			Download the found file from link [result].
-			--name, -n [name]				Specify new alias, if downloaded.
-		sha1 [hash]							List results from SHA1 file hash [hash].
-			--download, -d [result]			Download the found file from link [result].
-			--name, -n [name]				Specify new alias, if downloaded.
-		file [name]							List results from file [name].
-			--download, -d [result]			Download the found file from link [result].
-			--name, -n [name]				Specify new alias, if downloaded.
+doomy                                      Print version splash and basic help.
+    version                                Print version splash and terminate.
+    help                                   Print all of this help and terminate.
+    config                                 Print this subsection's help and terminate.
+        list                               Print Doomy's settings.
+            [phrase]                           ...that contain [phrase].
+        get [name]                         Prints the value of a Doomy setting called [name].
+        set [name] [value]                 Sets the value of a Doomy setting called [name] to [value].
+        expert-mode                        Open a simple SQL shell for browsing/altering the config.
+    engine                                 Print this subsection's help and terminate.
+        setup [name]                       Runs the engine's setup/settings program (if present).
+        add [name] [template]              Create a new engine profile named [name] by copying a template named [template].
+        remove [name]                      Remove an engine template named [name] (and confirm).
+            --quiet, -q                        ...but skip confirm.
+        list                               List all stored engine profiles.
+            templates                      List all engine profile templates.
+        config [name]
+            list                           Print engine profile [name]'s settings.
+                [phrase]                       ...that contain [phrase].
+            get [setting]                  Prints the value of setting called [setting] on the engine profile named [name].
+            set [setting] [value]          Sets the value of setting called [setting] to [value] on the engine profile named [name].
+        template
+            add [name]                     Create a new engine profile template named [name].
+                [template]                     ...by copying a template named [template].
+            remove [name]                  Remove the engine profile template named [name] (and confirm).
+                --quiet, -q                    ...but skip confirm.
+    iwad                                   Print this subsection's help and terminate.
+        list                               List all known IWADs.
+            [phrase]                           ...that contain [phrase].
+        add [name] [path]                  Add an IWAD by name [name] and its path at [path].
+        remove [name]                      Remove an IWAD by name.
+        rename [name1] [name2]             Changes an alias from IWAD [name1] to [name2].
+        get [name]                         Print the path of the IWAD named [name].
+        set [name] [path]                  Change the path of the IWAD named [name] to [path].
+        scan [path]                        Adds all IWADs in directory [path] (can be WAD/PK3/IPK3/IPK7). Filename becomes [name].
+            --recurse, -r                      ...and search recursively from [path].
+            --prefix, -p [string]              ...and prepend [string] to each WAD entry name.
+            --force-add-existing               ...and update the names of known paths (otherwise, this does not add existing).
+    wad                                    Print this subsection's help and terminate.
+        list                               List cached/downloaded WADs.
+            [phrase]                           ...that contains [phrase] (wildcard is *).
+        add [name] [path]                  Add a WAD alias for a WAD named [name] for [path] (can be a zip archive).
+        remove [name]                      Remove a WAD alias for a WAD named [name] for [path].
+            --downloaded, -d                   ...and also remove the downloaded WAD.
+        rename [name1] [name2]             Changes an alias from WAD [name1] to [name2].
+        get [name]                         Print the path of the WAD named [name].
+        set [name] [path]                  Change the path of the WAD named [name] to [path].
+        scan [path]                        Adds all WADs in directory [path] (can be WAD/PK3/PK7/ZIPs). Filename becomes [name].
+            --recurse, -r                      ...and search recursively from [path].
+            --prefix, -p [string]              ...and prepend [string] to each WAD entry name.
+            --force-add-existing               ...and update the names of known paths (otherwise, this does not add existing).
+        source                             Print this subsection's help and terminate.
+            list                           List all URL sources.
+                [phrase]                       ...whose WAD name contains [phrase].
+            get [name]                     Prints the URL source of a downloaded WAD named [name].
+            set [name] [url]               Sets the URL source of a downloaded WAD named [name] to [url].
+        text                               Dumps the WAD's text entry, if any (searches same directory for FILENAME.TXT or inside archive).
+        download [name] [url]              Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].
+        redownload 
+            [name]                         Redownload a downloaded WAD named [name].
+            --all                          Redownload everything.
+        dependency 
+            list [name]                    Lists all dependencies of WAD [name].
+            add [name1] [name2]            Sets a dependency of WAD [name1] to WAD [name2] (will be loaded automatically, and before [name1]).
+            remove [name1] [name2]         Removes a dependency of WAD [name1], specifically, [name2].
+            clear [name]                   Removes all dependencies of WAD [name].
+    preset                                 Print this subsection's help and terminate. 
+        list                               List all presets.
+            [phrase]                           ...whose name/hash contains [phrase].
+        name [hash] [name]                 Sets name [name] on a preset with hash [hash].
+        create [engine]                    Create preset, but don't run engine.
+            --wads, -w [wads...]               ...with these WADs/Zips (by name, dependency-expanded).
+            --iwad, -i [name]                  ...with IWAD name [name] (may not be required if specified in engine settings).
+        remove                             Print this subsection's help and terminate.
+            [name]                         Remove preset named [name] (takes precedence, must confirm).
+                --quiet, -q                    ...but skip confirm.
+            [hash]                         Remove preset by hash [hash] (must be full, must confirm).
+                --quiet, -q                    ...but skip confirm.
+        info                               Print this subsection's help and terminate.
+            [name]                         Get preset named [name] and list info (takes precedence).
+            [hash]                         Get preset hash [hash] and list info (can be starting partial, if unique enough).
+        run                                Print this subsection's help and terminate.
+            [name]                         Run preset named [name] (takes precedence).
+            [hash]                         Run preset hash [hash] (can be starting partial, if unique enough).
+            --                             Send args verbatim after this token.
+    run [engine]                           Run engine [engine]
+        --server                               ...but use the server EXE, if specified.
+        --wads, -w [wads...]                   ...with these WADs/Zips (by name, dependency-expanded) (they are unzipped and added via -file and -deh).
+        --iwad, -i [name]                      ...with IWAD name [name] (may not be required if specified in engine settings).
+        --preset, -p [name]                    ...and assign the created preset [name].
+        --spawn, -s                            ...and do not wait for its completion.
+        --dry-command                          ...or instead, print the full command line and do not execute.
+        --                                 Send args verbatim after this token.
+    idgames                                Print this subsection's help and terminate.
+        ping                               Ping service.
+        about                              Display API "About."
+        comic                              Return a Doom Comic quote (yes, it's a real call).
+        search                             Print this subsection's help and terminate.
+            id [id]                        Search for file with ID [id] (not standardized!).
+                --name, -n [name]          Specify new name, if downloaded.
+                --download, -d [result]    Download the file at result position [result].
+                --text, -t [result]        Print text file of result [result].
+            file [phrase]                  Searches for filename named [phrase], return best matches up to amount.
+                --name, -n [name]          Specify new name, if downloaded.
+                --limit, -l [amount]       Set max results to [amount].
+                --download, -d [result]    Download the file at result position [result].
+                --text, -t [result]        Print text file of result [result].
+            title [phrase]                 Searches for title containing [phrase], return best matches up to amount.
+                --name, -n [name]          Specify new name, if downloaded.
+                --limit, -l [amount]       Set max results to [amount].
+                --download, -d [result]    Download the file at result position [result].
+                --text, -t [result]        Print text file of result [result].
+            author [phrase]                Searches for author containing [phrase], return best matches up to amount.
+                --name, -n [name]          Specify new name, if downloaded.
+                --limit, -l [amount]       Set max results to [amount].
+                --download, -d [result]    Download the file at result position [result].
+                --text, -t [result]        Print text file of result [result].
+            text [phrase]                  Searches for author containing [phrase], return best matches up to amount.
+                --name, -n [name]          Specify new name, if downloaded.
+                --limit, -l [amount]       Set max results to [amount].
+                --download, -d [result]    Download the file at result position [result].
+                --text, -t [result]        Print text file of result [result].
+    wadarchive                             Print this subsection's help and terminate.
+        md5 [hash]                         List results from MD5 file hash [hash].
+            --download, -d [result]        Download the found file from link [result].
+            --name, -n [name]              Specify new alias, if downloaded.
+        sha1 [hash]                        List results from SHA1 file hash [hash].
+            --download, -d [result]        Download the found file from link [result].
+            --name, -n [name]              Specify new alias, if downloaded.
+        file [name]                        List results from file [name].
+            --download, -d [result]        Download the found file from link [result].
+            --name, -n [name]              Specify new alias, if downloaded.
 
 ..............................................................................
 

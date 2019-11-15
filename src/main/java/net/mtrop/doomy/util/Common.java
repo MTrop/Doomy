@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -138,12 +137,12 @@ public final class Common
 			out.println("        list                             Print Doomy's settings.");
 			out.println("        get [name]                       Prints the value of a Doomy setting called [name].");
 			out.println("        set [name] [value]               Sets the value of a Doomy setting called [name] to [value].");
-			out.println("        expert-mode                      Open a simple SQL shell for browsing/altering the config.");
+			out.println("        remove [name]                    Removes a Doomy setting called [name].");
 		}
 		if (commandName == null || DoomyCommand.ENGINE.equalsIgnoreCase(commandName))
 		{
 			out.println("    engine                               Print this subsection's help and terminate.");
-			out.println("        setup                            Runs the engine's setup/settings program (if present).");
+			out.println("        setup [name]                     Runs the engine's setup/settings program (if present).");
 			out.println("        add [name] [template]            Create a new engine profile named [name] by copying a template named [template].");
 			out.println("        remove [name]                    Remove an engine template named [name] (and confirm).");
 			out.println("            --quiet, -q                      ...but skip confirm.");
@@ -284,37 +283,6 @@ public final class Common
 			out.println("            --download, -d [result]      Download the found file from link [result].");
 			out.println("            --name, -n [name]            Specify new alias, if downloaded.");
 		}
-	}
-	
-	/**
-	 * Checks if the next argument matches the target, and if so, removes it.
-	 * @param arguments the queue of arguments.
-	 * @param target the target argument value.
-	 * @return true on match, false if not.
-	 */
-	public static boolean matchArgument(Deque<String> arguments, String target)
-	{
-		if (!currentArgument(arguments, target))
-			return false;
-		
-		arguments.pop();
-		return true;
-	}
-	
-	/**
-	 * Checks if the next argument matches the target.
-	 * @param arguments the queue of arguments.
-	 * @param target the target argument value.
-	 * @return true on match, false if not.
-	 */
-	public static boolean currentArgument(Deque<String> arguments, String target)
-	{
-		if (arguments.isEmpty())
-			return false;
-		if (!arguments.peek().equalsIgnoreCase(target))
-			return false;
-		
-		return true;
 	}
 	
 }

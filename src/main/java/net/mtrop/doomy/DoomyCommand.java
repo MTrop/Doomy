@@ -4,20 +4,25 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Deque;
 
+import net.mtrop.doomy.commands.BlankCommand;
 import net.mtrop.doomy.commands.ConfigCommand;
+import net.mtrop.doomy.commands.ConfigGetCommand;
+import net.mtrop.doomy.commands.ConfigListCommand;
+import net.mtrop.doomy.commands.ConfigSetCommand;
 import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.UsageCommand;
 import net.mtrop.doomy.commands.VersionCommand;
-import net.mtrop.doomy.util.Common;
 
 /**
  * Commands factory for Doomy.
  */
 public interface DoomyCommand
 {
-	static final int ERROR_NONE = 0;
-	static final int ERROR_BAD_COMMAND = 1;
-	static final int ERROR_BAD_ARGUMENT = 2;
+	static final int ERROR_NONE = 			0;
+	static final int ERROR_BAD_COMMAND = 	1;
+	static final int ERROR_BAD_ARGUMENT = 	2;
+	static final int ERROR_NOT_FOUND = 		3;
+	static final int ERROR_NOT_ADDED = 		4;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";
@@ -32,7 +37,7 @@ public interface DoomyCommand
 	static final String LIST = "list";
 	static final String GET = "get";
 	static final String SET = "set";
-	static final String EXPERT_MODE = "expert-mode";
+	static final String REMOVE = "remove";
 
 	/**
 	 * Thrown if a bad/unexpected argument is parsed on command initialize.
@@ -68,39 +73,21 @@ public interface DoomyCommand
 	static DoomyCommand getCommand(Deque<String> args) throws BadCommandException
 	{
 		if (args.isEmpty())
-		{
 			return new UsageCommand();
-		}
-		else if (Common.matchArgument(args, VERSION))
-		{
+		else if (matchArgument(args, VERSION))
 			return new VersionCommand();
-		}
-		else if (Common.matchArgument(args, HELP))
-		{
+		else if (matchArgument(args, HELP))
 			return new HelpCommand();
-		}
-		else if (Common.matchArgument(args, CONFIG))
+		else if (matchArgument(args, CONFIG))
 		{
-			if (Common.matchArgument(args, LIST))
-			{
-				// TODO: Finish this.
-			}
-			else if (Common.matchArgument(args, GET))
-			{
-				// TODO: Finish this.
-			}
-			else if (Common.matchArgument(args, SET))
-			{
-				// TODO: Finish this.
-			}
-			else if (Common.matchArgument(args, EXPERT_MODE))
-			{
-				// TODO: Finish this.
-			}
+			if (matchArgument(args, LIST))
+				return new ConfigListCommand();
+			else if (matchArgument(args, GET))
+				return new ConfigGetCommand();
+			else if (matchArgument(args, SET))
+				return new ConfigSetCommand();
 			else
-			{
 				return new ConfigCommand();
-			}
 		}
 
 		return new UsageCommand();
@@ -119,6 +106,37 @@ public interface DoomyCommand
 	 * @param in the STDIN stream.
 	 * @return the return code from running the command.
 	 */
-	int call(PrintStream out, PrintStream err, InputStream in);
+	int call(PrintStream out, PrintStream err, InputStream in) throws Exception;
+
+	/**
+	 * Checks if the next argument matches the target, and if so, removes it.
+	 * @param arguments the queue of arguments.
+	 * @param target the target argument value.
+	 * @return true on match, false if not.
+	 */
+	public static boolean matchArgument(Deque<String> arguments, String target)
+	{
+		if (!currentArgument(arguments, target))
+			return false;
+		
+		arguments.pop();
+		return true;
+	}
+
+	/**
+	 * Checks if the next argument matches the target.
+	 * @param arguments the queue of arguments.
+	 * @param target the target argument value.
+	 * @return true on match, false if not.
+	 */
+	public static boolean currentArgument(Deque<String> arguments, String target)
+	{
+		if (arguments.isEmpty())
+			return false;
+		if (!arguments.peek().equalsIgnoreCase(target))
+			return false;
+		
+		return true;
+	}
 	
 }

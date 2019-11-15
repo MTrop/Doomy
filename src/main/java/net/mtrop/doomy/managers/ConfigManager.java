@@ -13,6 +13,7 @@ public final class ConfigManager
 {
 	// ============================== QUERIES ================================
 	
+	private static final String QUERY_SEARCH_VALUE = "SELECT name, value FROM Config WHERE name LIKE ? ORDER BY name ASC";
 	private static final String QUERY_GET_VALUE = "SELECT value FROM Config WHERE name = ?";
 	private static final String QUERY_SET_VALUE = "UPDATE Config SET value = ? WHERE name = ?";
 	private static final String QUERY_ADD_VALUE = "INSERT INTO Config (name, value) VALUES (?, ?)";
@@ -35,6 +36,8 @@ public final class ConfigManager
 			return INSTANCE = new ConfigManager(DatabaseManager.get());
 		return INSTANCE;
 	}
+
+	// =======================================================================
 	
 	/** Open database connection. */
 	private SQLConnection connection;
@@ -78,5 +81,26 @@ public final class ConfigManager
 		SQLRow row = connection.getRow(QUERY_GET_VALUE, name);
 		return row != null ? row.getString("value") : null;
 	}
-	
+
+	/**
+	 * Gets a set of config values by name.
+	 * @param containingPhrase the phrase to search for.
+	 * @return the resultant value, or null if it doesn't exist.
+	 */
+	public ConfigSetting[] getAllValues(String containingPhrase)
+	{
+		return connection.getResult(ConfigSetting.class, QUERY_SEARCH_VALUE, containingPhrase != null ? containingPhrase.replace('*', '%') : "%");
+	}
+
+	/**
+	 * Each config setting entry. 
+	 */
+	public static class ConfigSetting
+	{
+		/** Setting name. */
+		public String name;
+		/** Setting value. */
+		public String value;
+	}
+
 }
