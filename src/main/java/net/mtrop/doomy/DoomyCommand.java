@@ -8,6 +8,7 @@ import net.mtrop.doomy.commands.BlankCommand;
 import net.mtrop.doomy.commands.ConfigCommand;
 import net.mtrop.doomy.commands.ConfigGetCommand;
 import net.mtrop.doomy.commands.ConfigListCommand;
+import net.mtrop.doomy.commands.ConfigRemoveCommand;
 import net.mtrop.doomy.commands.ConfigSetCommand;
 import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.UsageCommand;
@@ -23,6 +24,7 @@ public interface DoomyCommand
 	static final int ERROR_BAD_ARGUMENT = 	2;
 	static final int ERROR_NOT_FOUND = 		3;
 	static final int ERROR_NOT_ADDED = 		4;
+	static final int ERROR_NOT_REMOVED = 	5;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";
@@ -66,49 +68,6 @@ public interface DoomyCommand
 	}
 	
 	/**
-	 * Fetches the base command to initialize and execute.
-	 * @param args the deque of remaining arguments.
-	 * @return
-	 */
-	static DoomyCommand getCommand(Deque<String> args) throws BadCommandException
-	{
-		if (args.isEmpty())
-			return new UsageCommand();
-		else if (matchArgument(args, VERSION))
-			return new VersionCommand();
-		else if (matchArgument(args, HELP))
-			return new HelpCommand();
-		else if (matchArgument(args, CONFIG))
-		{
-			if (matchArgument(args, LIST))
-				return new ConfigListCommand();
-			else if (matchArgument(args, GET))
-				return new ConfigGetCommand();
-			else if (matchArgument(args, SET))
-				return new ConfigSetCommand();
-			else
-				return new ConfigCommand();
-		}
-
-		return new UsageCommand();
-	}
-
-	/**
-	 * Initializes this command from remaining arguments. 
-	 * @param args the deque of remaining arguments for parsing command types.
-	 */
-	void init(Deque<String> args) throws BadArgumentException;
-
-	/**
-	 * Processes this command.
-	 * @param out the STDOUT stream.
-	 * @param err the STDERR stream.
-	 * @param in the STDIN stream.
-	 * @return the return code from running the command.
-	 */
-	int call(PrintStream out, PrintStream err, InputStream in) throws Exception;
-
-	/**
 	 * Checks if the next argument matches the target, and if so, removes it.
 	 * @param arguments the queue of arguments.
 	 * @param target the target argument value.
@@ -138,5 +97,50 @@ public interface DoomyCommand
 		
 		return true;
 	}
+
+	/**
+	 * Fetches the base command to initialize and execute.
+	 * @param args the deque of remaining arguments.
+	 * @return
+	 */
+	static DoomyCommand getCommand(Deque<String> args) throws BadCommandException
+	{
+		if (args.isEmpty())
+			return new UsageCommand();
+		else if (matchArgument(args, VERSION))
+			return new VersionCommand();
+		else if (matchArgument(args, HELP))
+			return new HelpCommand();
+		else if (matchArgument(args, CONFIG))
+		{
+			if (matchArgument(args, LIST))
+				return new ConfigListCommand();
+			else if (matchArgument(args, GET))
+				return new ConfigGetCommand();
+			else if (matchArgument(args, SET))
+				return new ConfigSetCommand();
+			else if (matchArgument(args, REMOVE))
+				return new ConfigRemoveCommand();
+			else
+				return new ConfigCommand();
+		}
+
+		return new UsageCommand();
+	}
+
+	/**
+	 * Initializes this command from remaining arguments. 
+	 * @param args the deque of remaining arguments for parsing command types.
+	 */
+	void init(Deque<String> args) throws BadArgumentException;
+
+	/**
+	 * Processes this command.
+	 * @param out the STDOUT stream.
+	 * @param err the STDERR stream.
+	 * @param in the STDIN stream.
+	 * @return the return code from running the command.
+	 */
+	int call(PrintStream out, PrintStream err, InputStream in) throws Exception;
 	
 }

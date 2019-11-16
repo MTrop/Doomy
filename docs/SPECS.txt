@@ -195,7 +195,7 @@ doomy                                      Print version splash and basic help.
             [phrase]                           ...that contain [phrase].
         get [name]                         Prints the value of a Doomy setting called [name].
         set [name] [value]                 Sets the value of a Doomy setting called [name] to [value].
-        expert-mode                        Open a simple SQL shell for browsing/altering the config.
+        remove [name]                      Removes a Doomy setting called [name].
     engine                                 Print this subsection's help and terminate.
         setup [name]                       Runs the engine's setup/settings program (if present).
         add [name] [template]              Create a new engine profile named [name] by copying a template named [template].

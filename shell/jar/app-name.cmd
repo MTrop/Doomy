@@ -4,7 +4,6 @@ REM ============================[ VARIABLES ]================================
 SETLOCAL
 SET JAVAEXE=
 SET JAVAOPTS={{JAVA_OPTIONS}}
-SET JAVAJAR={{JAR_NAME}}
 SET MAINCLASS={{MAIN_CLASSNAME}}
 REM =========================================================================
 
@@ -24,7 +23,7 @@ if not %JAVAEXE%=="" goto _calljava
 goto _end
 
 :_calljava
-"%JAVAEXE%" -cp "%~dp0\%JAVAJAR%" %JAVAOPTS% %MAINCLASS% %*
+"%JAVAEXE%" -cp "%~dp0\jar\*.jar" %JAVAOPTS% %MAINCLASS% %*
 
 :_end
 ENDLOCAL

@@ -13,12 +13,18 @@ public final class ConfigManager
 {
 	// ============================== QUERIES ================================
 	
-	private static final String QUERY_SEARCH_VALUE = "SELECT name, value FROM Config WHERE name LIKE ? ORDER BY name ASC";
-	private static final String QUERY_GET_VALUE = "SELECT value FROM Config WHERE name = ?";
-	private static final String QUERY_SET_VALUE = "UPDATE Config SET value = ? WHERE name = ?";
-	private static final String QUERY_ADD_VALUE = "INSERT INTO Config (name, value) VALUES (?, ?)";
-	private static final String QUERY_EXIST_VALUE = "SELECT EXISTS (SELECT 1 FROM Config WHERE name = ?)";
-	private static final String QUERY_CLEAR_VALUE = "DELETE FROM Config WHERE name = ?";
+	private static final String QUERY_SEARCH_VALUE 
+		= "SELECT name, value FROM Config WHERE name LIKE ? ORDER BY name ASC";
+	private static final String QUERY_GET_VALUE 
+		= "SELECT value FROM Config WHERE name = ?";
+	private static final String QUERY_REMOVE_VALUE 
+		= "DELETE FROM Config WHERE name = ?";
+	private static final String QUERY_SET_VALUE 
+		= "UPDATE Config SET value = ? WHERE name = ?";
+	private static final String QUERY_ADD_VALUE 
+		= "INSERT INTO Config (name, value) VALUES (?, ?)";
+	private static final String QUERY_EXIST_VALUE 
+		= "SELECT EXISTS (SELECT 1 FROM Config WHERE name = ?)";
 	
 	// =======================================================================
 	
@@ -47,16 +53,6 @@ public final class ConfigManager
 		this.connection = db.getConnection();
 	}
 
-	/**
-	 * Clears a config value by name.
-	 * @param name the value name.
-	 * @return true if removed, false if not.
-	 */
-	public boolean clearValue(String name)
-	{
-		return connection.getUpdateResult(QUERY_CLEAR_VALUE, name).getRowCount() > 0;
-	}
-	
 	/**
 	 * Sets a config value by name.
 	 * @param name the value name.
@@ -90,6 +86,16 @@ public final class ConfigManager
 	public ConfigSetting[] getAllValues(String containingPhrase)
 	{
 		return connection.getResult(ConfigSetting.class, QUERY_SEARCH_VALUE, containingPhrase != null ? containingPhrase.replace('*', '%') : "%");
+	}
+
+	/**
+	 * Removes a config value by name.
+	 * @param name the value name.
+	 * @return true if removed, false if not.
+	 */
+	public boolean removeValue(String name)
+	{
+		return connection.getUpdateResult(QUERY_REMOVE_VALUE, name).getRowCount() > 0;
 	}
 
 	/**

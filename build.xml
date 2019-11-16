@@ -29,20 +29,24 @@
 	<property name="sql.project" value="blackrook-sql-${sql.lib.version}" />	
 	<property name="sql.jar" value="${sql.project}.jar" />
 	<property name="sql.jar.src" value="${sql.project}-sources.jar" />
-	<property name="sqlite.lib.version" value="1.0.0" />
-	<property name="sql.project" value="blackrook-sql-${sql.lib.version}" />	
-	<property name="sql.jar" value="${sql.project}.jar" />
-	<property name="sql.jar.src" value="${sql.project}-sources.jar" />
+	<property name="sqlite.lib.version" value="3.21.0.1" />
+	<property name="sqlite.jar" value="sqlite-jdbc-${sqlite.lib.version}.jar" />
 
 	<!-- Project Info -->
 	
-	<property name="project.archive" value="doomtools" />
-	<property name="project.javadoc.title" value="DoomTools" />
-	<property name="project.classpath" value="${dev.base}/${doom.jar}"/>
+	<property name="project.archive" value="doomy" />
+	<property name="project.javadoc.title" value="Doomy" />
+	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${sql.jar}${S}${dev.base}/${sqlite.jar}" />
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
 	<property name="project.javadoc.packages" value="
+		net.mtrop.doomy,
+		net.mtrop.doomy.commands,
+		net.mtrop.doomy.managers,
+		net.mtrop.doomy.struct,
+		net.mtrop.doomy.tasks,
+		net.mtrop.doomy.util
 		"
 	/>
 	
@@ -100,7 +104,6 @@
     </target>	
 
 	<target name="jar.one" depends="compile, init.versions">
-		<copy file="${dependencies.dir}/${doom.jar}" tofile="${jar.dir}/${jar.filename}" />
 		<copy todir="${bin.dir}/net/mtrop/doomy">
 			<fileset dir="${build.versions.dir}" includes="*.version" />
 		</copy>
@@ -118,8 +121,8 @@
 		<github-dl repository="BlackRookSoftware/SQL" tag="${sql.tag}" file="${sql.jar.src}" dest="${dependencies.dir}" />
 	</target>
 	<target name="dependency.sqlite">
-		<maven-jar-dl group-path="org/xerial" artifact="sqlite-jdbc" version="3.21.0.1" />
-		<maven-jar-sources-dl group-path="org/xerial" artifact="sqlite-jdbc" version="3.21.0.1" />
+		<maven-jar-dl group-path="org/xerial" artifact="sqlite-jdbc" version="${sqlite.lib.version}" />
+		<maven-jar-sources-dl group-path="org/xerial" artifact="sqlite-jdbc" version="${sqlite.lib.version}" />
 	</target>
 	
 	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.sql, dependency.sqlite, dependency.properties" description="Downloads and compiles the dependencies.">
@@ -127,9 +130,12 @@
 
 	<!-- Scripts -->
 
-	<target name="scripts" description="Creates application shell scripts.">
-		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
-		<shell-bash name="doomy" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
+	<property name="runtime.classpath.cmd" value="jar\${json.jar}${S}jar\${sql.jar}${S}jar\${sqlite.jar}" />
+	<property name="runtime.classpath.bash" value="jar/${json.jar}${S}jar/${sql.jar}${S}jar/${sqlite.jar}" />
+
+		<target name="scripts" description="Creates application shell scripts.">
+		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  options="-cp ${runtime.classpath.cmd}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
+		<shell-bash name="doomy" todir="${build.dir}/shell/bash" options="-cp ${runtime.classpath.bash}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
 	</target>
 
 	<!-- Shells -->
@@ -137,6 +143,9 @@
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
+			<zipfileset file="${dev.base}/${json.jar}" prefix="jar" />
+			<zipfileset file="${dev.base}/${sql.jar}" prefix="jar" />
+			<zipfileset file="${dev.base}/${sqlite.jar}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
 			<zipfileset dir="docs" prefix="docs" />
@@ -146,6 +155,9 @@
 	<target name="dist.bash" depends="init.jar, jar.one, scripts, init.dist">
 		<tar destfile="${dist.dir}/${tar.dist.filename}" compression="gzip">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
+			<zipfileset file="${dev.base}/${json.jar}" prefix="jar" />
+			<zipfileset file="${dev.base}/${sql.jar}" prefix="jar" />
+			<zipfileset file="${dev.base}/${sqlite.jar}" prefix="jar" />
 			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
 			<tarfileset refid="fileset.documents" prefix="docs" />
 			<tarfileset dir="docs" prefix="docs" />
