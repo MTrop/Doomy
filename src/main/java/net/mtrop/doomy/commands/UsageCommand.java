@@ -5,6 +5,7 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyMain;
 import net.mtrop.doomy.util.Common;
 
 /**
@@ -27,7 +28,7 @@ public class UsageCommand implements DoomyCommand
 		if (badCommand != null)
 			err.println("ERROR: Unknown command: " + badCommand);
 			
-		Common.splash(out, VERSION);
+		Common.splash(out, DoomyMain.VERSION);
 		Common.usage(out);
 		return ERROR_NONE;
 	}

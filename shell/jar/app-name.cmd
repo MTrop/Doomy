@@ -23,7 +23,7 @@ if not %JAVAEXE%=="" goto _calljava
 goto _end
 
 :_calljava
-"%JAVAEXE%" -cp "%~dp0\jar\*.jar" %JAVAOPTS% %MAINCLASS% %*
+"%JAVAEXE%" -cp "%~dp0\jar\*" %JAVAOPTS% %MAINCLASS% %*
 
 :_end
 ENDLOCAL

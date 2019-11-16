@@ -56,7 +56,7 @@
 	
 	<!-- Versions -->
 
-	<property name="doomy.version" value="${build.version}" />
+	<property name="doomy.version" value="${build.version.number}" />
 
 	<target name="clean.versions">
 		<delete dir="${build.versions.dir}" includeemptydirs="true" casesensitive="false" /> 
@@ -130,12 +130,9 @@
 
 	<!-- Scripts -->
 
-	<property name="runtime.classpath.cmd" value="jar\${json.jar}${S}jar\${sql.jar}${S}jar\${sqlite.jar}" />
-	<property name="runtime.classpath.bash" value="jar/${json.jar}${S}jar/${sql.jar}${S}jar/${sqlite.jar}" />
-
 		<target name="scripts" description="Creates application shell scripts.">
-		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  options="-cp ${runtime.classpath.cmd}" jarname="jar\${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
-		<shell-bash name="doomy" todir="${build.dir}/shell/bash" options="-cp ${runtime.classpath.bash}" jarname="jar/${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
+		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
+		<shell-bash name="doomy" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
 	</target>
 
 	<!-- Shells -->
