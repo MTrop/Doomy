@@ -13,6 +13,7 @@ import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.IOUtils;
+import net.mtrop.doomy.struct.ObjectUtils;
 
 /**
  * Database manager singleton.
@@ -80,6 +81,21 @@ public final class DatabaseManager
 		
 	}
 
+	/**
+	 * Converts an input search phrase to a query phrase (for LIKE).
+	 * @param phrase the input phrase.
+	 * @return the converted phrase.
+	 */
+	public static String toSearchPhrase(String phrase)
+	{
+		if (ObjectUtils.isEmpty(phrase))
+			return "%";
+		else if (phrase.indexOf('*') < 0)
+			return "%" + phrase + "%";
+		else
+			return phrase.replace('*', '%');
+	}
+	
 	/**
 	 * @return true if the database exists, false if not.
 	 */

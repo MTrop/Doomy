@@ -1,10 +1,12 @@
 package net.mtrop.doomy.commands;
 
+import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.DoomyMain;
 import net.mtrop.doomy.util.Common;
 
@@ -30,6 +32,7 @@ public class ConfigCommand implements DoomyCommand
 			
 		Common.splash(out, DoomyMain.VERSION);
 		Common.help(out, CONFIG);
+		out.println("\nConfig directory is: " + (new File(DoomyEnvironment.getConfigBasePath())).getAbsolutePath());
 		return ERROR_NONE;
 	}
 

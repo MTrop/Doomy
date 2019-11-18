@@ -13,18 +13,18 @@ public final class ConfigManager
 {
 	// ============================== QUERIES ================================
 	
-	private static final String QUERY_SEARCH_VALUE 
-		= "SELECT name, value FROM Config WHERE name LIKE ? ORDER BY name ASC";
-	private static final String QUERY_GET_VALUE 
+	private static final String QUERY_GET
 		= "SELECT value FROM Config WHERE name = ?";
-	private static final String QUERY_REMOVE_VALUE 
-		= "DELETE FROM Config WHERE name = ?";
-	private static final String QUERY_SET_VALUE 
-		= "UPDATE Config SET value = ? WHERE name = ?";
-	private static final String QUERY_ADD_VALUE 
-		= "INSERT INTO Config (name, value) VALUES (?, ?)";
-	private static final String QUERY_EXIST_VALUE 
+	private static final String QUERY_LIST
+		= "SELECT name, value FROM Config WHERE name LIKE ? ORDER BY name ASC";
+	private static final String QUERY_EXIST
 		= "SELECT EXISTS (SELECT 1 FROM Config WHERE name = ?)";
+	private static final String QUERY_SET
+		= "UPDATE Config SET value = ? WHERE name = ?";
+	private static final String QUERY_ADD
+		= "INSERT INTO Config (name, value) VALUES (?, ?)";
+	private static final String QUERY_REMOVE
+		= "DELETE FROM Config WHERE name = ?";
 	
 	// =======================================================================
 	
@@ -54,6 +54,16 @@ public final class ConfigManager
 	}
 
 	/**
+	 * Checks if a config value exists by name.
+	 * @param name the value name.
+	 * @return true if so, false if not.
+	 */
+	public boolean containsValue(String name)
+	{
+		return connection.getRow(QUERY_EXIST, name).getBoolean(0);
+	}
+	
+	/**
 	 * Sets a config value by name.
 	 * @param name the value name.
 	 * @param value the value.
@@ -61,10 +71,10 @@ public final class ConfigManager
 	 */
 	public boolean setValue(String name, String value)
 	{
-		if (connection.getRow(QUERY_EXIST_VALUE, name).getBoolean(0))
-			return connection.getUpdateResult(QUERY_SET_VALUE, value, name).getRowCount() > 0;
+		if (containsValue(name))
+			return connection.getUpdateResult(QUERY_SET, value, name).getRowCount() > 0;
 		else
-			return connection.getUpdateResult(QUERY_ADD_VALUE, name, value).getRowCount() > 0;
+			return connection.getUpdateResult(QUERY_ADD, name, value).getRowCount() > 0;
 	}
 	
 	/**
@@ -74,18 +84,8 @@ public final class ConfigManager
 	 */
 	public String getValue(String name)
 	{
-		SQLRow row = connection.getRow(QUERY_GET_VALUE, name);
+		SQLRow row = connection.getRow(QUERY_GET, name);
 		return row != null ? row.getString("value") : null;
-	}
-
-	/**
-	 * Gets a set of config values by name.
-	 * @param containingPhrase the phrase to search for.
-	 * @return the resultant value, or null if it doesn't exist.
-	 */
-	public ConfigSetting[] getAllValues(String containingPhrase)
-	{
-		return connection.getResult(ConfigSetting.class, QUERY_SEARCH_VALUE, containingPhrase != null ? containingPhrase.replace('*', '%') : "%");
 	}
 
 	/**
@@ -95,13 +95,23 @@ public final class ConfigManager
 	 */
 	public boolean removeValue(String name)
 	{
-		return connection.getUpdateResult(QUERY_REMOVE_VALUE, name).getRowCount() > 0;
+		return connection.getUpdateResult(QUERY_REMOVE, name).getRowCount() > 0;
+	}
+
+	/**
+	 * Gets a set of config values by name.
+	 * @param containingPhrase the phrase to search for.
+	 * @return the list of settings found.
+	 */
+	public ConfigSettingEntry[] getAllValues(String containingPhrase)
+	{
+		return connection.getResult(ConfigSettingEntry.class, QUERY_LIST, DatabaseManager.toSearchPhrase(containingPhrase));
 	}
 
 	/**
 	 * Each config setting entry. 
 	 */
-	public static class ConfigSetting
+	public static class ConfigSettingEntry
 	{
 		/** Setting name. */
 		public String name;

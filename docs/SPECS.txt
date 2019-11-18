@@ -116,7 +116,7 @@ CREATE TABLE WADSources (
 			ON UPDATE CASCADE
 );
 
-CREATE TABLE WADDepenencies (
+CREATE TABLE WADDependencies (
 	wadId INTEGER NOT NULL,
 	needsWadId INTEGER NOT NULL,
 	UNIQUE (wadId, needsWadId),
@@ -197,22 +197,35 @@ doomy                                      Print version splash and basic help.
         set [name] [value]                 Sets the value of a Doomy setting called [name] to [value].
         remove [name]                      Removes a Doomy setting called [name].
     engine                                 Print this subsection's help and terminate.
-        setup [name]                       Runs the engine's setup/settings program (if present).
-        add [name] [template]              Create a new engine profile named [name] by copying a template named [template].
+        add [name]                         Create a new engine profile named [name].
+        	[template]                         ...by copying a template named [template].
         remove [name]                      Remove an engine template named [name] (and confirm).
             --quiet, -q                        ...but skip confirm.
+        rename [name1] [name2]             Changes an alias from Engine [name1] to [name2].
         list                               List all stored engine profiles.
-            templates                      List all engine profile templates.
-        config [name]
-            list                           Print engine profile [name]'s settings.
+            [phrase]                           ...that contain [phrase].
+        setup [name]                       Runs the engine's setup/settings program (if present).
+        config 
+            list
+                [name]                     Print engine profile [name]'s settings.
                 [phrase]                       ...that contain [phrase].
-            get [setting]                  Prints the value of setting called [setting] on the engine profile named [name].
-            set [setting] [value]          Sets the value of setting called [setting] to [value] on the engine profile named [name].
-        template
+            get [name] [setting]           Prints the value of setting called [setting] on the engine profile named [name].
+            set [name] [setting] [value]   Sets the value of setting called [setting] to [value] on the engine profile named [name].
+            remove [name] [setting]        Removes an engine profile setting called [setting] on the engine profile named [name].
+        template                           Print engine help.
+        	list                           List all stored engine templates.
+                [phrase]                       ...that contain [phrase].
             add [name]                     Create a new engine profile template named [name].
                 [template]                     ...by copying a template named [template].
             remove [name]                  Remove the engine profile template named [name] (and confirm).
                 --quiet, -q                    ...but skip confirm.
+            config 
+                list                       
+                    [name]                 Print engine template [name]'s settings.
+                    [phrase]                   ...that contain [phrase].
+                get [name] [setting]       Prints the value of setting called [setting] on the engine profile named [name].
+                set [name] [setting] [value]  Sets the value of setting called [setting] to [value] on the engine profile named [name].
+                remove [name] [setting]    Removes an engine template setting called [setting].
     iwad                                   Print this subsection's help and terminate.
         list                               List all known IWADs.
             [phrase]                           ...that contain [phrase].

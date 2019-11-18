@@ -7,7 +7,7 @@ import java.util.Deque;
 import net.mtrop.doomy.DoomyCommand;
 
 /**
- * A command that prints the version and exits.
+ * A command that [DOES NOTHING].
  * @author Matthew Tropiano
  */
 public class BlankCommand implements DoomyCommand

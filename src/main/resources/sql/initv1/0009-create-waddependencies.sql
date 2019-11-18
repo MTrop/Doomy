@@ -1,4 +1,4 @@
-CREATE TABLE WADDepenencies (
+CREATE TABLE WADDependencies (
 	wadId INTEGER NOT NULL,
 	needsWadId INTEGER NOT NULL,
 	UNIQUE (wadId, needsWadId),

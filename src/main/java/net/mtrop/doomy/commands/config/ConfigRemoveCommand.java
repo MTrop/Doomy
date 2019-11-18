@@ -1,4 +1,4 @@
-package net.mtrop.doomy.commands;
+package net.mtrop.doomy.commands.config;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -28,11 +28,18 @@ public class ConfigRemoveCommand implements DoomyCommand
 	{
 		ConfigManager config = ConfigManager.get();
 		
-		if (!config.removeValue(name))
+		if (!config.containsValue(name))
 		{
-			err.println("ERROR: Could not remove: '" + name + "'. It may not exist.");
+			err.println("ERROR: Could not remove: '" + name + "'. It does not exist.");
 			return ERROR_NOT_REMOVED;
 		}
+		
+		if (!config.removeValue(name))
+		{
+			err.println("ERROR: Could not remove: '" + name + "'. An error may have occurred.");
+			return ERROR_NOT_REMOVED;
+		}
+		
 		out.println("Removed setting: " + name);
 		return ERROR_NONE;
 	}

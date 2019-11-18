@@ -9,10 +9,10 @@ import net.mtrop.doomy.DoomyMain;
 import net.mtrop.doomy.util.Common;
 
 /**
- * A command that prints the basic usage and exits.
+ * A command that prints the engine help output and exits.
  * @author Matthew Tropiano
  */
-public class UsageCommand implements DoomyCommand
+public class EngineCommand implements DoomyCommand
 {
 	private String badCommand;
 
@@ -30,7 +30,7 @@ public class UsageCommand implements DoomyCommand
 			
 		if (badCommand == null)
 			Common.splash(out, DoomyMain.VERSION);
-		Common.usage(out);
+		Common.help(out, ENGINE);
 		return ERROR_NONE;
 	}
 

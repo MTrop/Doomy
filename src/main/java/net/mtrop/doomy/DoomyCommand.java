@@ -4,15 +4,23 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Deque;
 
-import net.mtrop.doomy.commands.BlankCommand;
 import net.mtrop.doomy.commands.ConfigCommand;
-import net.mtrop.doomy.commands.ConfigGetCommand;
-import net.mtrop.doomy.commands.ConfigListCommand;
-import net.mtrop.doomy.commands.ConfigRemoveCommand;
-import net.mtrop.doomy.commands.ConfigSetCommand;
+import net.mtrop.doomy.commands.EngineCommand;
 import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.UsageCommand;
 import net.mtrop.doomy.commands.VersionCommand;
+import net.mtrop.doomy.commands.config.ConfigGetCommand;
+import net.mtrop.doomy.commands.config.ConfigListCommand;
+import net.mtrop.doomy.commands.config.ConfigRemoveCommand;
+import net.mtrop.doomy.commands.config.ConfigSetCommand;
+import net.mtrop.doomy.commands.engine.template.EngineTemplateAddCommand;
+import net.mtrop.doomy.commands.engine.template.EngineTemplateConfigCommand;
+import net.mtrop.doomy.commands.engine.template.EngineTemplateListCommand;
+import net.mtrop.doomy.commands.engine.template.EngineTemplateRemoveCommand;
+import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigGetCommand;
+import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigListCommand;
+import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigRemoveCommand;
+import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigSetCommand;
 
 /**
  * Commands factory for Doomy.
@@ -30,6 +38,7 @@ public interface DoomyCommand
 	static final String HELP = "help";
 	static final String CONFIG = "config";
 	static final String ENGINE = "engine";
+	static final String TEMPLATE = "template";
 	static final String IWAD = "iwad";
 	static final String WAD = "wad";
 	static final String PRESET = "preset";
@@ -39,7 +48,9 @@ public interface DoomyCommand
 	static final String LIST = "list";
 	static final String GET = "get";
 	static final String SET = "set";
+	static final String ADD = "add";
 	static final String REMOVE = "remove";
+	static final String RENAME = "rename";
 
 	/**
 	 * Thrown if a bad/unexpected argument is parsed on command initialize.
@@ -123,6 +134,35 @@ public interface DoomyCommand
 				return new ConfigRemoveCommand();
 			else
 				return new ConfigCommand();
+		}
+		else if (matchArgument(args, ENGINE))
+		{
+			if (matchArgument(args, TEMPLATE))
+			{
+				if (matchArgument(args, LIST))
+					return new EngineTemplateListCommand();
+				else if (matchArgument(args, ADD))
+					return new EngineTemplateAddCommand();
+				else if (matchArgument(args, REMOVE))
+					return new EngineTemplateRemoveCommand();
+				else if (matchArgument(args, CONFIG))
+				{
+					if (matchArgument(args, LIST))
+						return new EngineTemplateConfigListCommand();
+					else if (matchArgument(args, GET))
+						return new EngineTemplateConfigGetCommand();
+					else if (matchArgument(args, SET))
+						return new EngineTemplateConfigSetCommand();
+					else if (matchArgument(args, REMOVE))
+						return new EngineTemplateConfigRemoveCommand();
+					else
+						return new EngineTemplateConfigCommand();
+				}
+				else
+					return new EngineCommand();
+			}
+			else
+				return new EngineCommand();
 		}
 
 		return new UsageCommand();

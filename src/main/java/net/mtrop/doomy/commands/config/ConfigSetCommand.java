@@ -1,4 +1,4 @@
-package net.mtrop.doomy.commands;
+package net.mtrop.doomy.commands.config;
 
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -8,12 +8,13 @@ import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.managers.ConfigManager;
 
 /**
- * A command that prints a single setting value by name.
+ * A command that sets a config value.
  * @author Matthew Tropiano
  */
-public class ConfigGetCommand implements DoomyCommand
+public class ConfigSetCommand implements DoomyCommand
 {
 	private String name;
+	private String value;
 
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
@@ -21,21 +22,26 @@ public class ConfigGetCommand implements DoomyCommand
 		name = args.pollFirst();
 		if (name == null)
 			throw new BadArgumentException("Expected name of setting.");
+		value = args.pollFirst();
+		if (value == null)
+			throw new BadArgumentException("Expected value after name.");
 	}
 
 	@Override
 	public int call(PrintStream out, PrintStream err, InputStream in)
 	{
-		String value = ConfigManager.get().getValue(name);
+		ConfigManager config = ConfigManager.get();
 		
-		if (value == null)
+		String readValue;
+		if (!config.setValue(name, value))
 		{
-			err.println("ERROR: No such setting: " + name);
-			return ERROR_NOT_FOUND;
+			err.println("ERROR: Could not set: " + name);
+			return ERROR_NOT_ADDED;
 		}
 		else
 		{
-			out.println(value);
+			readValue = config.getValue(name);
+			out.println("'" + name + "' is '" + readValue + "'");
 		}
 		
 		return ERROR_NONE;

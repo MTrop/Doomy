@@ -32,8 +32,10 @@ public final class DoomyEnvironment
     	return (new File(PORTABLE_CONFIG_BASE + PORTABLE_FILE)).exists();
     }
 
-    // @return the configuration base directory.
-    private static String getConfigBasePath()
+    /** 
+     * @return the configuration base directory. 
+     */
+    public static String getConfigBasePath()
     {
     	return inPortableMode() ? PORTABLE_CONFIG_BASE : USER_CONFIG_BASE;
     }
