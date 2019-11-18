@@ -25,6 +25,7 @@ public class EngineTemplateListCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, InputStream in)
 	{
+		// TODO: Handle 0 records.
 		EngineTemplate[] records = EngineTemplateManager.get().getAllTemplates(phrase);
 		for (int i = 0; i < records.length; i++)
 			out.println(records[i].name);
