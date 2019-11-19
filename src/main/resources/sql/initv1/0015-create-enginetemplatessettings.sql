@@ -5,6 +5,4 @@ CREATE TABLE EngineTemplateSettings (
 	PRIMARY KEY (engineTemplateId, name),
 	FOREIGN KEY (engineTemplateId) 
 		REFERENCES EngineTemplates(id)
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
 )

@@ -1,20 +1,20 @@
-package net.mtrop.doomy.commands.engine.template;
+package net.mtrop.doomy.commands.engine;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.managers.EngineTemplateManager;
+import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.util.Common;
 
 import static net.mtrop.doomy.DoomyCommand.*;
 
 /**
- * A command that removes an existing engine template.
+ * A command that removes an existing engine.
  * @author Matthew Tropiano
  */
-public class EngineTemplateRemoveCommand implements DoomyCommand
+public class EngineRemoveCommand implements DoomyCommand
 {
 	private static final String SWITCH_QUIET1 = "--quiet";
 	private static final String SWITCH_QUIET2 = "-q";
@@ -41,27 +41,27 @@ public class EngineTemplateRemoveCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		EngineTemplateManager mgr = EngineTemplateManager.get();
+		EngineManager mgr = EngineManager.get();
 		
-		if (!mgr.containsTemplate(name))
+		if (!mgr.containsEngine(name))
 		{
-			err.println("ERROR: Engine template '" + name + "' does not exist.");
+			err.println("ERROR: Engine '" + name + "' does not exist.");
 			return ERROR_NOT_REMOVED;
 		}
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(Common.prompt(out, in, "Are you sure that you want to remove template '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(Common.prompt(out, in, "Are you sure that you want to remove engine '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		
-		if (!mgr.removeTemplate(name))
+		if (!mgr.removeEngine(name))
 		{
-			err.println("ERROR: Engine template '" + name + "' could not be removed.");
+			err.println("ERROR: Engine '" + name + "' could not be removed.");
 			return ERROR_NOT_REMOVED;
 		}
 		
-		out.println("Removed engine template '" + name + "'.");
+		out.println("Removed engine '" + name + "'.");
 		return ERROR_NONE;
 	}
 

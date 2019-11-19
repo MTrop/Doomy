@@ -1,28 +1,28 @@
-package net.mtrop.doomy.commands.engine.template.config;
+package net.mtrop.doomy.commands.engine.config;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.managers.EngineTemplateConfigManager;
-import net.mtrop.doomy.managers.EngineTemplateManager;
+import net.mtrop.doomy.managers.EngineConfigManager;
+import net.mtrop.doomy.managers.EngineManager;
 
 /**
  * A command that gets a single template setting value by name.
  * @author Matthew Tropiano
  */
-public class EngineTemplateConfigGetCommand implements DoomyCommand
+public class EngineConfigGetCommand implements DoomyCommand
 {
-	private String template;
+	private String engine;
 	private String name;
 
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
 	{
-		template = args.pollFirst();
-		if (template == null)
-			throw new BadArgumentException("Expected name of template.");
+		engine = args.pollFirst();
+		if (engine == null)
+			throw new BadArgumentException("Expected name of engine.");
 		name = args.pollFirst();
 		if (name == null)
 			throw new BadArgumentException("Expected name of setting.");
@@ -31,13 +31,13 @@ public class EngineTemplateConfigGetCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		if (!EngineTemplateManager.get().containsTemplate(template))
+		if (!EngineManager.get().containsEngine(engine))
 		{
-			err.println("ERROR: No such template: " + template);
+			err.println("ERROR: No such template: " + engine);
 			return ERROR_NOT_FOUND;
 		}
 
-		String value = EngineTemplateConfigManager.get().getSetting(template, name);
+		String value = EngineConfigManager.get().getSetting(engine, name);
 		
 		if (value == null)
 		{

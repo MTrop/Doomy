@@ -1,18 +1,18 @@
-package net.mtrop.doomy.commands.engine.template;
+package net.mtrop.doomy.commands.engine;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.managers.EngineTemplateManager;
-import net.mtrop.doomy.managers.EngineTemplateManager.EngineTemplate;
+import net.mtrop.doomy.managers.EngineManager;
+import net.mtrop.doomy.managers.EngineManager.Engine;
 
 /**
  * A command that prints all stored templates.
  * @author Matthew Tropiano
  */
-public class EngineTemplateListCommand implements DoomyCommand
+public class EngineListCommand implements DoomyCommand
 {
 	private String phrase;
 
@@ -25,10 +25,10 @@ public class EngineTemplateListCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		EngineTemplate[] records = EngineTemplateManager.get().getAllTemplates(phrase);
+		Engine[] records = EngineManager.get().getAllEngines(phrase);
 		for (int i = 0; i < records.length; i++)
 			out.println(records[i].name);
-		out.println(records.length + " templates found.");
+		out.println(records.length + " engines found.");
 		return ERROR_NONE;
 	}
 

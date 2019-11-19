@@ -1,6 +1,6 @@
 package net.mtrop.doomy;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
@@ -13,6 +13,17 @@ import net.mtrop.doomy.commands.config.ConfigGetCommand;
 import net.mtrop.doomy.commands.config.ConfigListCommand;
 import net.mtrop.doomy.commands.config.ConfigRemoveCommand;
 import net.mtrop.doomy.commands.config.ConfigSetCommand;
+import net.mtrop.doomy.commands.engine.EngineAddCommand;
+import net.mtrop.doomy.commands.engine.EngineConfigCommand;
+import net.mtrop.doomy.commands.engine.EngineCopyCommand;
+import net.mtrop.doomy.commands.engine.EngineListCommand;
+import net.mtrop.doomy.commands.engine.EngineRemoveCommand;
+import net.mtrop.doomy.commands.engine.EngineRenameCommand;
+import net.mtrop.doomy.commands.engine.EngineTemplateCommand;
+import net.mtrop.doomy.commands.engine.config.EngineConfigGetCommand;
+import net.mtrop.doomy.commands.engine.config.EngineConfigListCommand;
+import net.mtrop.doomy.commands.engine.config.EngineConfigRemoveCommand;
+import net.mtrop.doomy.commands.engine.config.EngineConfigSetCommand;
 import net.mtrop.doomy.commands.engine.template.EngineTemplateAddCommand;
 import net.mtrop.doomy.commands.engine.template.EngineTemplateConfigCommand;
 import net.mtrop.doomy.commands.engine.template.EngineTemplateListCommand;
@@ -28,11 +39,12 @@ import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigSetCo
 public interface DoomyCommand
 {
 	static final int ERROR_NONE = 			0;
-	static final int ERROR_BAD_COMMAND = 	1;
-	static final int ERROR_BAD_ARGUMENT = 	2;
-	static final int ERROR_NOT_FOUND = 		3;
-	static final int ERROR_NOT_ADDED = 		4;
-	static final int ERROR_NOT_REMOVED = 	5;
+	static final int ERROR_IO_ERROR = 		1;
+	static final int ERROR_BAD_COMMAND = 	2;
+	static final int ERROR_BAD_ARGUMENT = 	3;
+	static final int ERROR_NOT_FOUND = 		4;
+	static final int ERROR_NOT_ADDED = 		5;
+	static final int ERROR_NOT_REMOVED = 	6;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";
@@ -49,6 +61,7 @@ public interface DoomyCommand
 	static final String GET = "get";
 	static final String SET = "set";
 	static final String ADD = "add";
+	static final String COPY = "copy";
 	static final String REMOVE = "remove";
 	static final String RENAME = "rename";
 
@@ -137,7 +150,30 @@ public interface DoomyCommand
 		}
 		else if (matchArgument(args, ENGINE))
 		{
-			if (matchArgument(args, TEMPLATE))
+			if (matchArgument(args, LIST))
+				return new EngineListCommand();
+			else if (matchArgument(args, ADD))
+				return new EngineAddCommand();
+			else if (matchArgument(args, COPY))
+				return new EngineCopyCommand();
+			else if (matchArgument(args, REMOVE))
+				return new EngineRemoveCommand();
+			else if (matchArgument(args, RENAME))
+				return new EngineRenameCommand();
+			else if (matchArgument(args, CONFIG))
+			{
+				if (matchArgument(args, LIST))
+					return new EngineConfigListCommand();
+				else if (matchArgument(args, GET))
+					return new EngineConfigGetCommand();
+				else if (matchArgument(args, SET))
+					return new EngineConfigSetCommand();
+				else if (matchArgument(args, REMOVE))
+					return new EngineConfigRemoveCommand();
+				else
+					return new EngineConfigCommand();
+			}
+			else if (matchArgument(args, TEMPLATE))
 			{
 				if (matchArgument(args, LIST))
 					return new EngineTemplateListCommand();
@@ -159,7 +195,7 @@ public interface DoomyCommand
 						return new EngineTemplateConfigCommand();
 				}
 				else
-					return new EngineCommand();
+					return new EngineTemplateCommand();
 			}
 			else
 				return new EngineCommand();
@@ -181,6 +217,6 @@ public interface DoomyCommand
 	 * @param in the STDIN stream.
 	 * @return the return code from running the command.
 	 */
-	int call(PrintStream out, PrintStream err, InputStream in) throws Exception;
+	int call(PrintStream out, PrintStream err, BufferedReader in) throws Exception;
 	
 }

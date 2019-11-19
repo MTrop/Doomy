@@ -7,6 +7,4 @@ CREATE TABLE PresetItem (
 	UNIQUE (presetId, wadId),
 	FOREIGN KEY (presetId) 
 		REFERENCES Preset(id)
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
 )

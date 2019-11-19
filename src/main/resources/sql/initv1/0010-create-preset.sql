@@ -8,11 +8,7 @@ CREATE TABLE Preset (
 	UNIQUE (hash),
 	UNIQUE (name),
 	FOREIGN KEY (engineName) 
-		REFERENCES Engines(name)
-			ON DELETE NO ACTION
-			ON UPDATE CASCADE,
+		REFERENCES Engines(name),
 	FOREIGN KEY (iwadName) 
 		REFERENCES IWADs(name)
-			ON DELETE NO ACTION
-			ON UPDATE CASCADE
 )

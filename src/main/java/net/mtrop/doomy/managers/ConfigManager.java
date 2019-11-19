@@ -32,9 +32,9 @@ public final class ConfigManager
 	private static ConfigManager INSTANCE;
 
 	/**
-	 * Initializes/Returns the singleton config manager instance.
-	 * @return the single config manager.
-	 * @throws DoomySetupException if the config manager could not be set up.
+	 * Initializes/Returns the singleton manager instance.
+	 * @return the single manager.
+	 * @throws DoomySetupException if the manager could not be set up.
 	 */
 	public static ConfigManager get()
 	{

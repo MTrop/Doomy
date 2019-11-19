@@ -1,6 +1,6 @@
 package net.mtrop.doomy.commands.engine.template.config;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
@@ -29,7 +29,7 @@ public class EngineTemplateConfigRemoveCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, InputStream in)
+	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
 		if (!EngineTemplateManager.get().containsTemplate(template))
 		{
@@ -39,13 +39,13 @@ public class EngineTemplateConfigRemoveCommand implements DoomyCommand
 
 		EngineTemplateConfigManager config = EngineTemplateConfigManager.get();
 		
-		if (!config.containsValue(template, name))
+		if (!config.containsSetting(template, name))
 		{
 			err.println("ERROR: Could not remove template setting: '" + name + "'. It does not exist.");
 			return ERROR_NOT_REMOVED;
 		}
 		
-		if (!config.removeValue(template, name))
+		if (!config.removeSetting(template, name))
 		{
 			err.println("ERROR: Could not remove template setting: '" + name + "'. An error may have occurred.");
 			return ERROR_NOT_REMOVED;

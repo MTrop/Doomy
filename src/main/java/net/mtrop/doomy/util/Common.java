@@ -112,12 +112,11 @@ public final class Common
 	 * @param prompt the prompt to display.
 	 * @return the string read.
 	 */
-	public static String prompt(PrintStream out, InputStream in, String prompt)
+	public static String prompt(PrintStream out, BufferedReader in, String prompt)
 	{
 		try {
-			BufferedReader br = new BufferedReader(new InputStreamReader(in));
-			out.print(prompt + "> ");
-			return br.readLine();
+			out.print(prompt + " ");
+			return in.readLine();
 		} catch (IOException e) {
 			return null;
 		}
@@ -165,9 +164,10 @@ public final class Common
 			out.println("    setup [name]                       Runs the engine's setup/settings program (if present).");
 			out.println("    add [name]                         Create a new engine profile named [name].");
 			out.println("      [template]                         ...by copying a template named [template].");
+			out.println("    copy [name] [engine]               Create a new engine profile named [name] by copying an engine named [engine].");
 			out.println("    remove [name]                      Remove an engine template named [name] (and confirm).");
 			out.println("      --quiet, -q                        ...but skip confirm.");
-			out.println("    rename [name1] [name2]             Changes an alias from Engine [name1] to [name2].");
+			out.println("    rename [name1] [name2]             Changes an engine's name from [name1] to [name2].");
 			out.println("    list                               List all stored engine profiles.");
 			out.println("      [phrase]                           ...that contain [phrase].");
 			out.println("    config");

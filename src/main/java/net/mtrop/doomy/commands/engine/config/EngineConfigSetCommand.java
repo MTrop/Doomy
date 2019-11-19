@@ -1,29 +1,29 @@
-package net.mtrop.doomy.commands.engine.template.config;
+package net.mtrop.doomy.commands.engine.config;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.managers.EngineTemplateConfigManager;
-import net.mtrop.doomy.managers.EngineTemplateManager;
+import net.mtrop.doomy.managers.EngineConfigManager;
+import net.mtrop.doomy.managers.EngineManager;
 
 /**
- * A command that sets a single template value.
+ * A command that sets a single engine setting value.
  * @author Matthew Tropiano
  */
-public class EngineTemplateConfigSetCommand implements DoomyCommand
+public class EngineConfigSetCommand implements DoomyCommand
 {
-	private String template;
+	private String engine;
 	private String name;
 	private String value;
 
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
 	{
-		template = args.pollFirst();
-		if (template == null)
-			throw new BadArgumentException("Expected name of template.");
+		engine = args.pollFirst();
+		if (engine == null)
+			throw new BadArgumentException("Expected name of engine.");
 		name = args.pollFirst();
 		if (name == null)
 			throw new BadArgumentException("Expected name of setting.");
@@ -35,23 +35,23 @@ public class EngineTemplateConfigSetCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		if (!EngineTemplateManager.get().containsTemplate(template))
+		if (!EngineManager.get().containsEngine(engine))
 		{
-			err.println("ERROR: No such template: " + template);
+			err.println("ERROR: No such engine: " + engine);
 			return ERROR_NOT_FOUND;
 		}
 
-		EngineTemplateConfigManager config = EngineTemplateConfigManager.get();
+		EngineConfigManager config = EngineConfigManager.get();
 		
 		String readValue;
-		if (!config.setSetting(template, name, value))
+		if (!config.setSetting(engine, name, value))
 		{
 			err.println("ERROR: Could not set: " + name);
 			return ERROR_NOT_ADDED;
 		}
 		else
 		{
-			readValue = config.getSetting(template, name);
+			readValue = config.getSetting(engine, name);
 			out.println("'" + name + "' is '" + readValue + "'");
 		}
 		

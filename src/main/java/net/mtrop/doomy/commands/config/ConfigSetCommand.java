@@ -1,6 +1,6 @@
 package net.mtrop.doomy.commands.config;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
@@ -28,7 +28,7 @@ public class ConfigSetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, InputStream in)
+	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
 		ConfigManager config = ConfigManager.get();
 		

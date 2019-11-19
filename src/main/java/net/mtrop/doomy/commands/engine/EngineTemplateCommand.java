@@ -1,4 +1,4 @@
-package net.mtrop.doomy.commands;
+package net.mtrop.doomy.commands.engine;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
@@ -9,13 +9,13 @@ import net.mtrop.doomy.DoomyMain;
 import net.mtrop.doomy.util.Common;
 
 /**
- * A command that prints the basic usage and exits.
+ * A command that handles engine templates.
  * @author Matthew Tropiano
  */
-public class UsageCommand implements DoomyCommand
+public class EngineTemplateCommand implements DoomyCommand
 {
 	private String badCommand;
-
+	
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
 	{
@@ -30,7 +30,7 @@ public class UsageCommand implements DoomyCommand
 			
 		if (badCommand == null)
 			Common.splash(out, DoomyMain.VERSION);
-		Common.usage(out);
+		Common.help(out, ENGINE);
 		return ERROR_NONE;
 	}
 

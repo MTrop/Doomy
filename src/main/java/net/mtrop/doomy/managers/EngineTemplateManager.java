@@ -3,6 +3,7 @@ package net.mtrop.doomy.managers;
 import java.sql.SQLException;
 
 import com.blackrook.sql.SQLConnection;
+import com.blackrook.sql.SQLConnection.Transaction;
 import com.blackrook.sql.SQLConnection.TransactionLevel;
 import com.blackrook.sql.SQLResult;
 import com.blackrook.sql.util.SQLRuntimeException;
@@ -29,6 +30,8 @@ public final class EngineTemplateManager
 		= "INSERT INTO EngineTemplates (name) VALUES (?)"; 
 	private static final String QUERY_REMOVE
 		= "DELETE FROM EngineTemplates WHERE name = ?"; 
+	private static final String QUERY_REMOVE_SETTINGS
+		= "DELETE FROM EngineTemplateSettings WHERE engineTemplateId = ?"; 
 	
 	private static final String QUERY_COPY_SETTINGS 
 		= "INSERT INTO EngineTemplateSettings (engineTemplateId, name, value) " 
@@ -43,9 +46,9 @@ public final class EngineTemplateManager
 	private static EngineTemplateManager INSTANCE;
 
 	/**
-	 * Initializes/Returns the singleton config manager instance.
-	 * @return the single config manager.
-	 * @throws DoomySetupException if the config manager could not be set up.
+	 * Initializes/Returns the singleton manager instance.
+	 * @return the single manager.
+	 * @throws DoomySetupException if the manager could not be set up.
 	 */
 	public static EngineTemplateManager get()
 	{
@@ -126,7 +129,9 @@ public final class EngineTemplateManager
 				trn.abort();
 			else
 				trn.complete();
-		} catch (SQLException e) {
+		} 
+		catch (SQLException e) 
+		{
 			throw new SQLRuntimeException(e);
 		}
 		return out;
@@ -139,7 +144,22 @@ public final class EngineTemplateManager
 	 */
 	public boolean removeTemplate(String name)
 	{
-		return connection.getUpdateResult(QUERY_REMOVE, name).getRowCount() > 0;
+		EngineTemplate template = getTemplate(name);
+		if (template == null)
+			return false;
+		
+		try (Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
+		{
+			trn.getUpdateResult(QUERY_REMOVE_SETTINGS, template.id);
+			trn.getUpdateResult(QUERY_REMOVE, template.name);
+			trn.complete();
+		} 
+		catch (SQLException e) 
+		{
+			throw new SQLRuntimeException(e);
+		}
+		
+		return true;
 	}
 	
 	/**

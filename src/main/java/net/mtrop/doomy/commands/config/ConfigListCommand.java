@@ -1,6 +1,6 @@
 package net.mtrop.doomy.commands.config;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
@@ -23,7 +23,7 @@ public class ConfigListCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, InputStream in)
+	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
 		ConfigSettingEntry[] records = ConfigManager.get().getAllValues(phrase);
 		if (records.length > 0)
@@ -32,7 +32,8 @@ public class ConfigListCommand implements DoomyCommand
 			for (int i = 0; i < records.length; i++)
 				len = Math.max(records[i].name.length() + 1, len);
 			String format = "%-" + len + "s %s\n";
-			out.printf(format, "-Name", "-Value");
+			out.printf(format, "Name", "Value");
+			out.printf(format, "====", "=====");
 			for (int i = 0; i < records.length; i++)
 				out.printf(format, records[i].name, records[i].value);
 		}

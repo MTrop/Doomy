@@ -73,7 +73,7 @@ public final class EngineTemplateConfigManager
 	 * @param name the setting name.
 	 * @return true if so, false if not.
 	 */
-	public boolean containsValue(String templateName, String name)
+	public boolean containsSetting(String templateName, String name)
 	{
 		Long id = getTemplateId(templateName);
 		if (id == null)
@@ -88,13 +88,13 @@ public final class EngineTemplateConfigManager
 	 * @param value the value.
 	 * @return true if added/updated, false if not.
 	 */
-	public boolean setValue(String templateName, String name, String value)
+	public boolean setSetting(String templateName, String name, String value)
 	{
 		Long id = getTemplateId(templateName);
 		if (id == null)
 			return false;
-		if (containsValue(templateName, name))
-			return connection.getUpdateResult(QUERY_SET, id, value, name).getRowCount() > 0;
+		if (containsSetting(templateName, name))
+			return connection.getUpdateResult(QUERY_SET, value, id, name).getRowCount() > 0;
 		else
 			return connection.getUpdateResult(QUERY_ADD, id, name, value).getRowCount() > 0;
 	}
@@ -105,7 +105,7 @@ public final class EngineTemplateConfigManager
 	 * @param name the setting name.
 	 * @return the resultant value, or null if it doesn't exist.
 	 */
-	public String getValue(String templateName, String name)
+	public String getSetting(String templateName, String name)
 	{
 		Long id = getTemplateId(templateName);
 		if (id == null)
@@ -120,7 +120,7 @@ public final class EngineTemplateConfigManager
 	 * @param name the setting name.
 	 * @return true if removed, false if not.
 	 */
-	public boolean removeValue(String templateName, String name)
+	public boolean removeSetting(String templateName, String name)
 	{
 		Long id = getTemplateId(templateName);
 		if (id == null)
@@ -134,7 +134,7 @@ public final class EngineTemplateConfigManager
 	 * @param containingPhrase the phrase to search for.
 	 * @return the list of settings found, or null if the template name is not found.
 	 */
-	public EngineTemplateSettingEntry[] getAllValues(String templateName, String containingPhrase)
+	public EngineTemplateSettingEntry[] getAllSettings(String templateName, String containingPhrase)
 	{
 		Long id = getTemplateId(templateName);
 		if (id == null)

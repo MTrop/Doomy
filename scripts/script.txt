@@ -1,0 +1,9 @@
+config set junk 5
+config get junk
+config set fruit apple
+config list
+engine template add zdoom
+engine template config set zdoom junk 5
+engine template config get zdoom junk
+engine template config list zdoom
+engine template config remove zdoom junk

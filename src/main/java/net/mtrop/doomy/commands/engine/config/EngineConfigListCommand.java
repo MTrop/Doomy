@@ -1,18 +1,18 @@
-package net.mtrop.doomy.commands.engine.template.config;
+package net.mtrop.doomy.commands.engine.config;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.managers.EngineTemplateConfigManager;
-import net.mtrop.doomy.managers.EngineTemplateConfigManager.EngineTemplateSettingEntry;
+import net.mtrop.doomy.managers.EngineConfigManager;
+import net.mtrop.doomy.managers.EngineConfigManager.EngineSettingEntry;
 
 /**
- * A command that prints all stored settings for an engine template.
+ * A command that prints all stored settings for an engine.
  * @author Matthew Tropiano
  */
-public class EngineTemplateConfigListCommand implements DoomyCommand
+public class EngineConfigListCommand implements DoomyCommand
 {
 	private String name;
 	private String phrase;
@@ -22,18 +22,18 @@ public class EngineTemplateConfigListCommand implements DoomyCommand
 	{
 		name = args.pollFirst();
 		if (name == null)
-			throw new BadArgumentException("Expected name of template.");
+			throw new BadArgumentException("Expected name of engine.");
 		phrase = args.pollFirst();
 	}
 
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		EngineTemplateSettingEntry[] records = EngineTemplateConfigManager.get().getAllSettings(name, phrase);
+		EngineSettingEntry[] records = EngineConfigManager.get().getAllSettings(name, phrase);
 		
 		if (records == null)
 		{
-			out.println("Engine template '" + name + "' not found.");
+			out.println("Engine '" + name + "' not found.");
 			return ERROR_NONE;
 		}
 

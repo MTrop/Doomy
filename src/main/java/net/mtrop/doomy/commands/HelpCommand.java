@@ -1,6 +1,6 @@
 package net.mtrop.doomy.commands;
 
-import java.io.InputStream;
+import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
@@ -22,7 +22,7 @@ public class HelpCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, InputStream in)
+	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
 		Common.splash(System.out, DoomyMain.VERSION);
 		Common.help(System.out, null);
