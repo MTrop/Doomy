@@ -1,20 +1,20 @@
-package net.mtrop.doomy.commands.engine;
+package net.mtrop.doomy.commands.iwad;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.managers.EngineManager;
+import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.util.Common;
 
 import static net.mtrop.doomy.DoomyCommand.*;
 
 /**
- * A command that removes an existing engine.
+ * A command that removes an existing IWAD.
  * @author Matthew Tropiano
  */
-public class EngineRemoveCommand implements DoomyCommand
+public class IWADRemoveCommand implements DoomyCommand
 {
 	private static final String SWITCH_QUIET1 = "--quiet";
 	private static final String SWITCH_QUIET2 = "-q";
@@ -27,7 +27,7 @@ public class EngineRemoveCommand implements DoomyCommand
 	{
 		name = args.pollFirst();
 		if (name == null)
-			throw new BadArgumentException("Expected name of engine to remove.");
+			throw new BadArgumentException("Expected name of IWAD to remove.");
 		
 		if (!args.isEmpty())
 		{
@@ -41,27 +41,27 @@ public class EngineRemoveCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		EngineManager mgr = EngineManager.get();
+		IWADManager mgr = IWADManager.get();
 		
-		if (!mgr.containsEngine(name))
+		if (!mgr.containsIWAD(name))
 		{
-			err.println("ERROR: Engine '" + name + "' does not exist.");
+			err.println("ERROR: IWAD '" + name + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(Common.prompt(out, in, "Are you sure that you want to remove engine '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(Common.prompt(out, in, "Are you sure that you want to remove IWAD '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		
-		if (!mgr.removeEngine(name))
+		if (!mgr.removeIWAD(name))
 		{
-			err.println("ERROR: Engine '" + name + "' could not be removed.");
+			err.println("ERROR: IWAD '" + name + "' could not be removed.");
 			return ERROR_NOT_REMOVED;
 		}
 		
-		out.println("Removed engine '" + name + "'.");
+		out.println("Removed IWAD '" + name + "'.");
 		return ERROR_NONE;
 	}
 

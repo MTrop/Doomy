@@ -21,7 +21,7 @@ public class EngineRenameCommand implements DoomyCommand
 	{
 		name = args.pollFirst();
 		if (name == null)
-			throw new BadArgumentException("Expected name of new engine.");
+			throw new BadArgumentException("Expected name of engine.");
 		newName = args.pollFirst();
 		if (newName == null)
 			throw new BadArgumentException("Expected new name.");
@@ -35,19 +35,19 @@ public class EngineRenameCommand implements DoomyCommand
 		if (!mgr.containsEngine(name))
 		{
 			err.println("ERROR: Engine '" + name + "' does not exist.");
-			return ERROR_NOT_ADDED;
+			return ERROR_NOT_FOUND;
 		}
 		
 		if (mgr.containsEngine(newName))
 		{
-			err.println("ERROR: Source engine '" + newName + "' already exists.");
+			err.println("ERROR: Engine '" + newName + "' already exists. Choose a different name.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!mgr.renameEngine(name, newName))
 		{
-			err.println("ERROR: Engine '" + name + "' could not be created from '" + newName + "'.");
-			return ERROR_NOT_ADDED;
+			err.println("ERROR: Engine '" + name + "' could not be renamed to '" + newName + "'.");
+			return ERROR_NOT_RENAMED;
 		}
 
 		out.println("Renamed engine '" + name + "' to '" + newName + "'.");

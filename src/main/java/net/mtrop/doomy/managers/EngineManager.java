@@ -77,7 +77,7 @@ public final class EngineManager
 	}
 
 	/**
-	 * Fetches a full engine entry (and its settings).
+	 * Checks for an engine entry.
 	 * @param name the name of the engine.
 	 * @return an engine, or null if not found.
 	 */

@@ -7,6 +7,7 @@ import java.util.Deque;
 import net.mtrop.doomy.commands.ConfigCommand;
 import net.mtrop.doomy.commands.EngineCommand;
 import net.mtrop.doomy.commands.HelpCommand;
+import net.mtrop.doomy.commands.IWADCommand;
 import net.mtrop.doomy.commands.UsageCommand;
 import net.mtrop.doomy.commands.VersionCommand;
 import net.mtrop.doomy.commands.config.ConfigGetCommand;
@@ -19,6 +20,7 @@ import net.mtrop.doomy.commands.engine.EngineCopyCommand;
 import net.mtrop.doomy.commands.engine.EngineListCommand;
 import net.mtrop.doomy.commands.engine.EngineRemoveCommand;
 import net.mtrop.doomy.commands.engine.EngineRenameCommand;
+import net.mtrop.doomy.commands.engine.EngineSetupCommand;
 import net.mtrop.doomy.commands.engine.EngineTemplateCommand;
 import net.mtrop.doomy.commands.engine.config.EngineConfigGetCommand;
 import net.mtrop.doomy.commands.engine.config.EngineConfigListCommand;
@@ -32,6 +34,13 @@ import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigGetCo
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigListCommand;
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigRemoveCommand;
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigSetCommand;
+import net.mtrop.doomy.commands.iwad.IWADAddCommand;
+import net.mtrop.doomy.commands.iwad.IWADGetCommand;
+import net.mtrop.doomy.commands.iwad.IWADListCommand;
+import net.mtrop.doomy.commands.iwad.IWADRemoveCommand;
+import net.mtrop.doomy.commands.iwad.IWADRenameCommand;
+import net.mtrop.doomy.commands.iwad.IWADScanCommand;
+import net.mtrop.doomy.commands.iwad.IWADSetCommand;
 
 /**
  * Commands factory for Doomy.
@@ -45,6 +54,9 @@ public interface DoomyCommand
 	static final int ERROR_NOT_FOUND = 		4;
 	static final int ERROR_NOT_ADDED = 		5;
 	static final int ERROR_NOT_REMOVED = 	6;
+	static final int ERROR_NOT_RENAMED = 	7;
+	static final int ERROR_NOT_UPDATED = 	8;
+	static final int ERROR_BAD_EXE = 		9;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";
@@ -64,6 +76,8 @@ public interface DoomyCommand
 	static final String COPY = "copy";
 	static final String REMOVE = "remove";
 	static final String RENAME = "rename";
+	static final String SETUP = "setup";
+	static final String SCAN = "scan";
 
 	/**
 	 * Thrown if a bad/unexpected argument is parsed on command initialize.
@@ -125,7 +139,7 @@ public interface DoomyCommand
 	/**
 	 * Fetches the base command to initialize and execute.
 	 * @param args the deque of remaining arguments.
-	 * @return
+	 * @return a command to run.
 	 */
 	static DoomyCommand getCommand(Deque<String> args) throws BadCommandException
 	{
@@ -160,6 +174,8 @@ public interface DoomyCommand
 				return new EngineRemoveCommand();
 			else if (matchArgument(args, RENAME))
 				return new EngineRenameCommand();
+			else if (matchArgument(args, SETUP))
+				return new EngineSetupCommand();
 			else if (matchArgument(args, CONFIG))
 			{
 				if (matchArgument(args, LIST))
@@ -200,7 +216,26 @@ public interface DoomyCommand
 			else
 				return new EngineCommand();
 		}
-
+		else if (matchArgument(args, IWAD))
+		{
+			if (matchArgument(args, LIST))
+				return new IWADListCommand();
+			else if (matchArgument(args, ADD))
+				return new IWADAddCommand();
+			else if (matchArgument(args, REMOVE))
+				return new IWADRemoveCommand();
+			else if (matchArgument(args, RENAME))
+				return new IWADRenameCommand();
+			else if (matchArgument(args, GET))
+				return new IWADGetCommand();
+			else if (matchArgument(args, SET))
+				return new IWADSetCommand();
+			else if (matchArgument(args, SCAN))
+				return new IWADScanCommand();
+			else
+				return new IWADCommand();
+		}
+		
 		return new UsageCommand();
 	}
 

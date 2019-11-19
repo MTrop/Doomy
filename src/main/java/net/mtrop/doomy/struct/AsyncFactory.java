@@ -636,7 +636,8 @@ public final class AsyncFactory
 		 */
 		public Exception getException() throws InterruptedException, ExecutionException
 		{
-			join();
+			if (!isDone())
+				join();
 			return exception;
 		}
 	

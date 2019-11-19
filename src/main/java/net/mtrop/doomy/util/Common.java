@@ -166,7 +166,7 @@ public final class Common
 			out.println("      [template]                         ...by copying a template named [template].");
 			out.println("    copy [name] [engine]               Create a new engine profile named [name] by copying an engine named [engine].");
 			out.println("    remove [name]                      Remove an engine template named [name] (and confirm).");
-			out.println("      --quiet, -q                        ...but skip confirm.");
+			out.println("      --quiet, -q                        ...and skip confirm.");
 			out.println("    rename [name1] [name2]             Changes an engine's name from [name1] to [name2].");
 			out.println("    list                               List all stored engine profiles.");
 			out.println("      [phrase]                           ...that contain [phrase].");
@@ -181,8 +181,8 @@ public final class Common
 			out.println("        [phrase]                         ...that contain [phrase].");
 			out.println("      add [name]                       Create a new engine profile template named [name].");
 			out.println("        [template]                       ...by copying a template named [template].");
-			out.println("      remove [name]                    Remove the engine profile template named [name] (and confirm).");
-			out.println("        --quiet, -q                      ...but skip confirm.");
+			out.println("      remove [name]                    Remove the engine profile template named [name].");
+			out.println("        --quiet, -q                      ...and skip confirm.");
 			out.println("      config");
 			out.println("        list [name]                    Print engine profile [name]'s settings.");
 			out.println("          [phrase]                       ...that contain [phrase].");
@@ -197,10 +197,13 @@ public final class Common
 			out.println("      [phrase]                           ...that contain [phrase].");
 			out.println("    add [name] [path]                  Add an IWAD by name [name] and its path at [path].");
 			out.println("    remove [name]                      Remove an IWAD by name.");
+			out.println("      --quiet, -q                        ...and skip confirm.");
+			out.println("    clean                              Removes all IWADs with obsolete/missing paths.");
+			out.println("      --quiet, -q                        ...and skip confirm.");
 			out.println("    rename [name1] [name2]             Changes an alias from IWAD [name1] to [name2].");
 			out.println("    get [name]                         Print the path of the IWAD named [name].");
 			out.println("    set [name] [path]                  Change the path of the IWAD named [name] to [path].");
-			out.println("    scan [path]                        Adds all IWADs in directory [path] (can be WAD/PK3/IPK3/IPK7). Filename becomes [name].");
+			out.println("    scan [path]                        Adds all IWADs in directory [path] (can be WAD/PK3/PK7/IPK3/IPK7/IWAD). Filename becomes [name].");
 			out.println("      --recurse, -r                      ...and search recursively from [path].");
 			out.println("      --prefix, -p [string]              ...and prepend [string] to each WAD entry name.");
 			out.println("      --force-add-existing               ...and update the names of known paths (otherwise, this does not add existing).");
@@ -245,9 +248,9 @@ public final class Common
 			out.println("      --iwad, -i [name]                  ...with IWAD name [name] (may not be required if specified in engine settings).");
 			out.println("    remove                             Print this subsection's help and terminate.");
 			out.println("      [name]                           Remove preset named [name] (takes precedence, must confirm).");
-			out.println("        --quiet, -q                      ...but skip confirm.");
+			out.println("        --quiet, -q                      ...and skip confirm.");
 			out.println("      [hash]                           Remove preset by hash [hash] (must be full, must confirm).");
-			out.println("        --quiet, -q                      ...but skip confirm.");
+			out.println("        --quiet, -q                      ...and skip confirm.");
 			out.println("    info                               Print this subsection's help and terminate.");
 			out.println("      [name]                           Get preset named [name] and list info (takes precedence).");
 			out.println("      [hash]                           Get preset hash [hash] and list info (can be starting partial, if unique enough).");

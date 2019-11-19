@@ -25,10 +25,10 @@ public final class EngineConfigManager
 	public static final String SETTING_SERVERFILENAME = "server.exe.name";
 	/** [OPT] If NOT present (or empty), set to either DOSBox dir or the EXE parent. */
 	public static final String SETTING_WORKDIRPATH = 	"work.dir";
-	/** [OPT] If present (and not empty), this engine requires an IWAD and this is the switch for loading it. */
-	public static final String SETTING_IWADSWITCH = 	"switch.iwad";
 	/** The switch to use for loading PWAD data (might be "-merge" if Chocolate Doom). */
 	public static final String SETTING_FILESWITCH = 	"switch.file";
+	/** [OPT] If present (and not empty), this engine requires an IWAD and this is the switch for loading it. */
+	public static final String SETTING_IWADSWITCH = 	"switch.iwad";
 	/** [OPT] The switch to use for loading DeHackEd patches (blank for unsupported). */
 	public static final String SETTING_DEHSWITCH = 		"switch.dehacked";
 	/** [OPT] The switch to use for loading DeHackEd lumps (blank for unsupported). */

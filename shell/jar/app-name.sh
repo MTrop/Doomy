@@ -12,4 +12,6 @@ SCRIPTDIR="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
 JAVAOPTS={{JAVA_OPTIONS}}
 MAINCLASS={{MAIN_CLASSNAME}}
 
+pushd $SCRIPTDIR
 java -cp "$SCRIPTDIR/jar/*" $JAVAOPTS $MAINCLASS %*
+popd

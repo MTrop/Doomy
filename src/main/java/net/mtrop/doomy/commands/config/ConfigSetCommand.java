@@ -24,7 +24,7 @@ public class ConfigSetCommand implements DoomyCommand
 			throw new BadArgumentException("Expected name of setting.");
 		value = args.pollFirst();
 		if (value == null)
-			throw new BadArgumentException("Expected value after name.");
+			throw new BadArgumentException("Expected value after setting name.");
 	}
 
 	@Override
