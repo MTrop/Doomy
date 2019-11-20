@@ -1,5 +1,5 @@
 CREATE TABLE Meta (
-	name TEXT NOT NULL,
+	name TEXT NOT NULL COLLATE NOCASE,
 	value TEXT NULL,
 	PRIMARY KEY (name)
 )

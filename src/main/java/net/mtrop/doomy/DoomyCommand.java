@@ -10,6 +10,7 @@ import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.IWADCommand;
 import net.mtrop.doomy.commands.UsageCommand;
 import net.mtrop.doomy.commands.VersionCommand;
+import net.mtrop.doomy.commands.WADCommand;
 import net.mtrop.doomy.commands.config.ConfigGetCommand;
 import net.mtrop.doomy.commands.config.ConfigListCommand;
 import net.mtrop.doomy.commands.config.ConfigRemoveCommand;
@@ -35,12 +36,22 @@ import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigListC
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigRemoveCommand;
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigSetCommand;
 import net.mtrop.doomy.commands.iwad.IWADAddCommand;
+import net.mtrop.doomy.commands.iwad.IWADCleanCommand;
 import net.mtrop.doomy.commands.iwad.IWADGetCommand;
 import net.mtrop.doomy.commands.iwad.IWADListCommand;
 import net.mtrop.doomy.commands.iwad.IWADRemoveCommand;
 import net.mtrop.doomy.commands.iwad.IWADRenameCommand;
 import net.mtrop.doomy.commands.iwad.IWADScanCommand;
 import net.mtrop.doomy.commands.iwad.IWADSetCommand;
+import net.mtrop.doomy.commands.wad.WADAddCommand;
+import net.mtrop.doomy.commands.wad.WADCleanCommand;
+import net.mtrop.doomy.commands.wad.WADGetCommand;
+import net.mtrop.doomy.commands.wad.WADListCommand;
+import net.mtrop.doomy.commands.wad.WADRemoveCommand;
+import net.mtrop.doomy.commands.wad.WADRenameCommand;
+import net.mtrop.doomy.commands.wad.WADScanCommand;
+import net.mtrop.doomy.commands.wad.WADSetCommand;
+import net.mtrop.doomy.commands.wad.WADTextCommand;
 
 /**
  * Commands factory for Doomy.
@@ -78,6 +89,8 @@ public interface DoomyCommand
 	static final String RENAME = "rename";
 	static final String SETUP = "setup";
 	static final String SCAN = "scan";
+	static final String TEXT = "text";
+	static final String CLEAN = "clean";
 
 	/**
 	 * Thrown if a bad/unexpected argument is parsed on command initialize.
@@ -224,6 +237,8 @@ public interface DoomyCommand
 				return new IWADAddCommand();
 			else if (matchArgument(args, REMOVE))
 				return new IWADRemoveCommand();
+			else if (matchArgument(args, CLEAN))
+				return new IWADCleanCommand();
 			else if (matchArgument(args, RENAME))
 				return new IWADRenameCommand();
 			else if (matchArgument(args, GET))
@@ -234,6 +249,29 @@ public interface DoomyCommand
 				return new IWADScanCommand();
 			else
 				return new IWADCommand();
+		}
+		else if (matchArgument(args, WAD))
+		{
+			if (matchArgument(args, LIST))
+				return new WADListCommand();
+			else if (matchArgument(args, ADD))
+				return new WADAddCommand();
+			else if (matchArgument(args, REMOVE))
+				return new WADRemoveCommand();
+			else if (matchArgument(args, CLEAN))
+				return new WADCleanCommand();
+			else if (matchArgument(args, RENAME))
+				return new WADRenameCommand();
+			else if (matchArgument(args, GET))
+				return new WADGetCommand();
+			else if (matchArgument(args, SET))
+				return new WADSetCommand();
+			else if (matchArgument(args, SCAN))
+				return new WADScanCommand();
+			else if (matchArgument(args, TEXT))
+				return new WADTextCommand();
+			else
+				return new WADCommand();
 		}
 		
 		return new UsageCommand();

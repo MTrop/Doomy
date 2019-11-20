@@ -1,4 +1,4 @@
-package net.mtrop.doomy.commands.iwad;
+package net.mtrop.doomy.commands.wad;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -9,17 +9,17 @@ import java.util.Deque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.managers.IWADManager;
+import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.util.Common;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
 /**
- * A command that scans a directory for IWADs.
+ * A command that scans a directory for WADs.
  * @author Matthew Tropiano
  */
-public class IWADScanCommand implements DoomyCommand
+public class WADScanCommand implements DoomyCommand
 {
 	private static final String SWITCH_RECURSE1 = "--recurse";
 	private static final String SWITCH_RECURSE2 = "-r";
@@ -27,9 +27,9 @@ public class IWADScanCommand implements DoomyCommand
 	private static final String SWITCH_PREFIX2 = "-p";
 	private static final String SWITCH_FORCEADD = "--force-add-existing";
 
-	private static final String[] FILETYPES = {"IPK3", "IPK7", "IWAD", "PK3", "PK7", "WAD"};
+	private static final String[] FILETYPES = {"PK3", "PK7", "WAD", "ZIP"};
 	
-	private static final FileFilter IWADFILTER = (file) ->
+	private static final FileFilter WADFILTER = (file) ->
 	{
 		if (file.isDirectory())
 			return true;
@@ -47,7 +47,7 @@ public class IWADScanCommand implements DoomyCommand
 	{
 		path = args.pollFirst();
 		if (path == null)
-			throw new BadArgumentException("Expected path to scan for IWADs.");
+			throw new BadArgumentException("Expected path to scan for WADs.");
 
 		prefix = "";
 		recurse = false;
@@ -69,7 +69,7 @@ public class IWADScanCommand implements DoomyCommand
 					else if (matchArgument(args, SWITCH_FORCEADD))
 						force = true;
 					else
-						throw new BadArgumentException("Expected path to scan for IWADs.");
+						throw new BadArgumentException("Expected path to scan for WADs.");
 				}
 				break;
 
@@ -101,54 +101,54 @@ public class IWADScanCommand implements DoomyCommand
 		AtomicInteger updated = new AtomicInteger(0);
 		
 		// Get count.
-		out.print("Finding IWADs.... 0");
-		Common.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
+		out.print("Finding WADs.... 0");
+		Common.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 		{
-			IWADManager manager = IWADManager.get();
+			WADManager manager = WADManager.get();
 			String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
-			if (manager.containsIWAD(name) && force)
-				out.print("\rFinding IWADs.... " + updated.incrementAndGet());
-			else if (!manager.containsIWAD(name))
-				out.print("\rFinding IWADs.... " + added.incrementAndGet());
+			if (manager.containsWAD(name) && force)
+				out.print("\rFinding WADs.... " + updated.incrementAndGet());
+			else if (!manager.containsWAD(name))
+				out.print("\rFinding WADs.... " + added.incrementAndGet());
 		});
 		out.println();
 		
 		int totalCount = added.get() + updated.get();
-		
+
 		if (totalCount > 0)
 		{
 			// Do update.
 			AtomicInteger count = new AtomicInteger(0);
-			final String format = "\rAdding IWADs: %-" + (int)(Math.log10(totalCount) + 1.0) + "d of " + totalCount + " (%3d%%)...";
-	
+			final String format = "\rAdding WADs: %-" + (int)(Math.log10(totalCount) + 1.0) + "d of " + totalCount + " (%3d%%)...";
+
 			out.printf(format, 0, 0);
-			Common.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
+			Common.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 			{
-				IWADManager manager = IWADManager.get();
+				WADManager manager = WADManager.get();
 				String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
-				if (manager.containsIWAD(name) && force)
+				if (manager.containsWAD(name) && force)
 				{
-					manager.setIWADPath(name, file.getPath());
+					manager.setWADPath(name, file.getPath());
 					int c = count.incrementAndGet();
 					out.printf(format, c, (c * 100 / totalCount));
 				}
-				else if (!manager.containsIWAD(name))
+				else if (!manager.containsWAD(name))
 				{
-					manager.addIWAD(name, file.getPath());
+					manager.addWAD(name, file.getPath());
 					int c = count.incrementAndGet();
 					out.printf(format, c, (c * 100 / totalCount));
 				}
 			});
 			out.println();
 		}
-
+		
 		if (added.get() > 0)
-			out.println("Added " + added + " IWADs.");
+			out.println("Added " + added + " WADs.");
 		if (updated.get() > 0)
-			out.println("Updated " + updated + " IWADs.");
+			out.println("Updated " + updated + " WADs.");
 
 		if (added.get() == 0 && updated.get() == 0)
-			out.println("No IWADs added/updated.");
+			out.println("No WADs added/updated.");
 
 		return ERROR_NONE;
 	}

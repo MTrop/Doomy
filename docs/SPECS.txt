@@ -91,6 +91,7 @@ CREATE TABLE WADs (
 	id INTEGER,
 	name TEXT NOT NULL,
 	path TEXT NOT NULL,
+	sourceUrl TEXT NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (name)
 );
@@ -100,16 +101,6 @@ CREATE TABLE WADData (
 	name TEXT NOT NULL,
 	value TEXT NULL,
 	PRIMARY KEY (wadId, name),
-	FOREIGN KEY (wadId) 
-		REFERENCES WADs(id)
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
-);
-
-CREATE TABLE WADSources (
-	wadId INTEGER NOT NULL,
-	url TEXT NOT NULL,
-	UNIQUE (wadId),
 	FOREIGN KEY (wadId) 
 		REFERENCES WADs(id)
 			ON DELETE CASCADE
@@ -180,42 +171,3 @@ CREATE TABLE EngineTemplateSettings (
 			ON DELETE CASCADE
 			ON UPDATE CASCADE
 );
-
-..............................................................................
-
-final class IdGamesDriver {
-	...
-}
-
-final class WadArchiveDriver {
-	...
-}
-
-final class ConfigDriver {
-	private SQLConnection connection;
-	...
-}
-
-final class AsyncDriver {
-	...
-}
-
-enum Response {
-	SUCCESS,
-	...
-}
-
-abstract class DoomyCommand {
-	Response process(PrintStream out, PrintStream err, InputStream in, Deque<String> args);
-}
-
-class DoomyCommandFactory {
-	public static DoomyCommand parseCommand(Deque<String> args) {
-		...
-	}
-}
-
-main (String... args) {
-	Linked
-}
-

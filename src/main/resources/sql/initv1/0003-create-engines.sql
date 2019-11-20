@@ -1,6 +1,6 @@
 CREATE TABLE Engines (
 	id INTEGER,
-	name TEXT NOT NULL,
+	name TEXT NOT NULL COLLATE NOCASE,
 	templateSource TEXT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (name)

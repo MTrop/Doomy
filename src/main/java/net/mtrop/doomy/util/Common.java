@@ -1,12 +1,17 @@
 package net.mtrop.doomy.util;
 
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.struct.ObjectUtils;
@@ -122,6 +127,30 @@ public final class Common
 		}
 	}
 	
+	public static void scanAndListen(File startDir, boolean recurse, FileFilter filter, Consumer<File> onFile)
+	{
+		Deque<File> fileQueue = new LinkedList<>();
+		
+		for (File f : startDir.listFiles(filter))
+			fileQueue.add(f);
+
+		while (!fileQueue.isEmpty())
+		{
+			File file = fileQueue.pollFirst();
+			if (file.isDirectory())
+			{
+				if (recurse)
+				{
+					for (File f : file.listFiles(filter))
+						fileQueue.add(f);
+				}
+				continue;
+			}
+			
+			onFile.accept(file);
+		}
+	}
+	
 	/**
 	 * Prints the usage.
 	 * @param out the print stream to print to.
@@ -215,7 +244,10 @@ public final class Common
 			out.println("      [phrase]                           ...that contains [phrase] (wildcard is *).");
 			out.println("    add [name] [path]                  Add a WAD alias for a WAD named [name] for [path] (can be a zip archive).");
 			out.println("    remove [name]                      Remove a WAD alias for a WAD named [name] for [path].");
-			out.println("      --downloaded, -d                   ...and also remove the downloaded WAD.");
+			out.println("      --quiet, -q                        ...and skip confirm.");
+			out.println("      --file                             ...and also remove the stored file.");
+			out.println("    clean                              Removes all WADs with obsolete/missing paths.");
+			out.println("      --quiet, -q                        ...and skip confirm.");
 			out.println("    rename [name1] [name2]             Changes an alias from WAD [name1] to [name2].");
 			out.println("    get [name]                         Print the path of the WAD named [name].");
 			out.println("    set [name] [path]                  Change the path of the WAD named [name] to [path].");
@@ -229,12 +261,13 @@ public final class Common
 			out.println("    source                             Print this subsection's help and terminate.");
 			out.println("      list                             List all URL sources.");
 			out.println("        [phrase]                         ...whose WAD name contains [phrase].");
+			out.println("          --show-blank                   ...that aren't bound to URLs.");
 			out.println("      get [name]                       Prints the URL source of a downloaded WAD named [name].");
 			out.println("      set [name] [url]                 Sets the URL source of a downloaded WAD named [name] to [url].");
 			out.println("    dependency");
 			out.println("      list [name]                      Lists all dependencies of WAD [name].");
-			out.println("      add [name1] [name2]              Adds a dependency of WAD [name1] to WAD [name2] (will be loaded automatically, and before [name1]).");
-			out.println("      remove [name1] [name2]           Removes a dependency of WAD [name1], specifically, [name2].");
+			out.println("      add [name] [dependency]          Adds [dependency] as a dependency of WAD [name] (will be loaded automatically, and before [name1]).");
+			out.println("      remove [name] [dependency]       Removes [dependency] as a dependency of WAD [name].");
 			out.println("      clear [name]                     Removes all dependencies of WAD [name].");
 		}
 		if (commandName == null || DoomyCommand.PRESET.equalsIgnoreCase(commandName))

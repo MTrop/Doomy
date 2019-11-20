@@ -1,6 +1,6 @@
 CREATE TABLE EngineTemplates (
 	id INTEGER,
-	name TEXT NOT NULL,
+	name TEXT NOT NULL COLLATE NOCASE,
 	PRIMARY KEY (id),
 	UNIQUE (name)
 )

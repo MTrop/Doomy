@@ -35,7 +35,6 @@ public final class DatabaseManager
 		"sql/initv1/0005-create-iwads.sql",
 		"sql/initv1/0006-create-wads.sql",
 		"sql/initv1/0007-create-waddata.sql",
-		"sql/initv1/0008-create-wadsources.sql",
 		"sql/initv1/0009-create-waddependencies.sql",
 		"sql/initv1/0010-create-preset.sql",
 		"sql/initv1/0011-create-presetitem.sql",
@@ -48,7 +47,7 @@ public final class DatabaseManager
 	// Initializes/creates the connector.
 	private static SQLConnector createConnector(File databaseFile)
 	{
-		return new SQLConnector("org.sqlite.JDBC", "jdbc:sqlite:" + databaseFile.getPath().replaceAll("\\+", "/"));	
+		return new SQLConnector("org.sqlite.JDBC", "jdbc:sqlite:" + databaseFile.getPath().replaceAll("\\\\", "/"));	
 	}
 
 	// Initializes/creates the database.

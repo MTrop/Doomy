@@ -1,7 +1,0 @@
-CREATE TABLE WADSources (
-	wadId INTEGER NOT NULL,
-	url TEXT NOT NULL,
-	UNIQUE (wadId),
-	FOREIGN KEY (wadId) 
-		REFERENCES WADs(id)
-)

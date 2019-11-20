@@ -1,14 +1,14 @@
 CREATE TABLE Preset (
 	id INTEGER,
 	hash TEXT NOT NULL,
-	name TEXT NULL,
-	engineName TEXT NOT NULL,
-	iwadName TEXT NOT NULL,
+	name TEXT NULL COLLATE NOCASE,
+	engineId TEXT NOT NULL,
+	iwadId TEXT NOT NULL,
 	PRIMARY KEY (id),
 	UNIQUE (hash),
 	UNIQUE (name),
-	FOREIGN KEY (engineName) 
-		REFERENCES Engines(name),
-	FOREIGN KEY (iwadName) 
-		REFERENCES IWADs(name)
+	FOREIGN KEY (engineId) 
+		REFERENCES Engines(id),
+	FOREIGN KEY (iwadId) 
+		REFERENCES IWADs(id)
 )

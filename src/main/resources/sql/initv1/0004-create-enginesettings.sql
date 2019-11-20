@@ -16,11 +16,9 @@
 
 CREATE TABLE EngineSettings (
 	engineId INTEGER,
-	name TEXT NOT NULL,
+	name TEXT NOT NULL COLLATE NOCASE,
 	value TEXT NULL,
 	PRIMARY KEY (engineId, name),
 	FOREIGN KEY (engineId) 
 		REFERENCES Engines(id)
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
 )

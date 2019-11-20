@@ -14,11 +14,11 @@ public final class IWADManager
 	// ============================== QUERIES ================================
 	
 	private static final String QUERY_GET_BY_ID
-		= "SELECT id, name, path FROM IWADs WHERE id = ?"; 
+		= "SELECT * FROM IWADs WHERE id = ?"; 
 	private static final String QUERY_GET_BY_NAME 
-		= "SELECT id, name, path FROM IWADs WHERE name = ?"; 
+		= "SELECT * FROM IWADs WHERE name = ?"; 
 	private static final String QUERY_LIST
-		= "SELECT id, name, path FROM IWADs WHERE name LIKE ? ORDER BY name ASC";
+		= "SELECT * FROM IWADs WHERE name LIKE ? ORDER BY name ASC";
 	private static final String QUERY_EXIST
 		= "SELECT EXISTS (SELECT 1 FROM IWADs WHERE name = ?)";
 	private static final String QUERY_ADD 
