@@ -294,6 +294,7 @@ public interface DoomyCommand
 			}
 			else if (matchArgument(args, DEPENDENCY1) || matchArgument(args, DEPENDENCY2))
 			{
+				/*
 				if (matchArgument(args, LIST))
 					return new WADSourceListCommand();
 				else if (matchArgument(args, ADD))
@@ -303,7 +304,7 @@ public interface DoomyCommand
 				else if (matchArgument(args, CLEAR))
 					return new WADSourceSetCommand();
 				else
-					return new WADSourceCommand();
+				*/	return new WADSourceCommand();
 			}
 			else
 				return new WADCommand();
