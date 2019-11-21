@@ -51,7 +51,12 @@ import net.mtrop.doomy.commands.wad.WADRemoveCommand;
 import net.mtrop.doomy.commands.wad.WADRenameCommand;
 import net.mtrop.doomy.commands.wad.WADScanCommand;
 import net.mtrop.doomy.commands.wad.WADSetCommand;
+import net.mtrop.doomy.commands.wad.WADSourceCommand;
 import net.mtrop.doomy.commands.wad.WADTextCommand;
+import net.mtrop.doomy.commands.wad.source.WADSourceGetCommand;
+import net.mtrop.doomy.commands.wad.source.WADSourceListCommand;
+import net.mtrop.doomy.commands.wad.source.WADSourceRemoveCommand;
+import net.mtrop.doomy.commands.wad.source.WADSourceSetCommand;
 
 /**
  * Commands factory for Doomy.
@@ -91,6 +96,10 @@ public interface DoomyCommand
 	static final String SCAN = "scan";
 	static final String TEXT = "text";
 	static final String CLEAN = "clean";
+	static final String CLEAR = "clear";
+	static final String SOURCE = "source";
+	static final String DEPENDENCY1 = "dependency";
+	static final String DEPENDENCY2 = "dep";
 
 	/**
 	 * Thrown if a bad/unexpected argument is parsed on command initialize.
@@ -270,6 +279,32 @@ public interface DoomyCommand
 				return new WADScanCommand();
 			else if (matchArgument(args, TEXT))
 				return new WADTextCommand();
+			else if (matchArgument(args, SOURCE))
+			{
+				if (matchArgument(args, LIST))
+					return new WADSourceListCommand();
+				else if (matchArgument(args, GET))
+					return new WADSourceGetCommand();
+				else if (matchArgument(args, SET))
+					return new WADSourceSetCommand();
+				else if (matchArgument(args, REMOVE))
+					return new WADSourceRemoveCommand();
+				else
+					return new WADSourceCommand();
+			}
+			else if (matchArgument(args, DEPENDENCY1) || matchArgument(args, DEPENDENCY2))
+			{
+				if (matchArgument(args, LIST))
+					return new WADSourceListCommand();
+				else if (matchArgument(args, ADD))
+					return new WADSourceGetCommand();
+				else if (matchArgument(args, REMOVE))
+					return new WADSourceRemoveCommand();
+				else if (matchArgument(args, CLEAR))
+					return new WADSourceSetCommand();
+				else
+					return new WADSourceCommand();
+			}
 			else
 				return new WADCommand();
 		}

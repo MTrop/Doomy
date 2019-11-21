@@ -8,9 +8,9 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
-import net.mtrop.doomy.util.Common;
 
 /**
  * A command that prints all stored IWADs.
@@ -62,7 +62,7 @@ public class IWADCleanCommand implements DoomyCommand
 
 		if (!quiet)
 		{
-			String response = Common.prompt(out, in, "Found " + count + " IWADs with missing files. Remove them, or display (Y/N/D)?");
+			String response = DoomyCommon.prompt(out, in, "Found " + count + " IWADs with missing files. Remove them, or display (Y/N/D)?");
 			if ("d".equalsIgnoreCase(response))
 			{
 				out.printf(format, "Name", "Path");

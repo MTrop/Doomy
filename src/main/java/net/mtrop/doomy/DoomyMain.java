@@ -11,7 +11,6 @@ import java.util.LinkedList;
 import net.mtrop.doomy.DoomyCommand.BadArgumentException;
 import net.mtrop.doomy.DoomyCommand.BadCommandException;
 import net.mtrop.doomy.managers.DatabaseManager;
-import net.mtrop.doomy.util.Common;
 
 /**
  * Main class for Doomy.
@@ -20,7 +19,7 @@ import net.mtrop.doomy.util.Common;
 public final class DoomyMain
 {
 	/** Doomy Version */
-	public static final String VERSION = Common.getVersionString("doomy");
+	public static final String VERSION = DoomyCommon.getVersionString("doomy");
 	
 	/** Start REPL switch. */
 	public static final String SWITCH_SHELL = "--shell";
@@ -148,10 +147,10 @@ public final class DoomyMain
 	private static int doShellLoop(PrintStream out, PrintStream err, BufferedReader in)
 	{
 		String line;
-		Common.splash(out, VERSION);
+		DoomyCommon.splash(out, VERSION);
 		out.println("Type '" + COMMAND_EXIT + "' to exit.");
 		int returnValue = DoomyCommand.ERROR_NONE;
-		while ((line = Common.prompt(out, in, "Doomy>")) != null)
+		while ((line = DoomyCommon.prompt(out, in, "Doomy>")) != null)
 		{
 			line = line.trim();
 			if (COMMAND_EXIT.equalsIgnoreCase(line))

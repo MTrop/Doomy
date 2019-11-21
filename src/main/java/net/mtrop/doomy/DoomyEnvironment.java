@@ -3,7 +3,6 @@ package net.mtrop.doomy;
 import java.io.File;
 
 import net.mtrop.doomy.struct.OSUtils;
-import net.mtrop.doomy.util.Common;
 
 /**
  * Manager class for getting data from config.
@@ -55,7 +54,7 @@ public final class DoomyEnvironment
      */
     public static String getPresetDirectoryPath(String presetHash)
     {
-    	Common.checkNotEmpty(presetHash);
+    	DoomyCommon.checkNotEmpty(presetHash);
     	return (new File(getConfigBasePath() + "/" + PRESETS_DIR + "/" + presetHash)).getAbsolutePath();
     }
 

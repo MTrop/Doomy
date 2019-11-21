@@ -1519,9 +1519,8 @@ public final class HTTPUtils
 		
 		response.headers = conn.getHeaderFields();
 		response.input = new BufferedInputStream(conn.getInputStream());
-		
 		R out = reader.onHTTPResponse(response);
-		conn.disconnect();
+		response.input.close();
 		return out;
 	}
 	

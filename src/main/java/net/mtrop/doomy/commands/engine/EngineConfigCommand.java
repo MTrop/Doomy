@@ -5,8 +5,8 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyMain;
-import net.mtrop.doomy.util.Common;
 
 /**
  * A command that handles engine configuration.
@@ -29,8 +29,8 @@ public class EngineConfigCommand implements DoomyCommand
 			err.println("ERROR: Unknown command: " + badCommand);
 			
 		if (badCommand == null)
-			Common.splash(out, DoomyMain.VERSION);
-		Common.help(out, ENGINE);
+			DoomyCommon.splash(out, DoomyMain.VERSION);
+		DoomyCommon.help(out, ENGINE);
 		return ERROR_NONE;
 	}
 

@@ -5,8 +5,8 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.managers.EngineManager;
-import net.mtrop.doomy.util.Common;
 
 import static net.mtrop.doomy.DoomyCommand.*;
 
@@ -51,7 +51,7 @@ public class EngineRemoveCommand implements DoomyCommand
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(Common.prompt(out, in, "Are you sure that you want to remove engine '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(DoomyCommon.prompt(out, in, "Are you sure that you want to remove engine '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		

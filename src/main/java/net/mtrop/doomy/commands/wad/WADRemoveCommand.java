@@ -6,9 +6,9 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
-import net.mtrop.doomy.util.Common;
 
 import static net.mtrop.doomy.DoomyCommand.*;
 
@@ -58,7 +58,7 @@ public class WADRemoveCommand implements DoomyCommand
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(Common.prompt(out, in, "Are you sure that you want to remove WAD '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(DoomyCommon.prompt(out, in, "Are you sure that you want to remove WAD '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		

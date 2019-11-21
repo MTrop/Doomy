@@ -24,6 +24,8 @@ public final class WADManager
 		= "SELECT * FROM WADs WHERE name = ?"; 
 	private static final String QUERY_LIST
 		= "SELECT * FROM WADs WHERE name LIKE ? ORDER BY name ASC";
+	private static final String QUERY_LIST_NO_SOURCE
+		= "SELECT * FROM WADs WHERE name LIKE ? AND sourceURL IS NULL ORDER BY name ASC";
 	private static final String QUERY_EXIST
 		= "SELECT EXISTS (SELECT 1 FROM WADs WHERE name = ?)";
 	private static final String QUERY_ADD 
@@ -102,6 +104,16 @@ public final class WADManager
 	public WAD[] getAllWADs(String containingPhrase)
 	{
 		return connection.getResult(WAD.class, QUERY_LIST, DatabaseManager.toSearchPhrase(containingPhrase));
+	}
+	
+	/**
+	 * Gets a set of WAD templates by name.
+	 * @param containingPhrase the phrase to search for.
+	 * @return the found templates.
+	 */
+	public WAD[] getAllWADsWithNoSource(String containingPhrase)
+	{
+		return connection.getResult(WAD.class, QUERY_LIST_NO_SOURCE, DatabaseManager.toSearchPhrase(containingPhrase));
 	}
 	
 	/**

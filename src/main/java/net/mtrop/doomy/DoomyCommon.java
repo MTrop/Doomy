@@ -1,4 +1,4 @@
-package net.mtrop.doomy.util;
+package net.mtrop.doomy;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,14 +13,13 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.function.Consumer;
 
-import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.struct.ObjectUtils;
 
 /**
  * Common class.
  * @author Matthew Tropiano
  */
-public final class Common
+public final class DoomyCommon
 {
 
 	/** Version number. */
@@ -150,7 +149,7 @@ public final class Common
 			onFile.accept(file);
 		}
 	}
-	
+
 	/**
 	 * Prints the usage.
 	 * @param out the print stream to print to.
@@ -261,9 +260,10 @@ public final class Common
 			out.println("    source                             Print this subsection's help and terminate.");
 			out.println("      list                             List all URL sources.");
 			out.println("        [phrase]                         ...whose WAD name contains [phrase].");
-			out.println("          --show-blank                   ...that aren't bound to URLs.");
+			out.println("          --show-blank, -b               ...that aren't bound to URLs.");
 			out.println("      get [name]                       Prints the URL source of a downloaded WAD named [name].");
 			out.println("      set [name] [url]                 Sets the URL source of a downloaded WAD named [name] to [url].");
+			out.println("      remove [name]                    Removes the URL source of a downloaded WAD named [name].");
 			out.println("    dependency");
 			out.println("      list [name]                      Lists all dependencies of WAD [name].");
 			out.println("      add [name] [dependency]          Adds [dependency] as a dependency of WAD [name] (will be loaded automatically, and before [name1]).");

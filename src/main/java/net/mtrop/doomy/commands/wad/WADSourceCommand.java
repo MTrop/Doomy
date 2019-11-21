@@ -1,4 +1,4 @@
-package net.mtrop.doomy.commands;
+package net.mtrop.doomy.commands.wad;
 
 import java.io.BufferedReader;
 import java.io.PrintStream;
@@ -9,10 +9,10 @@ import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyMain;
 
 /**
- * A command that prints the basic usage and exits.
+ * A command that prints the WAD help output and exits.
  * @author Matthew Tropiano
  */
-public class UsageCommand implements DoomyCommand
+public class WADSourceCommand implements DoomyCommand
 {
 	private String badCommand;
 
@@ -30,7 +30,7 @@ public class UsageCommand implements DoomyCommand
 			
 		if (badCommand == null)
 			DoomyCommon.splash(out, DoomyMain.VERSION);
-		DoomyCommon.usage(out);
+		DoomyCommon.help(out, WAD);
 		return ERROR_NONE;
 	}
 

@@ -9,9 +9,9 @@ import java.util.Deque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.util.Common;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
@@ -102,7 +102,7 @@ public class WADScanCommand implements DoomyCommand
 		
 		// Get count.
 		out.print("Finding WADs.... 0");
-		Common.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
+		DoomyCommon.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 		{
 			WADManager manager = WADManager.get();
 			String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
@@ -122,7 +122,7 @@ public class WADScanCommand implements DoomyCommand
 			final String format = "\rAdding WADs: %-" + (int)(Math.log10(totalCount) + 1.0) + "d of " + totalCount + " (%3d%%)...";
 
 			out.printf(format, 0, 0);
-			Common.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
+			DoomyCommon.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 			{
 				WADManager manager = WADManager.get();
 				String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();

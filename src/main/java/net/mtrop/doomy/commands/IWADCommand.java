@@ -5,8 +5,8 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyMain;
-import net.mtrop.doomy.util.Common;
 
 /**
  * A command that prints the IWAD help output and exits.
@@ -29,8 +29,8 @@ public class IWADCommand implements DoomyCommand
 			err.println("ERROR: Unknown command: " + badCommand);
 			
 		if (badCommand == null)
-			Common.splash(out, DoomyMain.VERSION);
-		Common.help(out, IWAD);
+			DoomyCommon.splash(out, DoomyMain.VERSION);
+		DoomyCommon.help(out, IWAD);
 		return ERROR_NONE;
 	}
 

@@ -5,8 +5,8 @@ import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyMain;
-import net.mtrop.doomy.util.Common;
 
 /**
  * A command that prints the help output and exits.
@@ -24,8 +24,8 @@ public class HelpCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		Common.splash(System.out, DoomyMain.VERSION);
-		Common.help(System.out, null);
+		DoomyCommon.splash(System.out, DoomyMain.VERSION);
+		DoomyCommon.help(System.out, null);
 		return ERROR_NONE;
 	}
 

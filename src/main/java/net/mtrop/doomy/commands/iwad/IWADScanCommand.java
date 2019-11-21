@@ -9,9 +9,9 @@ import java.util.Deque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.util.Common;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
@@ -102,7 +102,7 @@ public class IWADScanCommand implements DoomyCommand
 		
 		// Get count.
 		out.print("Finding IWADs.... 0");
-		Common.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
+		DoomyCommon.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
 		{
 			IWADManager manager = IWADManager.get();
 			String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
@@ -122,7 +122,7 @@ public class IWADScanCommand implements DoomyCommand
 			final String format = "\rAdding IWADs: %-" + (int)(Math.log10(totalCount) + 1.0) + "d of " + totalCount + " (%3d%%)...";
 	
 			out.printf(format, 0, 0);
-			Common.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
+			DoomyCommon.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
 			{
 				IWADManager manager = IWADManager.get();
 				String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
