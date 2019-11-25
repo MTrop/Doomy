@@ -770,7 +770,19 @@ public final class HTTPUtils
 		{
 			this.map = new HashMap<>(); 
 		}
-		
+
+		/**
+		 * Copies this header object.
+		 * @return a copy of this header.
+		 */
+		public HTTPHeaders copy()
+		{
+			HTTPHeaders out = new HTTPHeaders();
+			for (Map.Entry<String, String> entry : map.entrySet())
+				out.setHeader(entry.getKey(), entry.getValue());
+			return out;
+		}
+
 		/**
 		 * Sets a header.
 		 * @param header the header name.
@@ -796,19 +808,32 @@ public final class HTTPUtils
 		{
 			this.map = new HashMap<>(); 
 		}
-		
+
+		/**
+		 * Copies this parameters object.
+		 * @return a copy of this parameter object.
+		 */
+		public HTTPParameters copy()
+		{
+			HTTPParameters out = new HTTPParameters();
+			for (Map.Entry<String, List<String>> entry : map.entrySet())
+				for (String value : entry.getValue())
+					out.addParameter(entry.getKey(), value);
+			return out;
+		}
+
 		/**
 		 * Adds/creates a parameter.
 		 * @param key the parameter name.
 		 * @param value the parameter value.
 		 * @return this, for chaining.
 		 */
-		public HTTPParameters addParameter(String key, String value)
+		public HTTPParameters addParameter(String key, Object value)
 		{
 			List<String> list;
 			if ((list = map.get(key)) == null)
 				map.put(key, (list = new LinkedList<>()));
-			list.add(value);
+			list.add(String.valueOf(value));
 			return this;
 		}
 
@@ -819,11 +844,11 @@ public final class HTTPUtils
 		 * @param value the parameter value.
 		 * @return this, for chaining.
 		 */
-		public HTTPParameters setParameter(String key, String value)
+		public HTTPParameters setParameter(String key, Object value)
 		{
 			List<String> list;
 			map.put(key, (list = new LinkedList<>()));
-			list.add(value);
+			list.add(String.valueOf(value));
 			return this;
 		}
 
@@ -834,12 +859,12 @@ public final class HTTPUtils
 		 * @param values the parameter values.
 		 * @return this, for chaining.
 		 */
-		public HTTPParameters setParameter(String key, String... values)
+		public HTTPParameters setParameter(String key, Object... values)
 		{
 			List<String> list;
 			map.put(key, (list = new LinkedList<>()));
-			for (String v : values)
-				list.add(v);
+			for (Object v : values)
+				list.add(String.valueOf(v));
 			return this;
 		}
 

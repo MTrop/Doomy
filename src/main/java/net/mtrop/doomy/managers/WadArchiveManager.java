@@ -2,12 +2,14 @@ package net.mtrop.doomy.managers;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.HashMap;
+import java.util.Map;
 
 import com.blackrook.json.JSONReader;
+import com.blackrook.json.annotation.JSONMapType;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.HTTPUtils;
+import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPReader;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPResponse;
 
@@ -23,6 +25,11 @@ public final class WadArchiveManager
 	private static JSONResponseReader<WadseekerResult[]> WADSEEKERRESULT_READER 
 		= new JSONResponseReader<WadseekerResult[]>(WadseekerResult[].class);
 	
+	private static HTTPHeaders HEADERS = HTTPUtils.headers()
+		// Wad-Archive blocks bots by Agent - send a browser string.
+		.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
+		;
+		
 	/** Singleton instance. */
 	private static WadArchiveManager INSTANCE;
 	
@@ -78,7 +85,7 @@ public final class WadArchiveManager
 	 */
 	public WadArchiveResult getByHash(String hash) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getAPIURL() + hash, getTimeout(), WADARCHIVERESULT_READER);
+		return HTTPUtils.httpGet(getAPIURL() + hash, HEADERS, getTimeout(), WADARCHIVERESULT_READER);
 	}
 	
 	/**
@@ -90,7 +97,7 @@ public final class WadArchiveManager
 	 */
 	public WadseekerResult[] getByName(String name) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, getTimeout(), WADSEEKERRESULT_READER);
+		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HEADERS, getTimeout(), WADSEEKERRESULT_READER);
 	}
 	
 	/**
@@ -103,7 +110,7 @@ public final class WadArchiveManager
 	 */
 	public WadseekerResult[] getByNameAndIWAD(String name, String iwad) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HTTPUtils.parameters().setParameter("iwad", iwad), getTimeout(), WADSEEKERRESULT_READER);
+		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HEADERS, HTTPUtils.parameters().setParameter("iwad", iwad), getTimeout(), WADSEEKERRESULT_READER);
 	}
 	
 	/**
@@ -116,7 +123,7 @@ public final class WadArchiveManager
 	 */
 	public WadseekerResult[] getByNameAndPort(String name, String port) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HTTPUtils.parameters().setParameter("port", port), getTimeout(), WADSEEKERRESULT_READER);
+		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HEADERS, HTTPUtils.parameters().setParameter("port", port), getTimeout(), WADSEEKERRESULT_READER);
 	}
 	
 	private static class JSONResponseReader<T> implements HTTPReader<T>
@@ -159,9 +166,11 @@ public final class WadArchiveManager
 		/** Comma-separated list of map lumps. */
 		public String maps;
 		/** Saved screenshots of each map. */
-		public HashMap<String, String> screenshots;
+		@JSONMapType(keyType = String.class, valueType = String.class)
+		public Map<String, String> screenshots;
 		/** What Discs this belongs to. */
-		public HashMap<String, String> discs;
+		@JSONMapType(keyType = String.class, valueType = String.class)
+		public Map<String, String> discs;
 	}
 	
 	/**

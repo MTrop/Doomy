@@ -329,7 +329,7 @@ public final class DoomyCommon
 			out.println("        --limit, -l [amount]           Set max results to [amount].");
 			out.println("        --download, -d [result]        Download the file at result position [result].");
 			out.println("        --text, -t [result]            Print text file of result [result].");
-			out.println("      text [phrase]                    Searches for author containing [phrase], return best matches up to amount.");
+			out.println("      text [phrase]                    Searches using text files containing [phrase], return best matches up to amount.");
 			out.println("        --name, -n [name]              Specify new name, if downloaded.");
 			out.println("        --limit, -l [amount]           Set max results to [amount].");
 			out.println("        --download, -d [result]        Download the file at result position [result].");

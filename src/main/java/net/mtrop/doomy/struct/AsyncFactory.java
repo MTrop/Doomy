@@ -532,7 +532,7 @@ public final class AsyncFactory
 		}
 
 		@Override
-		public abstract T call();
+		public abstract T call() throws Exception;
 
 	}
 
