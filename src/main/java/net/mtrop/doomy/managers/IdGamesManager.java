@@ -289,7 +289,7 @@ public final class IdGamesManager
 	 */
 	public static class IdGamesStatusContent
 	{
-		public boolean status;
+		public String status;
 	}
 
 	/**
