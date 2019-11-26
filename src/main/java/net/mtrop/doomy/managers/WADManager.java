@@ -39,6 +39,13 @@ public final class WADManager
 	private static final String QUERY_UPDATE_URL
 		= "UPDATE WADs SET url = ? WHERE name = ?";
 	
+	private static final String QUERY_CLEAR_DEPENDENCIES1
+		= "DELETE FROM WADDependencies WHERE wadId = ?";
+	private static final String QUERY_CLEAR_DEPENDENCIES2
+		= "DELETE FROM WADDependencies WHERE needsWadId = ?";
+	private static final String QUERY_CLEAR_DATA
+	= "DELETE FROM WADData WHERE wadId = ?";
+
 	// =======================================================================
 	
 	// Singleton instance.
@@ -153,7 +160,10 @@ public final class WADManager
 		
 		try (Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
 		{
-			// TODO: Remove other dependent data.
+			// Add other missing WAD references to clear.
+			trn.getUpdateResult(QUERY_CLEAR_DATA, wad.id);
+			trn.getUpdateResult(QUERY_CLEAR_DEPENDENCIES2, wad.id);
+			trn.getUpdateResult(QUERY_CLEAR_DEPENDENCIES1, wad.id);
 			trn.getUpdateResult(QUERY_REMOVE, wad.name);
 			trn.complete();
 		} 

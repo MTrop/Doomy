@@ -1,18 +1,13 @@
 package net.mtrop.doomy.managers;
 
-import java.sql.SQLException;
 import java.util.Deque;
 import java.util.LinkedList;
 
 import com.blackrook.sql.SQLConnection;
 import com.blackrook.sql.SQLResult;
 import com.blackrook.sql.SQLRow;
-import com.blackrook.sql.SQLConnection.Transaction;
-import com.blackrook.sql.SQLConnection.TransactionLevel;
-import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
-import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.WADManager.WAD;
 
 /**
@@ -26,7 +21,9 @@ public final class WADDependencyManager
 	private static final String QUERY_LIST 
 		= "SELECT n.name FROM WADDependencies wd " +
 		  "LEFT JOIN WADs n ON wd.needsWadId = n.id " + 
-		  "WHERE wd.id = ?"; 
+		  "WHERE wd.wadId = ?"; 
+	private static final String QUERY_EXIST
+		= "SELECT EXISTS (SELECT 1 FROM WADDependencies WHERE wadId = ? AND needsWadId = ?)";
 	private static final String QUERY_ADD 
 		= "INSERT INTO WADDependencies (wadId, needsWadId) VALUES (?, ?)"; 
 	private static final String QUERY_REMOVE
@@ -88,7 +85,7 @@ public final class WADDependencyManager
 		if (id == null)
 			return NO_NAMES;
 		
-		SQLResult result = connection.getResult(QUERY_LIST, name);
+		SQLResult result = connection.getResult(QUERY_LIST, id);
 		String[] out = new String[result.getRowCount()];
 		int i = 0;
 		for (SQLRow row : result)
@@ -106,6 +103,7 @@ public final class WADDependencyManager
 	{
 		Deque<String> toLookup = new LinkedList<String>();
 		Deque<String> accumulator = new LinkedList<String>();
+		toLookup.add(name);
 		
 		while (!toLookup.isEmpty())
 		{
@@ -123,6 +121,72 @@ public final class WADDependencyManager
 		return out;
 	}
 	
-	// TODO: Finish.
+	/**
+	 * Checks if a dependency to a WAD exists.
+	 * @param wad the WAD that has dependencies.
+	 * @param dependency the WAD it would depend on.
+	 * @return true if the dependency exists, false otherwise.
+	 */
+	public boolean containsDependency(String wad, String dependency)
+	{
+		Long wadId = getWADId(wad);
+		if (wadId == null)
+			return false;
+		Long needsWadId = getWADId(dependency);
+		if (needsWadId == null)
+			return false;
+		
+		return connection.getRow(QUERY_EXIST, wadId, needsWadId).getBoolean(0);
+	}
+	
+	/**
+	 * Adds a dependency to a WAD.
+	 * @param wad the WAD to add a dependency to.
+	 * @param dependency the WAD it depends on.
+	 * @return true if both are valid and added, false otherwise.
+	 */
+	public boolean addDependency(String wad, String dependency)
+	{
+		Long wadId = getWADId(wad);
+		if (wadId == null)
+			return false;
+		Long needsWadId = getWADId(dependency);
+		if (needsWadId == null)
+			return false;
+		
+		return connection.getUpdateResult(QUERY_ADD, wadId, needsWadId).getRowCount() > 0;
+	}
+	
+	/**
+	 * Removes a dependency from a WAD.
+	 * @param wad the WAD to remove a dependency from.
+	 * @param dependency the WAD it depends on.
+	 * @return true if both are valid and removed, false otherwise.
+	 */
+	public boolean removeDependency(String wad, String dependency)
+	{
+		Long wadId = getWADId(wad);
+		if (wadId == null)
+			return false;
+		Long needsWadId = getWADId(dependency);
+		if (needsWadId == null)
+			return false;
+		
+		return connection.getUpdateResult(QUERY_REMOVE, wadId, needsWadId).getRowCount() > 0;
+	}
+	
+	/**
+	 * Clears all dependencies from a WAD.
+	 * @param wad the WAD to remove all dependencies from.
+	 * @return true if both are valid and removed, false otherwise.
+	 */
+	public boolean clearDependency(String wad)
+	{
+		Long wadId = getWADId(wad);
+		if (wadId == null)
+			return false;
+		
+		return connection.getUpdateResult(QUERY_CLEAR, wadId).getRowCount() > 0;
+	}
 	
 }

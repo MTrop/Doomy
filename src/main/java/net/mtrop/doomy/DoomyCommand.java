@@ -45,6 +45,7 @@ import net.mtrop.doomy.commands.iwad.IWADScanCommand;
 import net.mtrop.doomy.commands.iwad.IWADSetCommand;
 import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
+import net.mtrop.doomy.commands.wad.WADDependencyCommand;
 import net.mtrop.doomy.commands.wad.WADGetCommand;
 import net.mtrop.doomy.commands.wad.WADListCommand;
 import net.mtrop.doomy.commands.wad.WADRemoveCommand;
@@ -53,6 +54,10 @@ import net.mtrop.doomy.commands.wad.WADScanCommand;
 import net.mtrop.doomy.commands.wad.WADSetCommand;
 import net.mtrop.doomy.commands.wad.WADSourceCommand;
 import net.mtrop.doomy.commands.wad.WADTextCommand;
+import net.mtrop.doomy.commands.wad.dependency.WADDependencyAddCommand;
+import net.mtrop.doomy.commands.wad.dependency.WADDependencyClearCommand;
+import net.mtrop.doomy.commands.wad.dependency.WADDependencyListCommand;
+import net.mtrop.doomy.commands.wad.dependency.WADDependencyRemoveCommand;
 import net.mtrop.doomy.commands.wad.source.WADSourceGetCommand;
 import net.mtrop.doomy.commands.wad.source.WADSourceListCommand;
 import net.mtrop.doomy.commands.wad.source.WADSourceRemoveCommand;
@@ -294,17 +299,16 @@ public interface DoomyCommand
 			}
 			else if (matchArgument(args, DEPENDENCY1) || matchArgument(args, DEPENDENCY2))
 			{
-				/*
 				if (matchArgument(args, LIST))
-					return new WADSourceListCommand();
+					return new WADDependencyListCommand();
 				else if (matchArgument(args, ADD))
-					return new WADSourceGetCommand();
+					return new WADDependencyAddCommand();
 				else if (matchArgument(args, REMOVE))
-					return new WADSourceRemoveCommand();
+					return new WADDependencyRemoveCommand();
 				else if (matchArgument(args, CLEAR))
-					return new WADSourceSetCommand();
+					return new WADDependencyClearCommand();
 				else
-				*/	return new WADSourceCommand();
+					return new WADDependencyCommand();
 			}
 			else
 				return new WADCommand();

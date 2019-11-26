@@ -6,7 +6,6 @@ import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
-import net.mtrop.doomy.DoomyMain;
 
 /**
  * A command that handles template configuration.
@@ -28,8 +27,6 @@ public class EngineTemplateConfigCommand implements DoomyCommand
 		if (badCommand != null)
 			err.println("ERROR: Unknown command: " + badCommand);
 			
-		if (badCommand == null)
-			DoomyCommon.splash(out, DoomyMain.VERSION);
 		DoomyCommon.help(out, ENGINE);
 		return ERROR_NONE;
 	}

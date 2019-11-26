@@ -8,7 +8,6 @@ import java.util.Deque;
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyEnvironment;
-import net.mtrop.doomy.DoomyMain;
 
 /**
  * A command that prints the config help output and exits.
@@ -30,7 +29,6 @@ public class ConfigCommand implements DoomyCommand
 		if (badCommand != null)
 			err.println("ERROR: Unknown command: " + badCommand);
 			
-		DoomyCommon.splash(out, DoomyMain.VERSION);
 		DoomyCommon.help(out, CONFIG);
 		out.println("\nConfig directory is: " + (new File(DoomyEnvironment.getConfigBasePath())).getAbsolutePath());
 		return ERROR_NONE;

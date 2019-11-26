@@ -29,12 +29,12 @@ public class EngineTemplateRemoveCommand implements DoomyCommand
 		if (name == null)
 			throw new BadArgumentException("Expected name of template to remove.");
 		
-		if (!args.isEmpty())
+		while (!args.isEmpty())
 		{
-			if (!matchArgument(args, SWITCH_QUIET1) && !matchArgument(args, SWITCH_QUIET2))
-				throw new BadArgumentException("Invalid switch: " + args.peekFirst());
-			else
+			if (matchArgument(args, SWITCH_QUIET1) || matchArgument(args, SWITCH_QUIET2))
 				quiet = true;
+			else
+				throw new BadArgumentException("Invalid switch: " + args.peekFirst());
 		}
 	}
 

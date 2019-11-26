@@ -264,8 +264,9 @@ public final class DoomyCommon
 			out.println("      get [name]                       Prints the URL source of a downloaded WAD named [name].");
 			out.println("      set [name] [url]                 Sets the URL source of a downloaded WAD named [name] to [url].");
 			out.println("      remove [name]                    Removes the URL source of a downloaded WAD named [name].");
-			out.println("    dependency");
+			out.println("    dependency                         Print this subsection's help and terminate.");
 			out.println("      list [name]                      Lists all dependencies of WAD [name].");
+			out.println("        --full, -f                       ...and not just the immediate ones.");
 			out.println("      add [name] [dependency]          Adds [dependency] as a dependency of WAD [name] (will be loaded automatically, and before [name1]).");
 			out.println("      remove [name] [dependency]       Removes [dependency] as a dependency of WAD [name].");
 			out.println("      clear [name]                     Removes all dependencies of WAD [name].");

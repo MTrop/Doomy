@@ -6,7 +6,6 @@ import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
-import net.mtrop.doomy.DoomyMain;
 
 /**
  * A command that prints the WAD help output and exits.
@@ -28,8 +27,6 @@ public class WADCommand implements DoomyCommand
 		if (badCommand != null)
 			err.println("ERROR: Unknown command: " + badCommand);
 			
-		if (badCommand == null)
-			DoomyCommon.splash(out, DoomyMain.VERSION);
 		DoomyCommon.help(out, WAD);
 		return ERROR_NONE;
 	}
