@@ -171,11 +171,11 @@ public final class DoomyCommon
 		out.println("doomy                                  Print version splash and basic help.");
 		if (commandName == null || DoomyCommand.VERSION.equalsIgnoreCase(commandName))
 		{
-			out.println("  version                              Print version splash and terminate.");
+			out.println("  version                              Print version.");
 		}
 		if (commandName == null || DoomyCommand.HELP.equalsIgnoreCase(commandName))
 		{
-			out.println("  help                                 Print all of this help and terminate.");
+			out.println("  help                                 Print all of this help.");
 		}
 		if (commandName == null || DoomyCommand.CONFIG.equalsIgnoreCase(commandName))
 		{

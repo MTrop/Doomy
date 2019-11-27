@@ -58,6 +58,22 @@ public final class IdGamesManager
 
 	// =======================================================================
 	
+	public enum SortType
+	{
+		DATE,
+		FILENAME,
+		SIZE,
+		RATING;
+	}
+	
+	public enum SortDirection
+	{
+		ASC,
+		DESC;
+	}
+	
+	// =======================================================================
+
 	/** Config manager. */
 	private ConfigManager config;
 	/** Download manager. */
@@ -160,60 +176,76 @@ public final class IdGamesManager
 	/**
 	 * Makes a search request from idGames by file name and returns the response.
 	 * @param criteria the search criteria.
+	 * @param sortType the result sort type.
+	 * @param direction the sort direction.
 	 * @return the response object.
 	 * @throws SocketTimeoutException if the call times out.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public IdGamesSearchResponse searchByFileName(String criteria) throws SocketTimeoutException, IOException
+	public IdGamesSearchResponse searchByFileName(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
 	{
 		return search(SEARCH_PARAMS.copy()
 			.addParameter("query", criteria)
 			.addParameter("type", "filename")
+			.addParameter("sort", sortType.name().toLowerCase())
+			.addParameter("dir", direction.name().toLowerCase())
 		);
 	}
 	
 	/**
 	 * Makes a search request from idGames by title and returns the response.
 	 * @param criteria the search criteria.
+	 * @param sortType the result sort type.
+	 * @param direction the sort direction.
 	 * @return the response object.
 	 * @throws SocketTimeoutException if the call times out.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public IdGamesSearchResponse searchByTitle(String criteria) throws SocketTimeoutException, IOException
+	public IdGamesSearchResponse searchByTitle(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
 	{
 		return search(SEARCH_PARAMS.copy()
 			.addParameter("query", criteria)
 			.addParameter("type", "title")
+			.addParameter("sort", sortType.name().toLowerCase())
+			.addParameter("dir", direction.name().toLowerCase())
 		);
 	}
 	
 	/**
 	 * Makes a search request from idGames by author and returns the response.
 	 * @param criteria the search criteria.
+	 * @param sortType the result sort type.
+	 * @param direction the sort direction.
 	 * @return the response object.
 	 * @throws SocketTimeoutException if the call times out.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public IdGamesSearchResponse searchByAuthor(String criteria) throws SocketTimeoutException, IOException
+	public IdGamesSearchResponse searchByAuthor(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
 	{
 		return search(SEARCH_PARAMS.copy()
 			.addParameter("query", criteria)
 			.addParameter("type", "author")
+			.addParameter("sort", sortType.name().toLowerCase())
+			.addParameter("dir", direction.name().toLowerCase())
 		);
 	}
 	
 	/**
 	 * Makes a search request from idGames by text file contents and returns the response.
 	 * @param criteria the search criteria.
+	 * @param sortType the result sort type.
+	 * @param direction the sort direction.
 	 * @return the response object.
 	 * @throws SocketTimeoutException if the call times out.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public IdGamesSearchResponse searchByTextFile(String criteria) throws SocketTimeoutException, IOException
+	public IdGamesSearchResponse searchByTextFile(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
 	{
 		return search(SEARCH_PARAMS.copy()
 			.addParameter("query", criteria)
 			.addParameter("type", "textfile")
+			.addParameter("sort", sortType.name().toLowerCase())
+			.addParameter("dir", direction.name().toLowerCase())
 		);
 	}
 	

@@ -8,6 +8,7 @@ import net.mtrop.doomy.commands.ConfigCommand;
 import net.mtrop.doomy.commands.EngineCommand;
 import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.IWADCommand;
+import net.mtrop.doomy.commands.IdGamesCommand;
 import net.mtrop.doomy.commands.UsageCommand;
 import net.mtrop.doomy.commands.VersionCommand;
 import net.mtrop.doomy.commands.WADCommand;
@@ -35,6 +36,10 @@ import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigGetCo
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigListCommand;
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigRemoveCommand;
 import net.mtrop.doomy.commands.engine.template.config.EngineTemplateConfigSetCommand;
+import net.mtrop.doomy.commands.idgames.IdGamesAboutCommand;
+import net.mtrop.doomy.commands.idgames.IdGamesComicCommand;
+import net.mtrop.doomy.commands.idgames.IdGamesPingCommand;
+import net.mtrop.doomy.commands.idgames.IdGamesSearchCommand;
 import net.mtrop.doomy.commands.iwad.IWADAddCommand;
 import net.mtrop.doomy.commands.iwad.IWADCleanCommand;
 import net.mtrop.doomy.commands.iwad.IWADGetCommand;
@@ -78,6 +83,7 @@ public interface DoomyCommand
 	static final int ERROR_NOT_RENAMED = 	7;
 	static final int ERROR_NOT_UPDATED = 	8;
 	static final int ERROR_BAD_EXE = 		9;
+	static final int ERROR_SOCKET_TIMEOUT = 10;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";
@@ -105,6 +111,14 @@ public interface DoomyCommand
 	static final String SOURCE = "source";
 	static final String DEPENDENCY1 = "dependency";
 	static final String DEPENDENCY2 = "dep";
+	static final String PING = "ping";
+	static final String ABOUT = "about";
+	static final String COMIC = "comic";
+	static final String SEARCH = "search";
+	static final String ID = "search";
+	static final String FILE = "file";
+	static final String TITLE = "title";
+	static final String AUTHOR = "author";
 
 	/**
 	 * Thrown if a bad/unexpected argument is parsed on command initialize.
@@ -312,6 +326,32 @@ public interface DoomyCommand
 			}
 			else
 				return new WADCommand();
+		}
+		else if (matchArgument(args, IDGAMES))
+		{
+			if (matchArgument(args, PING))
+				return new IdGamesPingCommand();
+			else if (matchArgument(args, ABOUT))
+				return new IdGamesAboutCommand();
+			else if (matchArgument(args, COMIC))
+				return new IdGamesComicCommand();
+			else if (matchArgument(args, SEARCH))
+			{
+				if (matchArgument(args, ID))
+					return new IdGamesSearchCommand();
+				else if (matchArgument(args, FILE))
+					return new IdGamesSearchCommand();
+				else if (matchArgument(args, TITLE))
+					return new IdGamesSearchCommand();
+				else if (matchArgument(args, AUTHOR))
+					return new IdGamesSearchCommand();
+				else if (matchArgument(args, TEXT))
+					return new IdGamesSearchCommand();
+				else
+					return new IdGamesSearchCommand();
+			}
+			else
+				return new IdGamesCommand();
 		}
 		
 		return new UsageCommand();

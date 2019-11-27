@@ -5,6 +5,7 @@ import java.net.SocketTimeoutException;
 
 public final class WadArchiveManagerTest
 {
+	@SuppressWarnings("unused")
 	public static void main(String[] args) throws SocketTimeoutException, IOException 
 	{
 		WadArchiveManager manager = WadArchiveManager.get();
