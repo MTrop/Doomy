@@ -125,7 +125,14 @@ public final class DoomyCommon
 			return null;
 		}
 	}
-	
+
+	/**
+	 * Scans a directory of files and calls the provided consumer per file.
+	 * @param startDir the starting directory.
+	 * @param recurse if true, recurse through subdirectories.
+	 * @param filter the file filter for accepted files.
+	 * @param onFile the consumer to call per accepted file.
+	 */
 	public static void scanAndListen(File startDir, boolean recurse, FileFilter filter, Consumer<File> onFile)
 	{
 		Deque<File> fileQueue = new LinkedList<>();

@@ -255,10 +255,8 @@ public final class IdGamesManager
 	 * @param targetPath the target file path to write to (the directory will be created).
 	 * @param listener a listener for file progress.
 	 * @return the response object.
-	 * @throws SocketTimeoutException if the call times out.
-	 * @throws IOException if an I/O error occurs.
 	 */
-	public Instance<File> download(String idGamesPath, String targetPath, FileDownloadListener listener) throws SocketTimeoutException, IOException
+	public Instance<File> download(String idGamesPath, String targetPath, FileDownloadListener listener)
 	{
 		return downloadManager.download(getMirrorURL() + idGamesPath, getTimeout(), targetPath, listener);
 	}

@@ -40,6 +40,7 @@ import net.mtrop.doomy.commands.idgames.IdGamesAboutCommand;
 import net.mtrop.doomy.commands.idgames.IdGamesComicCommand;
 import net.mtrop.doomy.commands.idgames.IdGamesPingCommand;
 import net.mtrop.doomy.commands.idgames.IdGamesSearchCommand;
+import net.mtrop.doomy.commands.idgames.search.IdGamesSearchFileCommand;
 import net.mtrop.doomy.commands.iwad.IWADAddCommand;
 import net.mtrop.doomy.commands.iwad.IWADCleanCommand;
 import net.mtrop.doomy.commands.iwad.IWADGetCommand;
@@ -84,6 +85,7 @@ public interface DoomyCommand
 	static final int ERROR_NOT_UPDATED = 	8;
 	static final int ERROR_BAD_EXE = 		9;
 	static final int ERROR_SOCKET_TIMEOUT = 10;
+	static final int ERROR_SERVICE_ERROR =  11;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";
@@ -340,7 +342,7 @@ public interface DoomyCommand
 				if (matchArgument(args, ID))
 					return new IdGamesSearchCommand();
 				else if (matchArgument(args, FILE))
-					return new IdGamesSearchCommand();
+					return new IdGamesSearchFileCommand();
 				else if (matchArgument(args, TITLE))
 					return new IdGamesSearchCommand();
 				else if (matchArgument(args, AUTHOR))

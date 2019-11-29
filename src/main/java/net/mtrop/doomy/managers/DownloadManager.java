@@ -7,6 +7,7 @@ import java.io.InputStream;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.AsyncFactory.Cancellable;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.HTTPUtils;
 
@@ -18,6 +19,11 @@ public final class DownloadManager
 {
 	// Singleton instance.
 	private static DownloadManager INSTANCE;
+
+	private static HTTPHeaders HEADERS = HTTPUtils.headers()
+			// Some services block Java's default agent - send a browser string.
+			.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
+			;
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -31,6 +37,18 @@ public final class DownloadManager
 		return INSTANCE;
 	}
 
+	/**
+	 * Creates a FileDownloadListener that calls {@link FileDownloadListener#onProgress(long, long, long)}
+	 * on a timed interval instead of each downloaded chunk.
+	 * @param intervalMillis the interval in milliseconds (a value less than 0 is 0).
+	 * @param listener the listener to call each interval.
+	 * @return a new listener.
+	 */
+	public static FileDownloadListener intervalListener(long intervalMillis, FileDownloadListener listener)
+	{
+		return new TimeIntervalProgressListener(intervalMillis, listener);
+	}
+	
 	// =======================================================================
 	
 	/** Task manager. */
@@ -89,28 +107,31 @@ public final class DownloadManager
 		@Override
 		public File call() throws Exception
 		{
-			return HTTPUtils.httpGet(url, timeoutMillis, response ->
+			return HTTPUtils.httpGet(url, HEADERS, timeoutMillis, response ->
 			{
 				File target = new File(targetFile);
 				if (!FileUtils.createPathForFile(target))
 					return null;
 				
-				int len = response.getLength();
+				long len = response.getLength();
 				
-				listener.onProgress(0, len, 0 / len);
+				listener.onProgress(0, len, len > 0 ? 0 / len : 0);
 				
 				byte[] buffer = new byte[8192];
 				InputStream in = response.getInputStream();
 				
 				try (FileOutputStream fos = new FileOutputStream(target))
 				{
-					int buf = 0;
-					int cur = 0;
-					while (!isCancelled() && (buf = in.read(buffer)) > 0)
+					if (len > 0)
 					{
-						fos.write(buffer, 0, buf);
-						cur += buf;
-						listener.onProgress(cur, len, cur * 100 / len);
+						int buf = 0;
+						long cur = 0;
+						while (!isCancelled() && (buf = in.read(buffer)) > 0)
+						{
+							fos.write(buffer, 0, buf);
+							cur += buf;
+							listener.onProgress(cur, len, cur * 100 / len);
+						}
 					}
 				}
 				finally
@@ -126,4 +147,38 @@ public final class DownloadManager
 		
 	}
 
+	private static class TimeIntervalProgressListener implements FileDownloadListener
+	{
+		private long intervalMillis;
+		private long nextTime;
+		private FileDownloadListener listener;
+		
+		private TimeIntervalProgressListener(long intervalMillis, FileDownloadListener listener) 
+		{
+			this.nextTime = -1L;
+			this.intervalMillis = Math.max(0, intervalMillis);
+			this.listener = listener;
+		}
+		
+		@Override
+		public void onProgress(long current, long total, long percent) 
+		{
+			long now = System.currentTimeMillis();
+			if (current == total)
+			{
+				listener.onProgress(current, total, percent);
+			}
+			else if (nextTime < 0L)
+			{
+				nextTime = now + intervalMillis;
+				listener.onProgress(current, total, percent);
+			}
+			else if (now > nextTime)
+			{
+				nextTime = now + intervalMillis;
+				listener.onProgress(current, total, percent);
+			}
+		}
+	}
+	
 }

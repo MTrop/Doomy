@@ -5,7 +5,7 @@ import java.io.File;
 import net.mtrop.doomy.struct.OSUtils;
 
 /**
- * Manager class for getting data from config.
+ * Environment class for getting runtime paths.
  * @author Matthew Tropiano
  */
 public final class DoomyEnvironment
