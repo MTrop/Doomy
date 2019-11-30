@@ -152,7 +152,6 @@ public final class DoomyMain
 		int returnValue = DoomyCommand.ERROR_NONE;
 		while ((line = DoomyCommon.prompt(out, in, "Doomy>")) != null)
 		{
-			line = line.trim();
 			if (COMMAND_EXIT.equalsIgnoreCase(line))
 				break;
 			if (!line.isEmpty())

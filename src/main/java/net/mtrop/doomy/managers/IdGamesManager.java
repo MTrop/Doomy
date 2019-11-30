@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
+import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
 
 import net.mtrop.doomy.DoomySetupException;
@@ -90,7 +91,7 @@ public final class IdGamesManager
 		return config.getValue(ConfigManager.SETTING_IDGAMES_API_URL);
 	}
 
-	private String getMirrorURL()
+	public String getMirrorURL()
 	{
 		return config.getValue(ConfigManager.SETTING_IDGAMES_MIRROR_BASE_URL);
 	}
@@ -170,7 +171,8 @@ public final class IdGamesManager
 
 	private IdGamesSearchResponse search(HTTPParameters parameters) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getAPIURL(), parameters, getTimeout(), IDGAMESSEARCH_READER);
+		IdGamesSearchResponse response = HTTPUtils.httpGet(getAPIURL(), parameters, getTimeout(), IDGAMESSEARCH_READER);
+		return response;
 	}
 	
 	/**
@@ -346,7 +348,21 @@ public final class IdGamesManager
 	 */
 	public static class IdGamesSearchContent
 	{
-		public IdGamesFileContent[] file;
+		public IdGamesFileContent[] files;
+		
+		public void setFile(JSONObject file) 
+		{
+			if (file.isArray())
+				files = file.applyToObject(new IdGamesFileContent[file.length()]);
+			else
+				files = new IdGamesFileContent[]{file.applyToObject(new IdGamesFileContent())};
+		}
+		
+		// don't use.
+		public JSONObject getFile() 
+		{
+			return null;
+		}
 	}
 
 	// ===== Response Shape ==================================================

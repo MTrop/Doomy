@@ -1,8 +1,12 @@
 package net.mtrop.doomy.managers;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.net.URLConnection;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.AsyncFactory.Cancellable;
@@ -69,7 +73,10 @@ public final class DownloadManager
 	 */
 	public Instance<File> download(final String url, int timeoutMillis, final String targetFile, final FileDownloadListener listener)
 	{
-		return taskManager.spawn(new FileDownloadTask(url, timeoutMillis, targetFile, listener));
+		if (url.startsWith("http://") || url.startsWith("https://"))
+			return taskManager.spawn(new HTTPFileDownloadTask(url, timeoutMillis, targetFile, listener));
+		else
+			return taskManager.spawn(new URLFileDownloadTask(url, timeoutMillis, targetFile, listener));
 	}
 
 	// =======================================================================
@@ -89,36 +96,38 @@ public final class DownloadManager
 		void onProgress(long current, long total, long percent);
 	}
 	
-	private static class FileDownloadTask extends Cancellable<File>
+	private static class URLFileDownloadTask extends Cancellable<File>
 	{
 		private String url;
 		private int timeoutMillis;
 		private String targetFile;
 		private FileDownloadListener listener;
 
-		private FileDownloadTask(String url, int timeoutMillis, String targetFile, FileDownloadListener listener)
+		private URLFileDownloadTask(String url, int timeoutMillis, String targetFile, FileDownloadListener listener)
 		{
 			this.url = url;
 			this.timeoutMillis = timeoutMillis;
 			this.targetFile = targetFile;
 			this.listener = listener;
 		}
-		
+
 		@Override
-		public File call() throws Exception
+		public File call() 
 		{
-			return HTTPUtils.httpGet(url, HEADERS, timeoutMillis, response ->
-			{
-				File target = new File(targetFile);
+			URLConnection conn;
+			File target;
+			
+			try {
+				target = new File(targetFile);
 				if (!FileUtils.createPathForFile(target))
 					return null;
 				
-				long len = response.getLength();
-				
-				listener.onProgress(0, len, len > 0 ? 0 / len : 0);
-				
+				conn = (new URL(url)).openConnection();
+				conn.setReadTimeout(timeoutMillis);
+
+				long len = conn.getContentLength();
+				InputStream in = new BufferedInputStream(conn.getInputStream());
 				byte[] buffer = new byte[8192];
-				InputStream in = response.getInputStream();
 				
 				try (FileOutputStream fos = new FileOutputStream(target))
 				{
@@ -130,7 +139,7 @@ public final class DownloadManager
 						{
 							fos.write(buffer, 0, buf);
 							cur += buf;
-							listener.onProgress(cur, len, cur * 100 / len);
+							listener.onProgress(cur, len, len > 0 ? cur * 100 / len : -1);
 						}
 					}
 				}
@@ -140,9 +149,73 @@ public final class DownloadManager
 						target.delete();
 				}
 				
-				listener.onProgress(len, len, 100);
-				return isCancelled() ? null : target;
-			});
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage());
+			}
+
+			return isCancelled() ? null : target;
+		}
+		
+	}
+	
+	private static class HTTPFileDownloadTask extends Cancellable<File>
+	{
+		private String url;
+		private int timeoutMillis;
+		private String targetFile;
+		private FileDownloadListener listener;
+
+		private HTTPFileDownloadTask(String url, int timeoutMillis, String targetFile, FileDownloadListener listener)
+		{
+			this.url = url;
+			this.timeoutMillis = timeoutMillis;
+			this.targetFile = targetFile;
+			this.listener = listener;
+		}
+		
+		@Override
+		public File call()
+		{
+			File out;
+			try {
+				out = HTTPUtils.httpGet(url, HEADERS, timeoutMillis, response ->
+				{
+					File target = new File(targetFile);
+					if (!FileUtils.createPathForFile(target))
+						return null;
+					
+					long len = response.getLength();
+					
+					listener.onProgress(0, len, len > 0 ? 0 / len : -1);
+					
+					byte[] buffer = new byte[8192];
+					InputStream in = response.getInputStream();
+					
+					try (FileOutputStream fos = new FileOutputStream(target))
+					{
+						int buf = 0;
+						long cur = 0;
+						while (!isCancelled() && (buf = in.read(buffer)) > 0)
+						{
+							fos.write(buffer, 0, buf);
+							cur += buf;
+							listener.onProgress(cur, len, len > 0 ? cur * 100 / len : -1);
+						}
+					}
+					finally
+					{
+						if (isCancelled())
+							target.delete();
+					}
+					
+					return isCancelled() ? null : target;
+				});
+				
+			} catch (IOException e) {
+				throw new RuntimeException(e.getMessage());
+			}
+			
+			return out;
 		}
 		
 	}

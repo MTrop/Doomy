@@ -16,7 +16,7 @@ import net.mtrop.doomy.managers.WADManager.WAD;
  */
 public class WADSourceListCommand implements DoomyCommand
 {
-	private static final String SWITCH_SHOWBLANK1 = "--show-blank";
+	private static final String SWITCH_SHOWBLANK1 = "--blank";
 	private static final String SWITCH_SHOWBLANK2 = "-b";
 
 	private String phrase;
@@ -41,7 +41,7 @@ public class WADSourceListCommand implements DoomyCommand
 	{
 		WAD[] records = blankOnly 
 			? WADManager.get().getAllWADsWithNoSource(phrase) 
-			: WADManager.get().getAllWADs(phrase);
+			: WADManager.get().getAllWADsWithSources(phrase);
 				
 		if (records.length > 0)
 		{
@@ -52,7 +52,7 @@ public class WADSourceListCommand implements DoomyCommand
 			out.printf(format, "Name", "Source");
 			out.printf(format, "====", "======");
 			for (int i = 0; i < records.length; i++)
-				out.printf(format, records[i].name, records[i].sourceURL != null ? records[i].sourceURL : "");
+				out.printf(format, records[i].name, records[i].sourceUrl != null ? records[i].sourceUrl : "");
 		}
 		out.println(records.length + " WADs found.");
 		return ERROR_NONE;

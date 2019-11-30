@@ -532,7 +532,7 @@ public final class AsyncFactory
 		}
 
 		@Override
-		public abstract T call() throws Exception;
+		public abstract T call();
 
 	}
 
@@ -634,7 +634,7 @@ public final class AsyncFactory
 		 * @throws ExecutionException if the computation threw an exception.
 		 * @throws InterruptedException if the current thread was interrupted while waiting.
 		 */
-		public Exception getException() throws InterruptedException, ExecutionException
+		public Exception getException()
 		{
 			if (!isDone())
 				join();

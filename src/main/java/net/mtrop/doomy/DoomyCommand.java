@@ -40,7 +40,10 @@ import net.mtrop.doomy.commands.idgames.IdGamesAboutCommand;
 import net.mtrop.doomy.commands.idgames.IdGamesComicCommand;
 import net.mtrop.doomy.commands.idgames.IdGamesPingCommand;
 import net.mtrop.doomy.commands.idgames.IdGamesSearchCommand;
+import net.mtrop.doomy.commands.idgames.search.IdGamesSearchAuthorCommand;
 import net.mtrop.doomy.commands.idgames.search.IdGamesSearchFileCommand;
+import net.mtrop.doomy.commands.idgames.search.IdGamesSearchTextFileCommand;
+import net.mtrop.doomy.commands.idgames.search.IdGamesSearchTitleCommand;
 import net.mtrop.doomy.commands.iwad.IWADAddCommand;
 import net.mtrop.doomy.commands.iwad.IWADCleanCommand;
 import net.mtrop.doomy.commands.iwad.IWADGetCommand;
@@ -52,8 +55,10 @@ import net.mtrop.doomy.commands.iwad.IWADSetCommand;
 import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
 import net.mtrop.doomy.commands.wad.WADDependencyCommand;
+import net.mtrop.doomy.commands.wad.WADDownloadCommand;
 import net.mtrop.doomy.commands.wad.WADGetCommand;
 import net.mtrop.doomy.commands.wad.WADListCommand;
+import net.mtrop.doomy.commands.wad.WADRedownloadCommand;
 import net.mtrop.doomy.commands.wad.WADRemoveCommand;
 import net.mtrop.doomy.commands.wad.WADRenameCommand;
 import net.mtrop.doomy.commands.wad.WADScanCommand;
@@ -110,6 +115,8 @@ public interface DoomyCommand
 	static final String TEXT = "text";
 	static final String CLEAN = "clean";
 	static final String CLEAR = "clear";
+	static final String DOWNLOAD = "download";
+	static final String REDOWNLOAD = "redownload";
 	static final String SOURCE = "source";
 	static final String DEPENDENCY1 = "dependency";
 	static final String DEPENDENCY2 = "dep";
@@ -300,6 +307,10 @@ public interface DoomyCommand
 				return new WADScanCommand();
 			else if (matchArgument(args, TEXT))
 				return new WADTextCommand();
+			else if (matchArgument(args, DOWNLOAD))
+				return new WADDownloadCommand();
+			else if (matchArgument(args, REDOWNLOAD))
+				return new WADRedownloadCommand();
 			else if (matchArgument(args, SOURCE))
 			{
 				if (matchArgument(args, LIST))
@@ -339,16 +350,14 @@ public interface DoomyCommand
 				return new IdGamesComicCommand();
 			else if (matchArgument(args, SEARCH))
 			{
-				if (matchArgument(args, ID))
-					return new IdGamesSearchCommand();
-				else if (matchArgument(args, FILE))
+				if (matchArgument(args, FILE))
 					return new IdGamesSearchFileCommand();
 				else if (matchArgument(args, TITLE))
-					return new IdGamesSearchCommand();
+					return new IdGamesSearchTitleCommand();
 				else if (matchArgument(args, AUTHOR))
-					return new IdGamesSearchCommand();
+					return new IdGamesSearchAuthorCommand();
 				else if (matchArgument(args, TEXT))
-					return new IdGamesSearchCommand();
+					return new IdGamesSearchTextFileCommand();
 				else
 					return new IdGamesSearchCommand();
 			}

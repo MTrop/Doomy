@@ -114,13 +114,14 @@ public final class DoomyCommon
 	 * @param out the output stream to print the prompt to.
 	 * @param in the input stream.
 	 * @param prompt the prompt to display.
-	 * @return the string read.
+	 * @return the string read (and trimmed).
 	 */
 	public static String prompt(PrintStream out, BufferedReader in, String prompt)
 	{
 		try {
 			out.print(prompt + " ");
-			return in.readLine();
+			String line = in.readLine();
+			return line != null ? line.trim() : null;
 		} catch (IOException e) {
 			return null;
 		}
@@ -262,12 +263,12 @@ public final class DoomyCommon
 			out.println("      --prefix, -p [string]              ...and prepend [string] to each WAD entry name.");
 			out.println("      --force-add-existing               ...and update the names of known paths (otherwise, this does not add existing).");
 			out.println("    text [name]                        Dumps the WAD's text entry, if any (searches same directory for FILENAME.TXT or inside archive).");
-			out.println("    download [name] [url]              Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].");
+			out.println("    download [url] [name]              Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].");
 			out.println("    redownload [name]                  Redownload a downloaded WAD named [name]."); 
 			out.println("    source                             Print this subsection's help and terminate.");
 			out.println("      list                             List all URL sources.");
 			out.println("        [phrase]                         ...whose WAD name contains [phrase].");
-			out.println("          --show-blank, -b               ...that aren't bound to URLs.");
+			out.println("          --blank, -b                    ...that aren't bound to URLs, instead.");
 			out.println("      get [name]                       Prints the URL source of a downloaded WAD named [name].");
 			out.println("      set [name] [url]                 Sets the URL source of a downloaded WAD named [name] to [url].");
 			out.println("      remove [name]                    Removes the URL source of a downloaded WAD named [name].");
@@ -318,10 +319,6 @@ public final class DoomyCommon
 			out.println("    about                              Display API \"About.\"");
 			out.println("    comic                              Return a Doom Comic quote (yes, it's a real call).");
 			out.println("    search                             Print this subsection's help and terminate.");
-			out.println("      id [id]                          Search for file with ID [id] (not standardized!).");
-			out.println("        --name, -n [name]              Specify new name, if downloaded.");
-			out.println("        --download, -d [result]        Download the file at result position [result].");
-			out.println("        --text, -t [result]            Print text file of result [result].");
 			out.println("      file [phrase]                    Searches for filename named [phrase], return best matches up to amount.");
 			out.println("        --name, -n [name]              Specify new name, if downloaded.");
 			out.println("        --limit, -l [amount]           Set max results to [amount].");

@@ -19,7 +19,7 @@
 
 	<!-- Project Libs -->
 	
-	<property name="json.lib.version" value="1.1.1" />
+	<property name="json.lib.version" value="1.1.2" />
 	<property name="json.tag" value="${json.lib.version}-RELEASE" />
 	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
 	<property name="json.jar" value="${json.project}.jar" />

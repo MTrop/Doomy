@@ -36,7 +36,7 @@ public class WADSourceGetCommand implements DoomyCommand
 		}
 		else
 		{
-			out.println(wad.sourceURL);
+			out.println(wad.sourceUrl);
 		}
 		
 		return ERROR_NONE;

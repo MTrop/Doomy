@@ -24,12 +24,14 @@ public final class WADManager
 		= "SELECT * FROM WADs WHERE name = ?"; 
 	private static final String QUERY_LIST
 		= "SELECT * FROM WADs WHERE name LIKE ? ORDER BY name ASC";
+	private static final String QUERY_LIST_SOURCE
+		= "SELECT * FROM WADs WHERE name LIKE ? AND sourceUrl IS NOT NULL ORDER BY name ASC";
 	private static final String QUERY_LIST_NO_SOURCE
-		= "SELECT * FROM WADs WHERE name LIKE ? AND sourceURL IS NULL ORDER BY name ASC";
+		= "SELECT * FROM WADs WHERE name LIKE ? AND sourceUrl IS NULL ORDER BY name ASC";
 	private static final String QUERY_EXIST
 		= "SELECT EXISTS (SELECT 1 FROM WADs WHERE name = ?)";
 	private static final String QUERY_ADD 
-		= "INSERT INTO WADs (name, path, sourceURL) VALUES (?, ?, ?)"; 
+		= "INSERT INTO WADs (name, path, sourceUrl) VALUES (?, ?, ?)"; 
 	private static final String QUERY_REMOVE
 		= "DELETE FROM WADs WHERE name = ?";
 	private static final String QUERY_RENAME
@@ -114,7 +116,17 @@ public final class WADManager
 	}
 	
 	/**
-	 * Gets a set of WAD templates by name.
+	 * Gets a set of WAD templates by name that have a source.
+	 * @param containingPhrase the phrase to search for.
+	 * @return the found templates.
+	 */
+	public WAD[] getAllWADsWithSources(String containingPhrase)
+	{
+		return connection.getResult(WAD.class, QUERY_LIST_SOURCE, DatabaseManager.toSearchPhrase(containingPhrase));
+	}
+	
+	/**
+	 * Gets a set of WAD templates by name that have no source.
 	 * @param containingPhrase the phrase to search for.
 	 * @return the found templates.
 	 */
@@ -172,7 +184,7 @@ public final class WADManager
 			throw new SQLRuntimeException(e);
 		}
 
-		return connection.getUpdateResult(QUERY_REMOVE, name).getRowCount() > 0;
+		return true;
 	}
 	
 	/**
@@ -220,7 +232,7 @@ public final class WADManager
 		/** WAD path. */
 		public String path;
 		/** Source URL. */
-		public String sourceURL;
+		public String sourceUrl;
 	}
 
 }

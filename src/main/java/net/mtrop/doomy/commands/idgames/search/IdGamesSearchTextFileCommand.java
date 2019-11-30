@@ -9,16 +9,16 @@ import net.mtrop.doomy.managers.IdGamesManager.SortDirection;
 import net.mtrop.doomy.managers.IdGamesManager.SortType;
 
 /**
- * An idGames search function for file names.
+ * An idGames search function for text file contents.
  * @author Matthew Tropiano
  */
-public class IdGamesSearchFileCommand extends IdGamesCommonSearchCommand 
+public class IdGamesSearchTextFileCommand extends IdGamesCommonSearchCommand 
 {
 
 	@Override
 	public IdGamesSearchResponse search(String query, int limit) throws SocketTimeoutException, IOException
 	{
-		return IdGamesManager.get().searchByFileName(query, SortType.FILENAME, SortDirection.ASC);
+		return IdGamesManager.get().searchByTextFile(query, SortType.FILENAME, SortDirection.ASC);
 	}
 
 }

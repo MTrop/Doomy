@@ -1,4 +1,4 @@
-package net.mtrop.doomy.commands.idgames;
+package net.mtrop.doomy.commands.idgames.search;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
@@ -21,6 +21,7 @@ import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSearchResponse;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 import net.mtrop.doomy.struct.FileUtils;
+import net.mtrop.doomy.struct.ObjectUtils;
 
 /**
  * A common implementation of all idGames search functions.
@@ -141,6 +142,136 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 	 */
 	public abstract IdGamesSearchResponse search(String query, int limit) throws SocketTimeoutException, IOException;
 	
+	/**
+	 * 
+	 * @param out
+	 * @param err
+	 * @param in
+	 * @param idGamesFileId
+	 * @return
+	 */
+	protected int download(final PrintStream out, final PrintStream err, final BufferedReader in, long idGamesFileId) 
+	{
+		IdGamesManager idgm = IdGamesManager.get();
+		
+		IdGamesFileResponse response;
+		try {
+			response = idgm.getById(idGamesFileId);
+		} catch (SocketTimeoutException e) {
+			err.println("ERROR: Call to idGames timed out.");
+			return ERROR_SOCKET_TIMEOUT;
+		} catch (IOException e) {
+			err.println("ERROR: I/O error on call to idGames.");
+			return ERROR_IO_ERROR;
+		}
+		
+		if (response.error != null)
+		{
+			err.println("ERROR: Error from idGames: " + response.error);
+			return ERROR_SERVICE_ERROR;
+		}
+		
+		// fetch text file and print.
+		if (!download)
+		{
+			out.println(response.content.textfile.replace("\t", "       "));
+			return ERROR_NONE;
+		}
+		
+		WADManager wadmgr = WADManager.get();
+
+		if (name == null)
+		{
+			String basename = FileUtils.getFileNameWithoutExtension(response.content.filename);
+			name = basename;
+			
+			int next = 1;
+			while (wadmgr.containsWAD(name))
+				name = basename + (next++);
+			
+			String input = DoomyCommon.prompt(out, in, "Add to WAD database as (press ENTER for \"" + name +"\"):");
+			if (!input.isEmpty())
+				name = input;
+		}
+		
+		if (wadmgr.containsWAD(name))
+		{
+			err.println("ERROR: WAD entry '" + name + "' already exists.");
+			return ERROR_NOT_ADDED;
+		}
+
+		String uri = response.content.dir + response.content.filename;
+		String downloadTarget = DoomyEnvironment.getDownloadDirectoryPath() + File.separator + uri.replace('/', File.separatorChar);
+		File downloadTargetFile = new File(downloadTarget);
+		String downloadTempTarget = downloadTarget + ".temp";
+		
+		if (downloadTargetFile.exists())
+		{
+			out.println("The target file, '" + downloadTarget + "', already exists.");
+			if (!"y".equals(DoomyCommon.prompt(out, in, "Overwrite (Y/N)?")))
+			{
+				out.println("Aborted add.");
+				return ERROR_NONE;
+			}
+		}
+		
+		out.println("Connecting to idGames Mirror (" + idgm.getMirrorURL() + ")...");
+
+		final long refdate = System.currentTimeMillis();
+
+		Instance<File> instance = idgm.download(uri, downloadTempTarget, DownloadManager.intervalListener(125L, (cur, len, pct) -> 
+		{
+			long timeMillis = System.currentTimeMillis() - refdate;
+			long speed = timeMillis > 0L ? cur / timeMillis * 1000L / 1024 : 0;
+			if (len < 0)
+				out.printf("\rDownloading: %d (%d KB/s)...", cur, speed);
+			else
+				out.printf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
+		}));
+
+		if (instance.getException() != null)
+		{
+			Exception e = instance.getException();
+			err.println("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			return ERROR_IO_ERROR;
+		}
+
+		out.println("\nAdding to database as '" + name + "'...");
+
+		File downloadedFile = instance.result();
+
+		if (wadmgr.addWAD(name, downloadTarget, idgm.getMirrorURL() + uri) == null)
+		{
+			err.println("ERROR: Could not add WAD entry '" + name + "'.");
+			downloadedFile.delete(); // cleanup
+			return ERROR_NOT_ADDED;
+		}
+
+		if (downloadTargetFile.exists())
+		{
+			out.println("Removing old file...");
+			if (!downloadTargetFile.delete())
+			{
+				err.println("ERROR: Could not delete old file.");
+				downloadedFile.delete(); // cleanup
+				wadmgr.removeWAD(name);
+				return ERROR_NOT_ADDED;
+			}
+		}
+
+		out.println("Finalizing download...");
+
+		if (!downloadedFile.renameTo(downloadTargetFile))
+		{
+			err.println("ERROR: Could not move downloaded file.");
+			wadmgr.removeWAD(name); // cleanup
+			return ERROR_NOT_ADDED;
+		}
+
+		out.println("Done.");
+		return ERROR_NONE;
+	}
+
 	@Override
 	public int call(final PrintStream out, final PrintStream err, final BufferedReader in) throws Exception
 	{
@@ -150,11 +281,18 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 		if (searchResponse.error != null)
 			throw new IOException("idGames returned error: " + searchResponse.error.type + ": " + searchResponse.error.message);
 
+		if (searchResponse.warning != null)
+		{
+			out.println("idGames: " + searchResponse.warning.type + ": " + searchResponse.warning.message);
+			if (searchResponse.content == null)
+				return ERROR_NONE;
+		}
+
 		IdGamesFileContent[] results;
-		if (searchResponse.content.file.length > selectedLimit)
-			results = Arrays.copyOfRange(searchResponse.content.file, 0, selectedLimit);
+		if (searchResponse.content.files.length > selectedLimit)
+			results = Arrays.copyOfRange(searchResponse.content.files, 0, selectedLimit);
 		else
-			results = searchResponse.content.file;
+			results = searchResponse.content.files;
 
 		if (results == null)
 			return ERROR_IO_ERROR;
@@ -162,33 +300,43 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 		if (resultNumber == null)
 		{
 			int titlelen = 1; 
-			int authorlen = 1; 
 			int pathlen = 1;
 			
 			for (int i = 0; i < results.length; i++)
 			{
-				titlelen = Math.max(results[i].title.length(), titlelen);
-				authorlen = Math.max(results[i].author.length(), titlelen);
+				titlelen = Math.max(ObjectUtils.isNull(results[i].title, "").length(), titlelen);
 				pathlen = Math.max((results[i].dir + results[i].filename).length(), titlelen);
 			}
 
-			String format = "%2d | %-" + titlelen + "s | %-" + authorlen + "s | %-" + pathlen + "s\n";
+			String format = "%2d | %-" + titlelen + "s | %-" + pathlen + "s\n";
 			
 			for (int i = 0; i < results.length; i++)
-				out.printf(format, i + 1, results[i].title, results[i].author, results[i].dir + results[i].filename);
-			String input = DoomyCommon.prompt(out, in, "Select which result?");
+				out.printf(format, i + 1, ObjectUtils.isNull(results[i].title, ""), results[i].dir + results[i].filename);
 			
-			if (input.trim().isEmpty())
+			if (results.length > 1)
 			{
-				err.println("ERROR: No input.");
-				return ERROR_BAD_ARGUMENT;
+				String input = DoomyCommon.prompt(out, in, "Select which result (1-" + results.length + ")?");
+				if (input.isEmpty())
+				{
+					err.println("ERROR: No input.");
+					return ERROR_BAD_ARGUMENT;
+				}
+				try {
+					resultNumber = Integer.parseInt(input);
+				} catch (NumberFormatException e) {
+					err.println("ERROR: Not a number: " + input);
+					return ERROR_BAD_ARGUMENT;
+				}
 			}
-			
-			try {
-				resultNumber = Integer.parseInt(input);
-			} catch (NumberFormatException e) {
-				err.println("ERROR: Not a number: " + input);
-				return ERROR_BAD_ARGUMENT;
+			else
+			{
+				String input = DoomyCommon.prompt(out, in, "One result. Is this OK (Y/N)?");
+				if (input != null && !input.substring(0, 1).equalsIgnoreCase("y"))
+				{
+					out.println("Aborted add.");
+					return ERROR_NONE;
+				}
+				resultNumber = 1;
 			}
 		}
 		
@@ -203,7 +351,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 		if (download == null)
 		{
 			String input = DoomyCommon.prompt(out, in, "Download or Text (D/T)?");
-			if (input.trim().isEmpty())
+			if (input == null || input.isEmpty())
 			{
 				err.println("ERROR: No input.");
 				return ERROR_BAD_ARGUMENT;
@@ -222,74 +370,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 			}
 		}
 
-		IdGamesManager idgm = IdGamesManager.get();
-		
-		IdGamesFileResponse response;
-		try {
-			response = idgm.getById(selected.id);
-		} catch (SocketTimeoutException e) {
-			err.println("ERROR: Call to idGames timed out.");
-			return ERROR_SOCKET_TIMEOUT;
-		} catch (IOException e) {
-			err.println("ERROR: I/O error on call to idGames.");
-			return ERROR_IO_ERROR;
-		}
-		
-		if (response.error != null)
-		{
-			err.println("ERROR: Error from idGames: " + response.error);
-			return ERROR_SERVICE_ERROR;
-		}
-		
-		// fetch text file and print.
-		if (!download)
-		{
-			out.println(response.content.textfile);
-			return ERROR_NONE;
-		}
-		
-		WADManager wadmgr = WADManager.get();
-
-		if (name == null)
-		{
-			String basename = FileUtils.getFileNameWithoutExtension(response.content.filename);
-			name = basename;
-			
-			int next = 1;
-			while (wadmgr.containsWAD(name))
-				name = basename + (next++);
-			
-			String input = DoomyCommon.prompt(out, in, "Add to WAD database as (blank for \"" + name +"\"):");
-			if (!input.trim().isEmpty())
-				name = input.trim();
-		}
-		
-		String uri = response.content.dir + response.content.filename;
-		String target = DoomyEnvironment.getDownloadDirectoryPath() + File.separator + uri.replace('/', File.separatorChar);
-		final long refdate = System.currentTimeMillis();
-		
-		Instance<File> instance = idgm.download(uri, target, DownloadManager.intervalListener(250L, (cur, len, pct) -> 
-		{
-			String format = "\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...";
-			long timeMillis = System.currentTimeMillis() - refdate;
-			long speed = timeMillis > 0L ? cur / timeMillis * 1000L / 1024 : 0;
-			out.printf(format, cur, pct, speed);
-		}));
-		
-		if (instance.getException() != null)
-		{
-			Exception e = instance.getException();
-			err.println("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
-			return ERROR_IO_ERROR;
-		}
-
-		out.println("\nDone.");
-		
-		File downloadedFile = instance.result();
-
-		// TODO: Add to database and stuff.
-		
-		return ERROR_NONE;
+		return download(out, err, in, selected.id);
 	}
 
 }

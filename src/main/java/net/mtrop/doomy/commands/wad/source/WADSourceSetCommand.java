@@ -41,7 +41,7 @@ public class WADSourceSetCommand implements DoomyCommand
 		else
 		{
 			WAD readValue = manager.getWAD(name);
-			out.println("WAD Source for '" + name + "' is now '" + readValue.sourceURL + "'");
+			out.println("WAD Source for '" + name + "' is now '" + readValue.sourceUrl + "'");
 		}
 		
 		return ERROR_NONE;
