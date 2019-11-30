@@ -55,7 +55,6 @@ import net.mtrop.doomy.commands.iwad.IWADSetCommand;
 import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
 import net.mtrop.doomy.commands.wad.WADDependencyCommand;
-import net.mtrop.doomy.commands.wad.WADDownloadCommand;
 import net.mtrop.doomy.commands.wad.WADGetCommand;
 import net.mtrop.doomy.commands.wad.WADListCommand;
 import net.mtrop.doomy.commands.wad.WADRedownloadCommand;
