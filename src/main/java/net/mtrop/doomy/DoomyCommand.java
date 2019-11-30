@@ -307,8 +307,6 @@ public interface DoomyCommand
 				return new WADScanCommand();
 			else if (matchArgument(args, TEXT))
 				return new WADTextCommand();
-			else if (matchArgument(args, DOWNLOAD))
-				return new WADDownloadCommand();
 			else if (matchArgument(args, REDOWNLOAD))
 				return new WADRedownloadCommand();
 			else if (matchArgument(args, SOURCE))

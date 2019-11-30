@@ -263,7 +263,7 @@ public final class DoomyCommon
 			out.println("      --prefix, -p [string]              ...and prepend [string] to each WAD entry name.");
 			out.println("      --force-add-existing               ...and update the names of known paths (otherwise, this does not add existing).");
 			out.println("    text [name]                        Dumps the WAD's text entry, if any (searches same directory for FILENAME.TXT or inside archive).");
-			out.println("    download [url] [name]              Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].");
+			//out.println("    download [url] [name]              Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].");
 			out.println("    redownload [name]                  Redownload a downloaded WAD named [name]."); 
 			out.println("    source                             Print this subsection's help and terminate.");
 			out.println("      list                             List all URL sources.");
