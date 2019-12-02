@@ -46,7 +46,7 @@ public final class WADManager
 	private static final String QUERY_CLEAR_DEPENDENCIES2
 		= "DELETE FROM WADDependencies WHERE needsWadId = ?";
 	private static final String QUERY_CLEAR_DATA
-	= "DELETE FROM WADData WHERE wadId = ?";
+		= "DELETE FROM WADData WHERE wadId = ?";
 
 	// =======================================================================
 	

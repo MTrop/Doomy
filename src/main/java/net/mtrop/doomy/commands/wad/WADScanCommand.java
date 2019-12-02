@@ -69,7 +69,7 @@ public class WADScanCommand implements DoomyCommand
 					else if (matchArgument(args, SWITCH_FORCEADD))
 						force = true;
 					else
-						throw new BadArgumentException("Expected path to scan for WADs.");
+						throw new BadArgumentException("Invalid switch: " + args.peekFirst());
 				}
 				break;
 

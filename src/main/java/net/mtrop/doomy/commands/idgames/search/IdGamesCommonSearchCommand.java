@@ -133,6 +133,15 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 			}
 		}
 		
+		if (state == STATE_NAME)
+			throw new BadArgumentException("Expected name after switch.");
+		if (state == STATE_LIMIT)
+			throw new BadArgumentException("Expected limit after switch.");
+		if (state == STATE_DOWNLOAD)
+			throw new BadArgumentException("Expected number after switch.");
+		if (state == STATE_TEXT)
+			throw new BadArgumentException("Expected number after switch.");
+
 	}
 
 	/**
