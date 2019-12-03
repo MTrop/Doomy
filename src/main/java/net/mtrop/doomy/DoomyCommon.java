@@ -284,7 +284,7 @@ public final class DoomyCommon
 			out.println("  preset                               Print this subsection's help and terminate."); 
 			out.println("    list                               List all presets.");
 			out.println("      [phrase]                           ...whose name/hash contains [phrase].");
-			out.println("    name [hash] [name]                 Sets name [name] on a preset with hash [hash].");
+			out.println("    rename [hash] [name]               Sets name [name] on a preset with hash [hash].");
 			out.println("    create [engine]                    Create preset, but don't run engine.");
 			out.println("      --wads, -w [wads...]               ...with these WADs/Zips (by name, dependency-expanded).");
 			out.println("      --iwad, -i [iwad]                  ...with IWAD name [iwad] (may not be required if specified in engine settings).");

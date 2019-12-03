@@ -39,7 +39,7 @@ public class EngineConfigListCommand implements DoomyCommand
 
 		if (records.length > 0)
 		{
-			int len = 0;
+			int len = 4;
 			for (int i = 0; i < records.length; i++)
 				len = Math.max(records[i].name.length() + 1, len);
 			String format = "%-" + len + "s %s\n";

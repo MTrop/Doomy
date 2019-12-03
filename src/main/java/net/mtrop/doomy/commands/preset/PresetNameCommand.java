@@ -50,7 +50,7 @@ public class PresetNameCommand implements DoomyCommand
 			return ERROR_NOT_FOUND;
 		}
 		
-		if (mgr.setPresetName(hash, name))
+		if (!mgr.setPresetName(hash, name))
 		{
 			err.println("ERROR: Preset could not be updated.");
 			return ERROR_NOT_UPDATED;

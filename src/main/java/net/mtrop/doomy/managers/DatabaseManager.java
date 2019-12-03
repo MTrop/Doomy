@@ -28,20 +28,20 @@ public final class DatabaseManager
 
 	// Query resources.
 	private static String[] INIT_QUERIES = {
-		"sql/initv1/0001-create-meta.sql",
-		"sql/initv1/0002-create-config.sql",
-		"sql/initv1/0003-create-engines.sql",
-		"sql/initv1/0004-create-enginesettings.sql",
-		"sql/initv1/0005-create-iwads.sql",
-		"sql/initv1/0006-create-wads.sql",
-		"sql/initv1/0007-create-waddata.sql",
-		"sql/initv1/0009-create-waddependencies.sql",
-		"sql/initv1/0010-create-preset.sql",
-		"sql/initv1/0011-create-presetitem.sql",
-		"sql/initv1/0012-insert-meta-defaults.sql",
-		"sql/initv1/0013-insert-config-defaults.sql",
-		"sql/initv1/0014-create-enginetemplates.sql",
-		"sql/initv1/0015-create-enginetemplatessettings.sql"
+		"sql/v1/init/0001-create-meta.sql",
+		"sql/v1/init/0002-create-config.sql",
+		"sql/v1/init/0003-create-engines.sql",
+		"sql/v1/init/0004-create-enginesettings.sql",
+		"sql/v1/init/0005-create-iwads.sql",
+		"sql/v1/init/0006-create-wads.sql",
+		"sql/v1/init/0007-create-waddata.sql",
+		"sql/v1/init/0009-create-waddependencies.sql",
+		"sql/v1/init/0010-create-preset.sql",
+		"sql/v1/init/0011-create-presetitem.sql",
+		"sql/v1/init/0012-insert-meta-defaults.sql",
+		"sql/v1/init/0013-insert-config-defaults.sql",
+		"sql/v1/init/0014-create-enginetemplates.sql",
+		"sql/v1/init/0015-create-enginetemplatessettings.sql"
 	};
 
 	// Initializes/creates the connector.

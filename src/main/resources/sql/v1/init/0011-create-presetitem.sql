@@ -1,4 +1,4 @@
-CREATE TABLE PresetItem (
+CREATE TABLE PresetItems (
 	id INTEGER,
 	presetId INTEGER NOT NULL,
 	wadId INTEGER NOT NULL,

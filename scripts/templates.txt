@@ -1,0 +1,36 @@
+engine template add choco-doom
+engine template config set choco-doom setup.exe.name chocolate-doom-setup.exe
+engine template config set choco-doom switch.file -merge
+engine template config set choco-doom switch.iwad -iwad
+engine template config set choco-doom switch.dehacked -deh
+engine template config set choco-doom switch.dehlump -dehlump
+engine template config set choco-doom switch.save.dir -savedir
+engine template config set choco-doom regex.screenshots "DOOM[0-9]+\.(pcx|png)"
+engine template config set choco-doom regex.demos ".+\.lmp"
+engine template add choco-heretic
+engine template config set choco-heretic setup.exe.name chocolate-heretic-setup.exe
+engine template config set choco-heretic switch.file -merge
+engine template config set choco-heretic switch.iwad -iwad
+engine template config set choco-heretic switch.dehacked -deh
+engine template config set choco-heretic switch.dehlump -dehlump
+engine template config set choco-heretic switch.save.dir -savedir
+engine template config set choco-heretic regex.screenshots "HTIC[0-9]+\.(pcx|png)"
+engine template config set choco-heretic regex.demos ".+\.lmp"
+engine template add choco-hexen
+engine template config set choco-hexen setup.exe.name chocolate-hexen-setup.exe
+engine template config set choco-hexen switch.file -merge
+engine template config set choco-hexen switch.iwad -iwad
+engine template config set choco-hexen switch.dehacked -deh
+engine template config set choco-hexen switch.dehlump -dehlump
+engine template config set choco-hexen switch.save.dir -savedir
+engine template config set choco-hexen regex.screenshots "HEXEN[0-9]+\.(pcx|png)"
+engine template config set choco-hexen regex.demos ".+\.lmp"
+engine template add choco-strife
+engine template config set choco-strife setup.exe.name chocolate-strife-setup.exe
+engine template config set choco-strife switch.file -merge
+engine template config set choco-strife switch.iwad -iwad
+engine template config set choco-strife switch.dehacked -deh
+engine template config set choco-strife switch.dehlump -dehlump
+engine template config set choco-strife switch.save.dir -savedir
+engine template config set choco-strife regex.screenshots "STRIFE[0-9]+\.(pcx|png)"
+engine template config set choco-strife regex.demos ".+\.lmp"

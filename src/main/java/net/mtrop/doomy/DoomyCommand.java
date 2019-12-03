@@ -9,6 +9,7 @@ import net.mtrop.doomy.commands.EngineCommand;
 import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.IWADCommand;
 import net.mtrop.doomy.commands.IdGamesCommand;
+import net.mtrop.doomy.commands.PresetCommand;
 import net.mtrop.doomy.commands.UsageCommand;
 import net.mtrop.doomy.commands.VersionCommand;
 import net.mtrop.doomy.commands.WADCommand;
@@ -52,6 +53,9 @@ import net.mtrop.doomy.commands.iwad.IWADRemoveCommand;
 import net.mtrop.doomy.commands.iwad.IWADRenameCommand;
 import net.mtrop.doomy.commands.iwad.IWADScanCommand;
 import net.mtrop.doomy.commands.iwad.IWADSetCommand;
+import net.mtrop.doomy.commands.preset.PresetCreateCommand;
+import net.mtrop.doomy.commands.preset.PresetListCommand;
+import net.mtrop.doomy.commands.preset.PresetNameCommand;
 import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
 import net.mtrop.doomy.commands.wad.WADDependencyCommand;
@@ -114,6 +118,7 @@ public interface DoomyCommand
 	static final String TEXT = "text";
 	static final String CLEAN = "clean";
 	static final String CLEAR = "clear";
+	static final String CREATE = "create";
 	static final String DOWNLOAD = "download";
 	static final String REDOWNLOAD = "redownload";
 	static final String SOURCE = "source";
@@ -336,6 +341,17 @@ public interface DoomyCommand
 			}
 			else
 				return new WADCommand();
+		}
+		else if (matchArgument(args, PRESET))
+		{
+			if (matchArgument(args, LIST))
+				return new PresetListCommand();
+			else if (matchArgument(args, RENAME))
+				return new PresetNameCommand();
+			else if (matchArgument(args, CREATE))
+				return new PresetCreateCommand();
+			else
+				return new PresetCommand();
 		}
 		else if (matchArgument(args, IDGAMES))
 		{

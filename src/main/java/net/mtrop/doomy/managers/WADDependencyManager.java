@@ -121,6 +121,8 @@ public final class WADDependencyManager
 		return out;
 	}
 	
+	// TODO: Write a multi-WAD dependency resolver.
+	
 	/**
 	 * Checks if a dependency to a WAD exists.
 	 * @param wad the WAD that has dependencies.

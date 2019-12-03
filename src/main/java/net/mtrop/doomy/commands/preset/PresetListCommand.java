@@ -31,9 +31,9 @@ public class PresetListCommand implements DoomyCommand
 		if (records.length > 0)
 		{
 			int hashlen = 0;
-			int namelen = 0;
-			int enginelen = 0;
-			int iwadlen = 0;
+			int namelen = 4;
+			int enginelen = 6;
+			int iwadlen = 4;
 			for (int i = 0; i < records.length; i++)
 			{
 				hashlen = Math.max(ObjectUtils.isNull(records[i].hash, "").length() + 1, hashlen);

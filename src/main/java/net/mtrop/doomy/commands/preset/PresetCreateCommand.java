@@ -9,7 +9,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommand.BadArgumentException;
+import net.mtrop.doomy.managers.EngineManager;
+import net.mtrop.doomy.managers.IWADManager;
+import net.mtrop.doomy.managers.PresetManager;
+import net.mtrop.doomy.managers.EngineManager.Engine;
+import net.mtrop.doomy.managers.IWADManager.IWAD;
+import net.mtrop.doomy.managers.WADManager;
+import net.mtrop.doomy.managers.WADManager.WAD;
 
 /**
  * A command that creates a new preset.
@@ -62,7 +68,7 @@ public class PresetCreateCommand implements DoomyCommand
 					else if (matchArgument(args, SWITCH_WADS1) || matchArgument(args, SWITCH_WADS2))
 						state = STATE_WADS;
 					else
-						throw new BadArgumentException("Expected path to scan for WADs.");
+						throw new BadArgumentException("Invalid switch: " + args.peekFirst());
 				}
 				break;
 
@@ -107,7 +113,99 @@ public class PresetCreateCommand implements DoomyCommand
 	@Override
 	public int call(PrintStream out, PrintStream err, BufferedReader in)
 	{
-		// TODO: Finish this.
+		long engineId;
+		Long iwadId;
+		long[] wadIds;
+		
+		Engine e;
+		if ((e = EngineManager.get().getEngine(engine)) == null)
+		{
+			err.println("ERROR: Engine '" + engine + "' not found.");
+			return ERROR_NOT_FOUND;
+		}
+		else
+		{
+			engineId = e.id;
+		}
+		
+		IWAD iw;
+		if (iwad != null)
+		{
+			if ((iw = IWADManager.get().getIWAD(iwad)) == null)
+			{
+				err.println("ERROR: IWAD '" + iwad + "' not found.");
+				return ERROR_NOT_FOUND;
+			}
+			else
+			{
+				iwadId = iw.id;
+			}
+		}
+		else
+		{
+			iwadId = null;
+		}
+		
+		List<Long> wids = new LinkedList<>();
+		for (String wn : wads)
+		{
+			WAD w;
+			if ((w = WADManager.get().getWAD(wn)) == null)
+			{
+				err.println("ERROR: WAD '" + wn + "' not found.");
+				return ERROR_NOT_FOUND;
+			}
+			else
+			{
+				wids.add(w.id);
+			}
+		}
+		wadIds = new long[wids.size()];
+		int x = 0;
+		for (Long l : wids)
+			wadIds[x++] = l;
+		
+		// TODO: Expand WAD dependencies.
+		
+		PresetManager presetManager = PresetManager.get();
+		
+		String hash = PresetManager.calculatePresetHash(engineId, iwadId, wadIds);
+		
+		if (presetManager.getPresetByHash(hash).length > 0)
+		{
+			err.println("ERROR: Preset already exists for this combination of engine/IWAD/WADs.");
+			return ERROR_NOT_ADDED;
+		}
+		
+		if (name == null)
+		{
+			String base;
+			if (wads != null && wads.length > 0)
+				base = wads[wads.length - 1];
+			else if (iwad != null)
+				base = iwad;
+			else
+				base = engine;
+			
+			int next = 1;
+			name = base;
+			while (presetManager.containsPreset(name))
+				name = base + (next++);
+		}
+
+		if (presetManager.getPresetByName(name) != null)
+		{
+			err.println("ERROR: Preset already exists called '" + name + "'.");
+			return ERROR_NOT_ADDED;
+		}
+		
+		if (presetManager.addPreset(name, engineId, iwadId, wadIds) == null)
+		{
+			err.println("ERROR: Could not add preset.");
+			return ERROR_NOT_ADDED;
+		}
+		
+		out.println("Created preset named '" + name + "'.");
 		return ERROR_NONE;
 	}
 

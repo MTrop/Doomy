@@ -32,6 +32,7 @@ public final class PresetManager
 
 	private static final String QUERY_LIST_INFO = (new StringBuilder())
 		.append("SELECT").append('\n')
+			.append("p.id,").append('\n')
 			.append("p.hash,").append('\n')
 			.append("p.name,").append('\n')
 			.append("e.name as engineName,").append('\n')
@@ -138,7 +139,7 @@ public final class PresetManager
 	 * @param wadIds the WAD record ids.
 	 * @return a new hash string.
 	 */
-	public static String calculatePresetHash(long engineId, long iwadId, long... wadIds) 
+	public static String calculatePresetHash(long engineId, Long iwadId, long... wadIds) 
 	{
 		MessageDigest sha1;
 		try {
@@ -150,7 +151,7 @@ public final class PresetManager
 		byte[] buffer = new byte[SIZEOF_LONG];
 		longToBytes(engineId, true, buffer, 0);
 		sha1.update(buffer);
-		longToBytes(iwadId, true, buffer, 0);
+		longToBytes(iwadId != null ? iwadId : -1, true, buffer, 0);
 		sha1.update(buffer);
 		for (long id : wadIds)
 		{
@@ -223,7 +224,7 @@ public final class PresetManager
 	/**
 	 * Gets a saved preset by partial or full hash. Can return more than one.
 	 * @param startingHash the hash or hash prefix.
-	 * @return the found presets, or null if not found.
+	 * @return the found presets.
 	 */
 	public Preset[] getPresetByHash(String startingHash)
 	{
@@ -284,11 +285,11 @@ public final class PresetManager
 	 * Adds a preset and preset directory.
 	 * @param name the name of the preset (can be null).
 	 * @param engineId the id of the engine to use.
-	 * @param iwadId the id of the IWAD to use.
+	 * @param iwadId the id of the IWAD to use (can be null).
 	 * @param wadIds the wad ids to use (already assumed to be expanded out in least-to-most dependent order).
 	 * @return the id of the created preset record.
 	 */
-	public Long addPreset(String name, long engineId, long iwadId, long... wadIds)
+	public Long addPreset(String name, long engineId, Long iwadId, long... wadIds)
 	{
 		String hash = calculatePresetHash(engineId, iwadId, wadIds);
 		
@@ -303,7 +304,7 @@ public final class PresetManager
 			int sort = 0;
 			for (long w : wadIds)
 			{
-				added = trn.getUpdateResult(QUERY_ADD_ITEM, addedId, w, engineId, sort);
+				added = trn.getUpdateResult(QUERY_ADD_ITEM, addedId, w, sort);
 				if (added.getRowCount() == 0)
 					return null;
 				sort += 10;
