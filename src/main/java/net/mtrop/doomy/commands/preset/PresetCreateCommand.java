@@ -12,6 +12,7 @@ import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.PresetManager;
+import net.mtrop.doomy.managers.WADDependencyManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.WADManager;
@@ -27,7 +28,7 @@ public class PresetCreateCommand implements DoomyCommand
 
 	private static final String SWITCH_WADS1 = "--wads";
 	private static final String SWITCH_WADS2 = "-w";
-	private static final String SWITCH_IWAD1 = "--iwads";
+	private static final String SWITCH_IWAD1 = "--iwad";
 	private static final String SWITCH_IWAD2 = "-i";
 	private static final String SWITCH_NAME1 = "--name";
 	private static final String SWITCH_NAME2 = "-n";
@@ -145,7 +146,9 @@ public class PresetCreateCommand implements DoomyCommand
 		{
 			iwadId = null;
 		}
-		
+
+		wads = WADDependencyManager.get().getFullDependencies(wads);
+
 		List<Long> wids = new LinkedList<>();
 		for (String wn : wads)
 		{
@@ -164,8 +167,6 @@ public class PresetCreateCommand implements DoomyCommand
 		int x = 0;
 		for (Long l : wids)
 			wadIds[x++] = l;
-		
-		// TODO: Expand WAD dependencies.
 		
 		PresetManager presetManager = PresetManager.get();
 		

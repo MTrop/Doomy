@@ -286,7 +286,7 @@ public final class DoomyCommon
 			out.println("      [phrase]                           ...whose name/hash contains [phrase].");
 			out.println("    rename [hash] [name]               Sets name [name] on a preset with hash [hash].");
 			out.println("    create [engine]                    Create preset, but don't run engine.");
-			out.println("      --wads, -w [wads...]               ...with these WADs/Zips (by name, dependency-expanded).");
+			out.println("      --wads, -w [wads...]               ...with these WADs (by name, dependency-expanded).");
 			out.println("      --iwad, -i [iwad]                  ...with IWAD name [iwad] (may not be required if specified in engine settings).");
 			out.println("      --name, -n [name]                  ...set to name [name].");
 			out.println("    remove                             Print this subsection's help and terminate.");
@@ -306,7 +306,7 @@ public final class DoomyCommon
 		{
 			out.println("  run [engine]                         Run engine [engine]");
 			out.println("    --server                             ...but use the server EXE, if specified.");
-			out.println("    --wads, -w [wads...]                 ...with these WADs/Zips (by name, dependency-expanded) (they are unzipped and added via -file and -deh).");
+			out.println("    --wads, -w [wads...]                 ...with these WADs (by name, dependency-expanded).");
 			out.println("    --iwad, -i [iwad]                    ...with IWAD name [iwad] (may not be required if specified in engine settings).");
 			out.println("    --name, -n [name]                    ...and assign the created preset [name].");
 			out.println("    --dry-command                        ...or instead, print the full command line and do not execute.");

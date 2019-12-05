@@ -39,15 +39,15 @@ public final class PresetManager
 			.append("i.name as iwadName").append('\n')
 		.append("FROM Presets p").append('\n')
 		.append("LEFT JOIN Engines e ON p.engineId = e.id").append('\n')
-		.append("LEFT JOIN IWADs i ON p.iwadId = i.id").append('\n')
+		.append("LEFT JOIN IWADs i ON p.iwadId = i.id AND p.iwadId IS NOT NULL").append('\n')
 	.toString();
 
 	private static final String QUERY_SEARCH
-		= QUERY_LIST_INFO + "WHERE p.name LIKE ? OR p.hash LIKE ?";
+		= QUERY_LIST_INFO + "WHERE p.name LIKE ? OR p.hash LIKE ? ORDER BY p.name";
 	private static final String QUERY_LIST_NAME 
-		= QUERY_LIST_INFO + "WHERE p.name LIKE ?";
+		= QUERY_LIST_INFO + "WHERE p.name LIKE ? ORDER BY p.name";
 	private static final String QUERY_LIST_HASH
-		= QUERY_LIST_INFO + "WHERE p.hash LIKE ?";
+		= QUERY_LIST_INFO + "WHERE p.hash LIKE ? ORDER BY p.name";
 	private static final String QUERY_LIST_WADS_BY_ID
 		= "SELECT PresetItems.*, WADs.name as wadName FROM PresetItems LEFT JOIN WADs ON PresetItems.wadId = WADs.id WHERE PresetItems.presetId = ? ORDER BY sort ASC";
 
@@ -347,6 +347,20 @@ public final class PresetManager
 		}
 	}
 	
+	/**
+	 * Deletes a preset by id (but not the directory contents).
+	 * @param id the id of the preset.
+	 * @return true if deleted, false if not.
+	 */
+	public boolean deletePresetById(long id)
+	{
+		Preset preset = getPreset(id);
+		if (preset == null)
+			return false;
+		deletePresetData(preset);
+		return true;
+	}
+
 	/**
 	 * Deletes a preset by name (but not the directory contents).
 	 * @param name the name of the preset.

@@ -46,7 +46,10 @@ public class PresetListCommand implements DoomyCommand
 			out.printf(format, "Hash", "Name", "Engine", "IWAD", "Wads");
 			out.printf(format, "====", "====", "======", "====", "====");
 			for (int i = 0; i < records.length; i++)
-				out.printf(format, records[i].hash, records[i].name, records[i].engineName, records[i].iwadName, Arrays.toString(records[i].wads));
+			{
+				String wadliststr = Arrays.toString(records[i].wads);
+				out.printf(format, records[i].hash, records[i].name, records[i].engineName, ObjectUtils.isNull(records[i].iwadName, ""), wadliststr.substring(1, wadliststr.length() - 1));
+			}
 		}
 		out.println(records.length + " presets found.");
 		return ERROR_NONE;

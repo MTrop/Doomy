@@ -1,0 +1,89 @@
+package net.mtrop.doomy.commands.preset;
+
+import static net.mtrop.doomy.DoomyCommand.matchArgument;
+
+import java.io.BufferedReader;
+import java.io.PrintStream;
+import java.util.Deque;
+
+import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.managers.PresetManager;
+import net.mtrop.doomy.managers.PresetManager.Preset;
+
+/**
+ * A command that removes a preset.
+ * @author Matthew Tropiano
+ */
+public class PresetRemoveCommand implements DoomyCommand
+{
+	private static final String SWITCH_QUIET1 = "--quiet";
+	private static final String SWITCH_QUIET2 = "-q";
+	
+	private String name;
+	private boolean quiet;
+
+	@Override
+	public void init(Deque<String> args) throws BadArgumentException
+	{
+		name = args.pollFirst();
+		if (name == null)
+			throw new BadArgumentException("Expected name/hash of preset to remove.");
+		
+		while (!args.isEmpty())
+		{
+			if (matchArgument(args, SWITCH_QUIET1) || matchArgument(args, SWITCH_QUIET2))
+				quiet = true;
+			else
+				throw new BadArgumentException("Invalid switch: " + args.peekFirst());
+		}
+	}
+
+	@Override
+	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	{
+		PresetManager mgr = PresetManager.get();
+		
+		Preset preset;
+		int hashCount;
+		
+		if (mgr.containsPreset(name))
+		{
+			preset = mgr.getPresetByName(name);
+		}
+		else if ((hashCount = mgr.countPreset(name)) > 0)
+		{
+			if (hashCount == 1)
+			{
+				preset = mgr.getPresetByHash(name)[0];
+			}
+			else
+			{
+				err.println("ERROR: Hash '" + name + "' matches more than one preset.");
+				return ERROR_NOT_FOUND;
+			}
+			
+		}
+		else
+		{
+			err.println("ERROR: '" + name + "' does not match a preset name nor hash.");
+			return ERROR_NOT_FOUND;
+		}
+		
+		if (!quiet)
+		{
+			if (!"y".equalsIgnoreCase(DoomyCommon.prompt(out, in, "Are you sure that you want to remove preset '" + name +"' (Y/N)?")))
+				return ERROR_NONE;
+		}
+		
+		if (!mgr.deletePresetById(preset.id))
+		{
+			err.println("ERROR: Preset '" + preset.name + "' could not be removed.");
+			return ERROR_NOT_REMOVED;
+		}
+		
+		out.println("Removed preset '" + name + "'.");
+		return ERROR_NONE;
+	}
+
+}

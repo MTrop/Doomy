@@ -92,6 +92,18 @@ public final class WADDependencyManager
 			out[i++] = row.getString(0);
 		return out;
 	}
+
+	private void addFullDependencies(String name, Deque<String> accumulator)
+	{
+		String[] deps = getDependencies(name);
+		for (int i = deps.length - 1; i >= 0; i++)
+		{
+			String dep = deps[i];
+			if (!accumulator.contains(dep))
+				accumulator.addFirst(dep);
+			addFullDependencies(dep, accumulator);
+		}
+	}
 	
 	/**
 	 * Gets all the names of the WADs that another WAD depends on.
@@ -99,29 +111,20 @@ public final class WADDependencyManager
 	 * @return an array of all WAD dependencies (names).
 	 * @see WADManager#getWAD(String)
 	 */
-	public String[] getFullDependencies(String name)
+	public String[] getFullDependencies(String... name)
 	{
-		Deque<String> toLookup = new LinkedList<String>();
 		Deque<String> accumulator = new LinkedList<String>();
-		toLookup.add(name);
-		
-		while (!toLookup.isEmpty())
+		for (int i = name.length - 1; i >= 0; i--)
 		{
-			for (String dep : getDependencies(toLookup.pollFirst()))
-			{
-				// Sequential search - not proud of it, but I don't see the list growing very large, anyway.
-				if (!accumulator.contains(dep))
-					toLookup.add(dep);
+			String dep = name[i];
+			if (!accumulator.contains(dep))
 				accumulator.addFirst(dep);
-			}
+			addFullDependencies(dep, accumulator);
 		}
-		
 		String[] out = new String[accumulator.size()];
 		accumulator.toArray(out);
 		return out;
 	}
-	
-	// TODO: Write a multi-WAD dependency resolver.
 	
 	/**
 	 * Checks if a dependency to a WAD exists.

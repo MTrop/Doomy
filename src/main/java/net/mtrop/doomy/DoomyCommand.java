@@ -56,6 +56,7 @@ import net.mtrop.doomy.commands.iwad.IWADSetCommand;
 import net.mtrop.doomy.commands.preset.PresetCreateCommand;
 import net.mtrop.doomy.commands.preset.PresetListCommand;
 import net.mtrop.doomy.commands.preset.PresetNameCommand;
+import net.mtrop.doomy.commands.preset.PresetRemoveCommand;
 import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
 import net.mtrop.doomy.commands.wad.WADDependencyCommand;
@@ -113,6 +114,7 @@ public interface DoomyCommand
 	static final String COPY = "copy";
 	static final String REMOVE = "remove";
 	static final String RENAME = "rename";
+	static final String INFO = "info";
 	static final String SETUP = "setup";
 	static final String SCAN = "scan";
 	static final String TEXT = "text";
@@ -350,6 +352,8 @@ public interface DoomyCommand
 				return new PresetNameCommand();
 			else if (matchArgument(args, CREATE))
 				return new PresetCreateCommand();
+			else if (matchArgument(args, REMOVE))
+				return new PresetRemoveCommand();
 			else
 				return new PresetCommand();
 		}
