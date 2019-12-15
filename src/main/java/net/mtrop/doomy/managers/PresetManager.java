@@ -241,22 +241,7 @@ public final class PresetManager
 	 * @param containingPhrase the name phrase or hash phrase.
 	 * @return the found presets.
 	 */
-	public PresetInfo[] getAllPresetsByNameOrHash(String containingPhrase)
-	{
-		PresetInfo[] out = connection.getResult(PresetInfo.class, QUERY_SEARCH, DatabaseManager.toSearchPhrase(containingPhrase), DatabaseManager.toSearchPhrase(containingPhrase));
-
-		for (PresetInfo p : out)
-			getPresetWADNames(p);
-
-		return out;
-	}
-
-	/**
-	 * Gets saved preset info. Can return more than one.
-	 * @param containingPhrase the containing phrase.
-	 * @return the found presets.
-	 */
-	public PresetInfo[] searchPresetInfoByName(String containingPhrase)
+	public PresetInfo[] getPresetInfoByName(String containingPhrase)
 	{
 		PresetInfo[] out = connection.getResult(PresetInfo.class, QUERY_LIST_NAME, DatabaseManager.toSearchPhrase(containingPhrase));
 
@@ -267,17 +252,32 @@ public final class PresetManager
 	}
 
 	/**
-	 * Gets saved preset info. Can return more than one.
-	 * @param startingHash the Hash or hash prefix.
+	 * Searches for all presets.
+	 * @param containingPhrase the name phrase or hash phrase.
 	 * @return the found presets.
 	 */
-	public PresetInfo[] searchPresetInfoByHash(String startingHash)
+	public PresetInfo[] getPresetInfoByHash(String containingPhrase)
 	{
-		PresetInfo[] out = connection.getResult(PresetInfo.class, QUERY_LIST_HASH, startingHash.replace("%", "") + "%");
+		PresetInfo[] out = connection.getResult(PresetInfo.class, QUERY_LIST_HASH, containingPhrase.replace("%", "") + "%");
 
 		for (PresetInfo p : out)
 			getPresetWADNames(p);
-		
+
+		return out;
+	}
+
+	/**
+	 * Searches for all presets.
+	 * @param containingPhrase the name phrase or hash phrase.
+	 * @return the found presets.
+	 */
+	public PresetInfo[] getAllPresetsByNameOrHash(String containingPhrase)
+	{
+		PresetInfo[] out = connection.getResult(PresetInfo.class, QUERY_SEARCH, DatabaseManager.toSearchPhrase(containingPhrase), containingPhrase != null ? containingPhrase.replace("%", "") + "%" : "%");
+
+		for (PresetInfo p : out)
+			getPresetWADNames(p);
+
 		return out;
 	}
 
@@ -407,8 +407,6 @@ public final class PresetManager
 		public String iwadName;
 		/** Preset WADs. */
 		public String[] wads;
-		/** Preset directory path. */
-		public String presetDir;
 	}
 	
 	/**

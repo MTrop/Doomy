@@ -54,9 +54,11 @@ import net.mtrop.doomy.commands.iwad.IWADRenameCommand;
 import net.mtrop.doomy.commands.iwad.IWADScanCommand;
 import net.mtrop.doomy.commands.iwad.IWADSetCommand;
 import net.mtrop.doomy.commands.preset.PresetCreateCommand;
+import net.mtrop.doomy.commands.preset.PresetInfoCommand;
 import net.mtrop.doomy.commands.preset.PresetListCommand;
 import net.mtrop.doomy.commands.preset.PresetNameCommand;
 import net.mtrop.doomy.commands.preset.PresetRemoveCommand;
+import net.mtrop.doomy.commands.preset.PresetRunCommand;
 import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
 import net.mtrop.doomy.commands.wad.WADDependencyCommand;
@@ -354,6 +356,10 @@ public interface DoomyCommand
 				return new PresetCreateCommand();
 			else if (matchArgument(args, REMOVE))
 				return new PresetRemoveCommand();
+			else if (matchArgument(args, INFO))
+				return new PresetInfoCommand();
+			else if (matchArgument(args, RUN))
+				return new PresetRunCommand();
 			else
 				return new PresetCommand();
 		}

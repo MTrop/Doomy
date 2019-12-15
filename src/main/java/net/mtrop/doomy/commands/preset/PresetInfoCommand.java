@@ -1,16 +1,18 @@
 package net.mtrop.doomy.commands.preset;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommand.BadArgumentException;
+import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.managers.PresetManager;
-import net.mtrop.doomy.managers.PresetManager.Preset;
+import net.mtrop.doomy.managers.PresetManager.PresetInfo;
 
 /**
- * A command that [DOES NOTHING].
+ * A command that shows detailed info about a preset.
  * @author Matthew Tropiano
  */
 public class PresetInfoCommand implements DoomyCommand
@@ -30,18 +32,18 @@ public class PresetInfoCommand implements DoomyCommand
 	{
 		PresetManager mgr = PresetManager.get();
 		
-		Preset preset;
+		PresetInfo preset;
 		int hashCount;
 		
 		if (mgr.containsPreset(name))
 		{
-			preset = mgr.getPresetByName(name);
+			preset = mgr.getPresetInfoByName(name)[0];
 		}
 		else if ((hashCount = mgr.countPreset(name)) > 0)
 		{
 			if (hashCount == 1)
 			{
-				preset = mgr.getPresetByHash(name)[0];
+				preset = mgr.getPresetInfoByHash(name)[0];
 			}
 			else
 			{
@@ -55,7 +57,25 @@ public class PresetInfoCommand implements DoomyCommand
 			return ERROR_NOT_FOUND;
 		}
 
-		// TODO: Print info.
+		out.println("Preset name:   " + preset.name);
+		out.println("Preset hash:   " + preset.hash);
+		out.println("Preset engine: " + preset.engineName);
+		if (preset.iwadName != null)
+			out.println("Preset IWAD:   " + preset.iwadName);
+		if (preset.wads.length > 0)
+		{
+			String wadliststr = Arrays.toString(preset.wads);
+			out.println("Preset WADs:   " + wadliststr.substring(1, wadliststr.length() - 1));
+		}
+		
+		File presetDir = new File(DoomyEnvironment.getPresetDirectoryPath(preset.hash));
+		
+		out.println("    Directory: " + presetDir.getAbsolutePath());
+		
+		if (presetDir.exists()) for (File f : presetDir.listFiles())
+		{
+			out.println("        " + f.getPath() + ", " + f.length() + " bytes");
+		}
 		
 		return ERROR_NONE;
 	}
