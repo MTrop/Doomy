@@ -426,7 +426,7 @@ public final class PresetManager
 		/** Preset engine. */
 		public long engineId;
 		/** Preset IWAD. */
-		public long iwadId;
+		public Long iwadId;
 		/** Preset WADs (in the sort order). */
 		public long[] wadIds;
 	}

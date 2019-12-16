@@ -16,35 +16,37 @@ import net.mtrop.doomy.struct.ObjectUtils;
 public final class EngineConfigManager
 {
 	/** Engine executable path. */
-	public static final String SETTING_EXEPATH = 		"exe.path";
-	/**  OPT] If present (and not empty), starts DOSBox, mounts temp, and calls the EXE via it. */
-	public static final String SETTING_DOSBOXPATH =		"dosbox.path";
+	public static final String SETTING_EXEPATH = 			"exe.path";
+	/** [OPT] If present (and not empty), starts DOSBox, mounts temp, and calls the EXE via it. */
+	public static final String SETTING_DOSBOXPATH =			"dosbox.path";
+	/** [OPT] If present (and not empty), run DOSBox with these additional command line switches. */
+	public static final String SETTING_DOSBOXCOMMANDLINE =	"dosbox.cmdline";
 	/** [OPT] If present, "engine setup" will run this executable in the engine's parent directory. */
-	public static final String SETTING_SETUPFILENAME = 	"setup.exe.name";
+	public static final String SETTING_SETUPFILENAME = 		"setup.exe.name";
 	/** [OPT] If present, "run --server" will run this executable in the engine's parent directory. */
-	public static final String SETTING_SERVERFILENAME = "server.exe.name";
+	public static final String SETTING_SERVERFILENAME =		"server.exe.name";
 	/** [OPT] If NOT present (or empty), set to either DOSBox dir or the EXE parent. */
-	public static final String SETTING_WORKDIRPATH = 	"work.dir";
+	public static final String SETTING_WORKDIRPATH = 		"work.dir";
 	/** The switch to use for loading PWAD data (might be "-merge" if Chocolate Doom). */
-	public static final String SETTING_FILESWITCH = 	"switch.file";
+	public static final String SETTING_FILESWITCH = 		"switch.file";
 	/** [OPT] If present (and not empty), this engine requires an IWAD and this is the switch for loading it. */
-	public static final String SETTING_IWADSWITCH = 	"switch.iwad";
+	public static final String SETTING_IWADSWITCH = 		"switch.iwad";
 	/** [OPT] The switch to use for loading DeHackEd patches (blank for unsupported). */
-	public static final String SETTING_DEHSWITCH = 		"switch.dehacked";
+	public static final String SETTING_DEHSWITCH = 			"switch.dehacked";
 	/** [OPT] The switch to use for loading DeHackEd lumps (blank for unsupported). */
-	public static final String SETTING_DEHLUMPSWITCH = 	"switch.dehlump";
+	public static final String SETTING_DEHLUMPSWITCH = 		"switch.dehlump";
 	/** [OPT] If present (and not empty), this switch is used to map to preset directories for saves. */
-	public static final String SETTING_SAVEDIRSWITCH = 	"switch.save.dir";
+	public static final String SETTING_SAVEDIRSWITCH = 		"switch.save.dir";
 	/** [OPT] If present (and not empty), this switch is used to map to preset directories for screenshots. */
-	public static final String SETTING_SHOTDIRSWITCH = 	"switch.screenshots.dir";
+	public static final String SETTING_SHOTDIRSWITCH = 		"switch.screenshots.dir";
 	/** [OPT] If present (and not empty), this regex pattern is used to find savegame files in the Engine Dir to move to the preset folder on exit, or preset to Engine dir. */
-	public static final String SETTING_SAVEPATTERN = 	"regex.saves";
+	public static final String SETTING_SAVEPATTERN = 		"regex.saves";
 	/** [OPT] If present (and not empty), this regex pattern is used to find screenshot files in the Engine Dir to move to the preset folder on exit, or preset to Engine dir. */
-	public static final String SETTING_SHOTPATTERN = 	"regex.screenshots";
+	public static final String SETTING_SHOTPATTERN = 		"regex.screenshots";
 	/** [OPT] If present (and not empty), this regex pattern is used to find demo files in the Engine Dir to move to the preset folder on exit, or preset to Engine dir. */
-	public static final String SETTING_DEMOPATTERN = 	"regex.demos";
+	public static final String SETTING_DEMOPATTERN = 		"regex.demos";
 	/** [OPT] If present (and not empty), this command line is appended (but before the as-is passed-in options). */
-	public static final String SETTING_COMMANDLINE = 	"cmdline";
+	public static final String SETTING_COMMANDLINE = 		"cmdline";
 	
 	// ============================== QUERIES ================================
 	
@@ -111,6 +113,9 @@ public final class EngineConfigManager
 						break;
 					case SETTING_DOSBOXPATH:
 						out.dosboxPath = entry.value;
+						break;
+					case SETTING_DOSBOXCOMMANDLINE:
+						out.dosboxCommandLine = entry.value;
 						break;
 					case SETTING_SETUPFILENAME:
 						out.setupFileName = entry.value;
@@ -291,6 +296,8 @@ public final class EngineConfigManager
 		public String exePath;
 		/** DOSBOX Path. */
 		public String dosboxPath;
+		/** DOSBOX command line. */
+		public String dosboxCommandLine;
 		/** SETUP EXE name. */
 		public String setupFileName;
 		/** Server EXE name. */

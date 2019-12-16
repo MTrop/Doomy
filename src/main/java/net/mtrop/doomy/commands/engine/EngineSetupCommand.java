@@ -41,13 +41,13 @@ public class EngineSetupCommand implements DoomyCommand
 
 		if (settings.setupFileName == null)
 		{
-			err.println("ERROR: Engine '" + name + "' has no setup EXE specified (" + EngineConfigManager.SETTING_SETUPFILENAME + ").");
+			err.println("ERROR: Engine '" + name + "' has no setup executable specified (" + EngineConfigManager.SETTING_SETUPFILENAME + ").");
 			return ERROR_NOT_FOUND;
 		}
 
 		if (settings.exePath == null)
 		{
-			err.println("ERROR: Engine '" + name + "' has no main EXE specified (" + EngineConfigManager.SETTING_EXEPATH + "). This is used to find the setup exe.");
+			err.println("ERROR: Engine '" + name + "' has no main executable specified (" + EngineConfigManager.SETTING_EXEPATH + "). This is used to find the setup exe.");
 			return ERROR_NOT_FOUND;
 		}
 
