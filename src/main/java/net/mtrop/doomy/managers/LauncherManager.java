@@ -266,12 +266,22 @@ public final class LauncherManager
 					out.println("Extract WADs...");
 					unzipped = uzs.unzipAll(WAD_ZIPFILTER);
 					for (File f : unzipped)
-						context.wads.add(f);
+					{
+						if (context.dosboxExecutable != null)
+							context.wads.add(new File(DOSBOX_TEMP_MOUNT + "\\" + f.getName()));
+						else
+							context.wads.add(f);
+					}
 					
-					out.println("Extract WADs...");
+					out.println("Extract DEHs...");
 					unzipped = uzs.unzipAll(DEH_ZIPFILTER);
 					for (File f : unzipped)
-						context.dehs.add(f);
+					{
+						if (context.dosboxExecutable != null)
+							context.dehs.add(new File(DOSBOX_TEMP_MOUNT + "\\" + f.getName()));
+						else
+							context.dehs.add(f);
+					}
 					
 					context.zipSets.add(uzs);
 				} 
@@ -283,37 +293,41 @@ public final class LauncherManager
 		}
 	}
 
+	private static String quoteEscape(String input)
+	{
+		return input.contains(" ") ? '"' + input + '"' : input;
+	}
+	
 	private static File createCommandLineFile(LaunchContext context, EngineSettings settings, File tempDirectory, String[] extraArgs) throws LaunchException
 	{
 		File cmdlineFile = new File(tempDirectory + File.separator + CMDLINE_FILE);
 		try (PrintWriter cmdWriter = new PrintWriter(cmdlineFile))
 		{
 			if (settings.iwadSwitch != null && context.iwadFile != null)
-				cmdWriter.append(settings.iwadSwitch).append(' ').append('"'+context.iwadFile.getPath()+'"').print(' ');
+				cmdWriter.append(settings.iwadSwitch).append(' ').append(quoteEscape(context.iwadFile.getPath())).print(' ');
 			
 			if (!context.wads.isEmpty()) 
 			{
 				cmdWriter.append(settings.fileSwitch).print(' ');
 				for (File w : context.wads)
-					cmdWriter.append('"'+w.getPath()+'"').print(' ');					
+					cmdWriter.append(quoteEscape(w.getPath())).print(' ');
 			}
 			
 			if (settings.dehackedSwitch != null && !context.dehs.isEmpty())
-				cmdWriter.append(settings.dehackedSwitch).append(' ').append('"'+context.dehs.getLast().getPath()+'"').print(' ');
+				cmdWriter.append(settings.dehackedSwitch).append(' ').append(quoteEscape(context.dehs.getLast().getPath())).print(' ');
 			else if (settings.dehlumpSwitch != null)
 				cmdWriter.append(settings.dehlumpSwitch).print(' ');
 	
 			if (context.saveDir != null)
-				cmdWriter.append(settings.saveDirectorySwitch).append(' ').append('"'+context.saveDir.getPath()+'"').print(' ');
+				cmdWriter.append(settings.saveDirectorySwitch).append(' ').append(quoteEscape(context.saveDir.getPath())).print(' ');
 			if (context.screenshotDir != null)
-				cmdWriter.append(settings.screenshotDirectorySwitch).append(' ').append('"'+context.screenshotDir.getPath()+'"').print(' ');
-	
+				cmdWriter.append(settings.screenshotDirectorySwitch).append(' ').append(quoteEscape(context.screenshotDir.getPath())).print(' ');
+
+			if (settings.commandLine != null)
+				cmdWriter.append(settings.commandLine).print(' ');
+
 			for (String arg : extraArgs)
-			{
-				if (arg.contains(" "))
-					arg = '"' + arg +'"';
-				cmdWriter.append(arg).print(' ');
-			}
+				cmdWriter.append(quoteEscape(arg)).print(' ');
 			
 			cmdWriter.flush();
 		} 
@@ -392,17 +406,26 @@ public final class LauncherManager
 			Instance<Integer> process; 
 			if (context.dosboxExecutable != null)
 			{
+				List<String> commandList = new LinkedList<>();
+				commandList.add(context.dosboxExecutable.getPath());
+				commandList.add("-c");
+				commandList.add("mount C: " + "'" + context.engineExecutable.getParentFile() + "'");
+				commandList.add("-c");
+				commandList.add("mount " + DOSBOX_PRESET_MOUNT + " " + "'" + presetDirectory.getPath() + "'");
+				commandList.add("-c");
+				commandList.add("mount " + DOSBOX_TEMP_MOUNT + " " + "'" + tempDirectory.getPath() + "'");
+				commandList.add("-c");
+				commandList.add("C:");
+				commandList.add("-c");
+				commandList.add(context.engineExecutable.getName() + " @" + cmdlineFile.getPath());
+				commandList.add("-c");
+				commandList.add("exit");
+				if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
+					commandList.add(s);
+				
 				try {
 					process = TaskManager.get().spawn((new ProcessBuilder())
-						.command(
-							context.dosboxExecutable.getPath(),
-							"-c", "mount C: " + "\"" + presetDirectory.getPath() + "\"",
-							"-c", "mount " + DOSBOX_PRESET_MOUNT + " " + "\"" + presetDirectory.getPath() + "\"",
-							"-c", "mount " + DOSBOX_TEMP_MOUNT + " " + "\"" + tempDirectory.getPath() + "\"",
-							"-c", "C:",
-							"-c", context.engineExecutable.getName() + " @" + cmdlineFile.getPath(),
-							"-exit"
-						)
+						.command(commandList)
 						.start()
 					);
 				} catch (IOException e) {
