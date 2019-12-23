@@ -59,6 +59,7 @@ import net.mtrop.doomy.commands.preset.PresetListCommand;
 import net.mtrop.doomy.commands.preset.PresetNameCommand;
 import net.mtrop.doomy.commands.preset.PresetRemoveCommand;
 import net.mtrop.doomy.commands.preset.PresetRunCommand;
+import net.mtrop.doomy.commands.run.RunCommand;
 import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
 import net.mtrop.doomy.commands.wad.WADDependencyCommand;
@@ -364,6 +365,10 @@ public interface DoomyCommand
 				return new PresetRunCommand();
 			else
 				return new PresetCommand();
+		}
+		else if (matchArgument(args, RUN))
+		{
+			return new RunCommand();
 		}
 		else if (matchArgument(args, IDGAMES))
 		{

@@ -309,11 +309,9 @@ public final class DoomyCommon
 		if (commandName == null || DoomyCommand.RUN.equalsIgnoreCase(commandName))
 		{
 			out.println("  run [engine]                         Run engine [engine]");
-			out.println("    --server                             ...but use the server EXE, if specified.");
 			out.println("    --wads, -w [wads...]                 ...with these WADs (by name, dependency-expanded).");
 			out.println("    --iwad, -i [iwad]                    ...with IWAD name [iwad] (may not be required if specified in engine settings).");
 			out.println("    --name, -n [name]                    ...and assign the created preset [name].");
-			out.println("    --dry-command                        ...or instead, print the full command line and do not execute.");
 			out.println("    --                                 Send args verbatim after this token.");
 		}
 		if (commandName == null || DoomyCommand.IDGAMES.equalsIgnoreCase(commandName))
