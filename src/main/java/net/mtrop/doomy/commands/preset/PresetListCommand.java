@@ -37,7 +37,7 @@ public class PresetListCommand implements DoomyCommand
 			for (int i = 0; i < records.length; i++)
 			{
 				namelen = Math.max(ObjectUtils.isNull(records[i].name, "").length() + 1, namelen);
-				hashlen = Math.max(ObjectUtils.isNull(records[i].hash, "").length() + 1, hashlen);
+				hashlen = Math.max(ObjectUtils.isNull(records[i].hash.substring(0, 17) + "...", "").length() + 1, hashlen);
 				enginelen = Math.max(ObjectUtils.isNull(records[i].engineName, "").length() + 1, enginelen);
 				iwadlen = Math.max(ObjectUtils.isNull(records[i].iwadName, "").length() + 1, iwadlen);
 			}
@@ -48,7 +48,7 @@ public class PresetListCommand implements DoomyCommand
 			for (int i = 0; i < records.length; i++)
 			{
 				String wadliststr = Arrays.toString(records[i].wads);
-				out.printf(format, records[i].name, records[i].hash, records[i].engineName, ObjectUtils.isNull(records[i].iwadName, ""), wadliststr.substring(1, wadliststr.length() - 1));
+				out.printf(format, records[i].name, records[i].hash.substring(0, 17) + "...", records[i].engineName, ObjectUtils.isNull(records[i].iwadName, ""), wadliststr.substring(1, wadliststr.length() - 1));
 			}
 		}
 		out.println(records.length + " presets found.");

@@ -19,7 +19,7 @@ import net.mtrop.doomy.managers.PresetManager.Preset;
 public class PresetRunCommand implements DoomyCommand
 {
 	private static final String SWITCH_ARGS = "--";
-	private static final String SWITCH_NOCLEANUP = "--no-cleanup";
+	//private static final String SWITCH_NOCLEANUP = "--no-cleanup";
 
 	private String name;
 	private String[] additionalArgs;
