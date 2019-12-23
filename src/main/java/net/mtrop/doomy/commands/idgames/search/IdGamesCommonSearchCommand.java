@@ -147,17 +147,20 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 	/**
 	 * Calls a search and grabs the resulting file content.
 	 * @param query the query to send to the idGames service.
+	 * @param limit the result limit.
 	 * @return a list of file results, or null on service error.
+	 * @throws SocketTimeoutException if the request times out.
+	 * @throws IOException if a read error occurs.
 	 */
 	public abstract IdGamesSearchResponse search(String query, int limit) throws SocketTimeoutException, IOException;
 	
 	/**
-	 * 
-	 * @param out
-	 * @param err
-	 * @param in
-	 * @param idGamesFileId
-	 * @return
+	 * Downloads a file.
+	 * @param out the standard out stream.
+	 * @param err the error out stream.
+	 * @param in the buffered input stream reader to use.
+	 * @param idGamesFileId the idGames file id.
+	 * @return command return code.
 	 */
 	protected int download(final PrintStream out, final PrintStream err, final BufferedReader in, long idGamesFileId) 
 	{

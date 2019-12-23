@@ -7,7 +7,6 @@ import java.sql.SQLException;
 
 import com.blackrook.sql.SQLConnection;
 import com.blackrook.sql.SQLConnector;
-import com.blackrook.sql.SQLResult;
 
 import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.DoomySetupException;
@@ -152,15 +151,6 @@ public final class DatabaseManager
 	SQLConnection getConnection() 
 	{
 		return connection;
-	}
-	
-	/** Runs a generic query. */
-	public SQLResult query(String query)
-	{
-		if (query.substring(0, "SELECT".length()).equalsIgnoreCase("SELECT"))
-			return connection.getResult(query);
-		else
-			return connection.getUpdateResult(query);
 	}
 	
 }

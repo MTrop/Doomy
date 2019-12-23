@@ -73,9 +73,14 @@ public class EngineSetupCommand implements DoomyCommand
 			return ERROR_NOT_FOUND;
 		}
 
-		Instance<Integer> process; 
+		Instance<Integer> process;
+		
 		try {
-			process = TaskManager.get().spawn(Runtime.getRuntime().exec(exe.getPath(), null, workingDirFile));
+			process = TaskManager.get().spawn((new ProcessBuilder())
+				.command(exe.getPath())
+				.directory(workingDirFile)
+				.start()
+			);
 		} catch (IOException e) {
 			err.println("ERROR: Could not start '" + exe.getPath() + "': " + e.getMessage());
 			return ERROR_BAD_EXE;

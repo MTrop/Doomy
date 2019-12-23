@@ -8,6 +8,8 @@ package net.mtrop.doomy.struct;
 
 import java.lang.reflect.Array;
 import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Iterator;
 
 /**
  * Simple utility functions around plain objects.
@@ -17,6 +19,47 @@ public final class ObjectUtils
 {
 	private ObjectUtils() {}
 
+	/**
+	 * Transforms an Enumeration to an {@link Iterable} class.
+	 * @param <T> the object type in the enumeration.
+	 * @param enumeration the input enumeration
+	 * @return an Iterable that encapsulates to enumeration.
+	 */
+	public static <T> Iterable<T> enumerationToIterable(Enumeration<T> enumeration)
+	{
+		return new EnumerationEncapsulator<T>(enumeration);
+	}
+	
+	private static class EnumerationEncapsulator<T> implements Iterable<T>
+	{
+		private Enumeration<T> enumeration;
+		
+		EnumerationEncapsulator(Enumeration<T> enumeration)
+		{
+			this.enumeration = enumeration;
+		}
+		
+		@Override
+		public Iterator<T> iterator()
+		{
+			return new Iterator<T>() 
+			{
+				@Override
+				public boolean hasNext()
+				{
+					return enumeration.hasMoreElements();
+				}
+
+				@Override
+				public T next() 
+				{
+					return enumeration.nextElement();
+				}
+			};
+		}
+		
+	}
+	
 	/**
 	 * Returns if two objects are equal, performing null checking. 
 	 * @param a the first object.

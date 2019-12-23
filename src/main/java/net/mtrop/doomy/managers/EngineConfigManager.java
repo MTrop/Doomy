@@ -145,13 +145,13 @@ public final class EngineConfigManager
 						out.screenshotDirectorySwitch = entry.value;
 						break;
 					case SETTING_SAVEPATTERN:
-						out.savegameRegex = Pattern.compile(entry.value);
+						out.saveGameRegex = Pattern.compile(entry.value, Pattern.CASE_INSENSITIVE);
 						break;
 					case SETTING_SHOTPATTERN:
-						out.screenshotRegex = Pattern.compile(entry.value);
+						out.screenshotRegex = Pattern.compile(entry.value, Pattern.CASE_INSENSITIVE);
 						break;
 					case SETTING_DEMOPATTERN:
-						out.demoRegex = Pattern.compile(entry.value);
+						out.demoRegex = Pattern.compile(entry.value, Pattern.CASE_INSENSITIVE);
 						break;
 					case SETTING_COMMANDLINE:
 						out.commandLine = entry.value;
@@ -317,7 +317,7 @@ public final class EngineConfigManager
 		/** Screenshot directory switch. */
 		public String screenshotDirectorySwitch;
 		/** RegEx for savegame cleanup. */
-		public Pattern savegameRegex;
+		public Pattern saveGameRegex;
 		/** RegEx for screenshot cleanup. */
 		public Pattern screenshotRegex;
 		/** RegEx for demo cleanup. */

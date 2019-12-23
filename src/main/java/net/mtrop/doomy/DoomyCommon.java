@@ -82,6 +82,7 @@ public final class DoomyCommon
 
 	/**
 	 * Checks if the input is not null.
+	 * @param object the input.
 	 * @throws IllegalArgumentException if object is null.
 	 */
 	public static void checkNotNull(Object object)
@@ -92,6 +93,7 @@ public final class DoomyCommon
 	
 	/**
 	 * Checks if the input is not empty.
+	 * @param object the input.
 	 * @throws IllegalArgumentException if object is empty.
 	 */
 	public static void checkNotEmpty(Object object)
@@ -103,6 +105,7 @@ public final class DoomyCommon
 	/**
 	 * Prints the splash.
 	 * @param out the print stream to print to.
+	 * @param version the 
 	 */
 	public static void splash(PrintStream out, String version)
 	{
@@ -173,6 +176,7 @@ public final class DoomyCommon
 	/**
 	 * Prints the help.
 	 * @param out the print stream to print to.
+	 * @param commandName the command name to filter the output.
 	 */
 	public static void help(PrintStream out, String commandName)
 	{

@@ -97,6 +97,7 @@ public interface DoomyCommand
 	static final int ERROR_BAD_EXE = 		9;
 	static final int ERROR_SOCKET_TIMEOUT = 10;
 	static final int ERROR_SERVICE_ERROR =  11;
+	static final int ERROR_LAUNCH_ERROR =	12;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";
@@ -198,6 +199,7 @@ public interface DoomyCommand
 	 * Fetches the base command to initialize and execute.
 	 * @param args the deque of remaining arguments.
 	 * @return a command to run.
+	 * @throws BadCommandException if an argument parse fails.
 	 */
 	static DoomyCommand getCommand(Deque<String> args) throws BadCommandException
 	{
@@ -394,6 +396,7 @@ public interface DoomyCommand
 	/**
 	 * Initializes this command from remaining arguments. 
 	 * @param args the deque of remaining arguments for parsing command types.
+	 * @throws BadArgumentException if an argument parse fails.
 	 */
 	void init(Deque<String> args) throws BadArgumentException;
 
@@ -403,6 +406,7 @@ public interface DoomyCommand
 	 * @param err the STDERR stream.
 	 * @param in the STDIN stream.
 	 * @return the return code from running the command.
+	 * @throws Exception
 	 */
 	int call(PrintStream out, PrintStream err, BufferedReader in) throws Exception;
 	
