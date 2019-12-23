@@ -40,13 +40,13 @@ public class PresetNameCommand implements DoomyCommand
 		
 		if (mgr.countPreset(hash) < 1)
 		{
-			err.println("ERROR: No matching presets by hash '" + name + "'.");
+			err.println("ERROR: No matching presets by hash '" + hash + "'.");
 			return ERROR_NOT_FOUND;
 		}
 
 		if (mgr.countPreset(hash) > 1)
 		{
-			err.println("ERROR: Too many preset hashes start with '" + name + "'.");
+			err.println("ERROR: Too many preset hashes start with '" + hash + "'.");
 			return ERROR_NOT_FOUND;
 		}
 		

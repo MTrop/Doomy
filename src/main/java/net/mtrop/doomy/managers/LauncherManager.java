@@ -426,6 +426,7 @@ public final class LauncherManager
 				try {
 					process = TaskManager.get().spawn((new ProcessBuilder())
 						.command(commandList)
+						.directory(context.workingDirectory)
 						.start()
 					);
 				} catch (IOException e) {
