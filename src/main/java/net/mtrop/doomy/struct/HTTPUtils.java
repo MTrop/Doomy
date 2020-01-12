@@ -884,6 +884,8 @@ public final class HTTPUtils
 		private String contentType;
 		private String contentTypeHeader;
 		private String encoding;
+		private String contentDisposition;
+		private String filename;
 	
 		private HTTPResponse() {}
 		
@@ -959,6 +961,21 @@ public final class HTTPUtils
 			return encoding;
 		}
 	
+		/**
+		 * @return the content disposition. if present, usually "attachment". Can be null.
+		 */
+		public String getContentDisposition() 
+		{
+			return contentDisposition;
+		}
+
+		/**
+		 * @return the content filename. Set if content disposition is "attachment". Can be null.
+		 */
+		public String getFilename() 
+		{
+			return filename;
+		}
 	}
 
 	/**
@@ -1537,12 +1554,31 @@ public final class HTTPUtils
 				response.charset = response.contentTypeHeader.substring(charsetindex + "charset=".length(), endIndex).trim();
 			else
 				response.charset = response.contentTypeHeader.substring(charsetindex + "charset=".length()).trim();
+			if (response.charset.startsWith("\"")) // remove surrounding quotes
+				response.charset = response.charset.substring(1, response.charset.length() - 1); 
 		}
 		
 		if (response.charset == null)
 			response.charset = defaultResponseCharset;
 		
 		response.headers = conn.getHeaderFields();
+		
+		// content disposition?
+		if ((response.contentDisposition = conn.getHeaderField("content-disposition")) != null)
+		{
+			int fileNameIndex;
+			if ((fileNameIndex = response.contentDisposition.toLowerCase().indexOf("filename=")) >= 0)
+			{
+				int endIndex = response.contentDisposition.indexOf(";", fileNameIndex);
+				if (endIndex >= 0)
+					response.filename = response.contentDisposition.substring(fileNameIndex + "filename=".length(), endIndex).trim();
+				else
+					response.filename = response.contentDisposition.substring(fileNameIndex + "filename=".length()).trim();
+				if (response.filename.startsWith("\"")) // remove surrounding quotes
+					response.filename = response.filename.substring(1, response.filename.length() - 1); 
+			}
+		}
+		
 		response.input = new BufferedInputStream(conn.getInputStream());
 		R out = reader.onHTTPResponse(response);
 		response.input.close();
