@@ -179,6 +179,13 @@ public final class DoomyMain
 		return returnValue;
 	}
 	
+	private static int runShell(PrintStream out, PrintStream err, BufferedReader in)
+	{
+		// Pre-warm DB connection.
+		DatabaseManager.get();
+		return doShellLoop(out, err, in);
+	}
+	
 	public static void main(String[] args) 
 	{
 		if (!DatabaseManager.databaseExists())
@@ -196,9 +203,7 @@ public final class DoomyMain
 		
 		if (DoomyCommand.matchArgument(arguments, SWITCH_SHELL))
 		{
-			// Pre-warm DB connection.
-			DatabaseManager.get();
-			returnValue = doShellLoop(System.out, System.err, in);
+			returnValue = runShell(System.out, System.err, in);
 		}
 		else if (DoomyCommand.matchArgument(arguments, SWITCH_SCRIPT))
 		{
@@ -208,7 +213,11 @@ public final class DoomyMain
 		}
 		else
 		{
-			returnValue = executeCommand(arguments, System.out, System.err, in);
+			String arg = arguments.pollFirst();
+			if (arg == null)
+				returnValue = runShell(System.out, System.err, in);
+			else
+				returnValue = executeCommand(arguments, System.out, System.err, in);
 		}
 		
 		System.exit(returnValue);
