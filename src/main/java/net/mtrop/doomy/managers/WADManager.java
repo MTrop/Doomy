@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import com.blackrook.sql.SQLConnection;
 import com.blackrook.sql.SQLResult;
+import com.blackrook.sql.SQLRow;
 import com.blackrook.sql.SQLConnection.Transaction;
 import com.blackrook.sql.SQLConnection.TransactionLevel;
 import com.blackrook.sql.util.SQLRuntimeException;
@@ -47,6 +48,12 @@ public final class WADManager
 		= "DELETE FROM WADDependencies WHERE needsWadId = ?";
 	private static final String QUERY_CLEAR_DATA
 		= "DELETE FROM WADData WHERE wadId = ?";
+	private static final String QUERY_GET_PRESET_IDS
+		= "SELECT DISTINCT presetId FROM PresetItems WHERE wadId = ?";
+	private static final String QUERY_CLEAR_PRESETITEMS
+		= "DELETE FROM PresetItems WHERE wadId = ?";
+	private static final String QUERY_REMOVE_PRESET
+		= "DELETE FROM Presets WHERE id = ?";
 
 	// =======================================================================
 	
@@ -176,6 +183,12 @@ public final class WADManager
 			trn.getUpdateResult(QUERY_CLEAR_DATA, wad.id);
 			trn.getUpdateResult(QUERY_CLEAR_DEPENDENCIES2, wad.id);
 			trn.getUpdateResult(QUERY_CLEAR_DEPENDENCIES1, wad.id);
+			
+			SQLResult result = trn.getResult(QUERY_GET_PRESET_IDS, wad.id);
+			for (SQLRow row : result)
+				trn.getUpdateResult(QUERY_REMOVE_PRESET, row.getLong(0));
+			
+			trn.getUpdateResult(QUERY_CLEAR_PRESETITEMS, wad.id);
 			trn.getUpdateResult(QUERY_REMOVE, wad.name);
 			trn.complete();
 		} 

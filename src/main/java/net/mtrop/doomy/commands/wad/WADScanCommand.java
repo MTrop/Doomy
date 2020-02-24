@@ -6,6 +6,8 @@ import java.io.FileFilter;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mtrop.doomy.DoomyCommand;
@@ -102,14 +104,22 @@ public class WADScanCommand implements DoomyCommand
 		
 		// Get count.
 		out.print("Finding WADs.... 0");
+		final List<File> filesToAdd = new LinkedList<>();
+		
 		DoomyCommon.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 		{
 			WADManager manager = WADManager.get();
 			String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
 			if (manager.containsWAD(name) && force)
+			{
 				out.print("\rFinding WADs.... " + updated.incrementAndGet());
+				filesToAdd.add(file);
+			}
 			else if (!manager.containsWAD(name))
+			{
 				out.print("\rFinding WADs.... " + added.incrementAndGet());
+				filesToAdd.add(file);
+			}
 		});
 		out.println();
 		
@@ -122,7 +132,7 @@ public class WADScanCommand implements DoomyCommand
 			final String format = "\rAdding WADs: %-" + (int)(Math.log10(totalCount) + 1.0) + "d of " + totalCount + " (%3d%%)...";
 
 			out.printf(format, 0, 0);
-			DoomyCommon.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
+			filesToAdd.forEach((file) -> 
 			{
 				WADManager manager = WADManager.get();
 				String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();

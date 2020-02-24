@@ -49,6 +49,9 @@ public final class EngineManager
 					+ "EngineTemplateSettings.engineTemplateId = EngineTemplates.id "
 				+ "WHERE EngineTemplates.name = ?"; 
 
+	private static final String QUERY_REMOVE_PRESET
+		= "DELETE FROM Presets WHERE engineId = ?";
+	
 	// =======================================================================
 	
 	// Singleton instance.
@@ -187,6 +190,7 @@ public final class EngineManager
 		
 		try (Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
 		{
+			trn.getUpdateResult(QUERY_REMOVE_PRESET, engine.id);
 			trn.getUpdateResult(QUERY_REMOVE_SETTINGS, engine.id);
 			trn.getUpdateResult(QUERY_REMOVE, engine.name);
 			trn.complete();

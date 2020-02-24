@@ -1,7 +1,12 @@
 package net.mtrop.doomy.managers;
 
+import java.sql.SQLException;
+
 import com.blackrook.sql.SQLConnection;
 import com.blackrook.sql.SQLResult;
+import com.blackrook.sql.SQLConnection.Transaction;
+import com.blackrook.sql.SQLConnection.TransactionLevel;
+import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
 
@@ -30,6 +35,9 @@ public final class IWADManager
 	private static final String QUERY_UPDATE
 		= "UPDATE IWADs SET path = ? WHERE name = ?";
 	
+	private static final String QUERY_REMOVE_PRESET
+		= "DELETE FROM Presets WHERE iwadId = ?";
+
 	// =======================================================================
 	
 	// Singleton instance.
@@ -116,7 +124,22 @@ public final class IWADManager
 	 */
 	public boolean removeIWAD(String name)
 	{
-		return connection.getUpdateResult(QUERY_REMOVE, name).getRowCount() > 0;
+		IWAD iwad = getIWAD(name);
+		if (iwad == null)
+			return false;
+		
+		try (Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
+		{
+			trn.getUpdateResult(QUERY_REMOVE_PRESET, iwad.id);
+			trn.getUpdateResult(QUERY_REMOVE, iwad.name);
+			trn.complete();
+		} 
+		catch (SQLException e) 
+		{
+			throw new SQLRuntimeException(e);
+		}
+
+		return true;
 	}
 	
 	/**
