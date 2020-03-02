@@ -130,7 +130,7 @@
 
 	<!-- Scripts -->
 
-		<target name="scripts" description="Creates application shell scripts.">
+	<target name="scripts" description="Creates application shell scripts.">
 		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  jarname="jar\${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
 		<shell-bash name="doomy" todir="${build.dir}/shell/bash" jarname="jar/${jar.filename}" mainclass="net.mtrop.doomy.DoomyMain" />
 	</target>
