@@ -163,7 +163,7 @@ public final class WADManager
 	public Long addWAD(String name, String path, String sourceURL)
 	{
 		SQLResult result = connection.getUpdateResult(QUERY_ADD, name, path, sourceURL);
-		return result.getRowCount() > 0 ? result.getId() : null;
+		return result.getRowCount() > 0 ? (Long)result.getId() : null;
 	}
 	
 	/**

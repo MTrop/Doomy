@@ -106,7 +106,7 @@ public final class EngineTemplateManager
 	{
 		SQLResult result = connection.getUpdateResult(QUERY_ADD, name);
 		if (result.getRowCount() > 0)
-			return result.getId();
+			return (Long)result.getId();
 		else
 			return null;
 	}
@@ -122,7 +122,7 @@ public final class EngineTemplateManager
 		Long out = null;
 		try (SQLConnection.Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
 		{
-			out = trn.getUpdateResult(QUERY_ADD, name).getId();
+			out = (Long)trn.getUpdateResult(QUERY_ADD, name).getId();
 			if (out == null)
 				trn.abort();
 			else if (trn.getUpdateResult(QUERY_COPY_SETTINGS, out, sourceName).getRowCount() == 0)

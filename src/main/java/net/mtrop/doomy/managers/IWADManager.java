@@ -114,7 +114,7 @@ public final class IWADManager
 	public Long addIWAD(String name, String path)
 	{
 		SQLResult result = connection.getUpdateResult(QUERY_ADD, name, path);
-		return result.getRowCount() > 0 ? result.getId() : null;
+		return result.getRowCount() > 0 ? (Long)result.getId() : null;
 	}
 	
 	/**

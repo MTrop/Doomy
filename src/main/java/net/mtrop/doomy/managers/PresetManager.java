@@ -299,7 +299,7 @@ public final class PresetManager
 			SQLResult added = trn.getUpdateResult(QUERY_ADD, hash, name, engineId, iwadId);
 			if (added.getRowCount() == 0)
 				return null;
-			addedId = added.getId();
+			addedId = (Long)added.getId();
 
 			int sort = 0;
 			for (long w : wadIds)

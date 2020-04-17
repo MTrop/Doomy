@@ -128,7 +128,7 @@ public final class EngineManager
 	{
 		SQLResult result = connection.getUpdateResult(QUERY_ADD, name, null);
 		if (result.getRowCount() > 0)
-			return result.getId();
+			return (Long)result.getId();
 		else
 			return null;
 	}
@@ -144,7 +144,7 @@ public final class EngineManager
 		Long out = null;
 		try (SQLConnection.Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
 		{
-			out = trn.getUpdateResult(QUERY_ADD, name, null).getId();
+			out = (Long)trn.getUpdateResult(QUERY_ADD, name, null).getId();
 			if (out == null)
 				trn.abort();
 			trn.getUpdateResult(QUERY_COPY_SETTINGS, out, engineName);
@@ -166,7 +166,7 @@ public final class EngineManager
 		Long out = null;
 		try (SQLConnection.Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
 		{
-			out = trn.getUpdateResult(QUERY_ADD, name, templateName).getId();
+			out = (Long)trn.getUpdateResult(QUERY_ADD, name, templateName).getId();
 			if (out == null)
 				trn.abort();
 			trn.getUpdateResult(QUERY_COPY_TEMPLATE_SETTINGS, out, templateName);
