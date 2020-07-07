@@ -1,3 +1,41 @@
+engine template add dos-doom
+engine template config set dos-doom exe.path [[FILL THIS IN]]
+engine template config set dos-doom dosbox.path [[FILL THIS IN]]
+engine template config set dos-doom setup.exe.name setup.exe
+engine template config set dos-doom switch.file -file
+engine template config set dos-doom regex.demos ".+\.lmp"
+engine template config set dos-doom regex.screenshots "DOOM[0-9]+\.pcx"
+engine template config set dos-doom regex.saves "doomsav[0-9]\.dsg"
+engine template add dos-doom2
+engine template config set dos-doom2 exe.path [[FILL THIS IN]]
+engine template config set dos-doom2 dosbox.path [[FILL THIS IN]]
+engine template config set dos-doom2 setup.exe.name setup.exe
+engine template config set dos-doom2 switch.file -file
+engine template config set dos-doom regex.demos ".+\.lmp"
+engine template config set dos-doom regex.screenshots "DOOM[0-9]+\.pcx"
+engine template config set dos-doom regex.saves "doomsav[0-9]\.dsg"
+engine template add dos-heretic
+engine template config set dos-heretic exe.path [[FILL THIS IN]]
+engine template config set dos-heretic dosbox.path [[FILL THIS IN]]
+engine template config set dos-heretic setup.exe.name setup.exe
+engine template config set dos-heretic switch.file -file
+engine template config set dos-heretic regex.demos ".+\.lmp"
+engine template config set dos-heretic regex.screenshots "HTIC[0-9]+\.pcx"
+engine template config set dos-heretic regex.saves "hticsav[0-9]\.hsg"
+engine template add dos-hexen
+engine template config set dos-hexen exe.path [[FILL THIS IN]]
+engine template config set dos-hexen dosbox.path [[FILL THIS IN]]
+engine template config set dos-hexen setup.exe.name setup.exe
+engine template config set dos-hexen switch.file -file
+engine template config set dos-hexen regex.demos ".+\.lmp"
+engine template config set dos-hexen regex.screenshots "HEXEN[0-9]+\.pcx"
+engine template add dos-strife
+engine template config set dos-strife exe.path [[FILL THIS IN]]
+engine template config set dos-strife dosbox.path [[FILL THIS IN]]
+engine template config set dos-strife setup.exe.name setup.exe
+engine template config set dos-strife switch.file -file
+engine template config set dos-strife regex.screenshots "STRIFE[0-9]+\.pcx"
+engine template config set dos-strife regex.demos ".+\.lmp"
 engine template add choco-doom
 engine template config set choco-doom exe.path [[FILL THIS IN]]
 engine template config set choco-doom setup.exe.name chocolate-doom-setup.exe
@@ -44,42 +82,6 @@ engine template config set prboom switch.file -file
 engine template config set prboom switch.iwad -iwad
 engine template config set prboom switch.dehacked -deh
 engine template config set prboom regex.demos ".+\.lmp"
-engine template add dos-doom
-engine template config set dos-doom exe.path [[FILL THIS IN]]
-engine template config set dos-doom dosbox.path [[FILL THIS IN]]
-engine template config set dos-doom setup.exe.name setup.exe
-engine template config set dos-doom switch.file -file
-engine template config set dos-doom regex.demos ".+\.lmp"
-engine template config set dos-doom regex.screenshots "DOOM[0-9]+\.pcx"
-engine template config set dos-doom regex.saves "doomsav[0-9]\.dsg"
-engine template add dos-doom2
-engine template config set dos-doom2 exe.path [[FILL THIS IN]]
-engine template config set dos-doom2 dosbox.path [[FILL THIS IN]]
-engine template config set dos-doom2 setup.exe.name setup.exe
-engine template config set dos-doom2 switch.file -file
-engine template config set dos-doom regex.demos ".+\.lmp"
-engine template config set dos-doom regex.screenshots "DOOM[0-9]+\.pcx"
-engine template config set dos-doom regex.saves "doomsav[0-9]\.dsg"
-engine template add dos-heretic
-engine template config set dos-heretic exe.path [[FILL THIS IN]]
-engine template config set dos-heretic dosbox.path [[FILL THIS IN]]
-engine template config set dos-heretic setup.exe.name setup.exe
-engine template config set dos-heretic switch.file -file
-engine template config set dos-heretic regex.demos ".+\.lmp"
-engine template config set dos-heretic regex.screenshots "HTIC[0-9]+\.pcx"
-engine template config set dos-heretic regex.saves "hticsav[0-9]\.hsg"
-engine template add dos-hexen
-engine template config set dos-hexen exe.path [[FILL THIS IN]]
-engine template config set dos-hexen dosbox.path [[FILL THIS IN]]
-engine template config set dos-hexen setup.exe.name setup.exe
-engine template config set dos-hexen switch.file -file
-engine template config set dos-hexen regex.demos ".+\.lmp"
-engine template config set dos-hexen regex.screenshots "HEXEN[0-9]+\.pcx"
-engine template add dos-strife
-engine template config set dos-strife exe.path [[FILL THIS IN]]
-engine template config set dos-strife dosbox.path [[FILL THIS IN]]
-engine template config set dos-strife setup.exe.name setup.exe
-engine template config set dos-strife switch.file -file
 engine template add zdoom
 engine template config set zdoom exe.path [[FILL THIS IN]]
 engine template config set zdoom switch.file -file
