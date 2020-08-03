@@ -12,7 +12,6 @@ import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.PresetManager;
-import net.mtrop.doomy.managers.WADDependencyManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.WADManager;
@@ -146,8 +145,6 @@ public class PresetCreateCommand implements DoomyCommand
 		{
 			iwadId = null;
 		}
-
-		wads = WADDependencyManager.get().getFullDependencies(wads);
 
 		List<Long> wids = new LinkedList<>();
 		for (String wn : wads)

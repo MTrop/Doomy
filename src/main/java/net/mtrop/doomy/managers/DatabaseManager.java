@@ -34,7 +34,6 @@ public final class DatabaseManager
 		"sql/v1/init/0005-create-iwads.sql",
 		"sql/v1/init/0006-create-wads.sql",
 		"sql/v1/init/0007-create-waddata.sql",
-		"sql/v1/init/0009-create-waddependencies.sql",
 		"sql/v1/init/0010-create-preset.sql",
 		"sql/v1/init/0011-create-presetitem.sql",
 		"sql/v1/init/0012-insert-meta-defaults.sql",

@@ -14,7 +14,6 @@ import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.LauncherManager;
 import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.Preset;
-import net.mtrop.doomy.managers.WADDependencyManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.LauncherManager.LaunchException;
@@ -166,8 +165,6 @@ public class RunCommand implements DoomyCommand
 		{
 			iwadId = null;
 		}
-
-		wads = WADDependencyManager.get().getFullDependencies(wads);
 
 		List<Long> wids = new LinkedList<>();
 		for (String wn : wads)

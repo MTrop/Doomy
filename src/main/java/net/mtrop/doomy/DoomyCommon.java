@@ -393,16 +393,6 @@ public final class DoomyCommon
 			out.println();
 			wrapPrint(out, 80, 40, "      remove [name]                     Removes the URL source of a downloaded WAD named [name].");
 			out.println();
-			wrapPrint(out, 80, 40, "    dependency                          Print this subsection's help and terminate.");
-			out.println();
-			wrapPrint(out, 80, 40, "      list [name]                       Lists all dependencies of WAD [name].");
-			wrapPrint(out, 80, 45, "        --full, -f                        ...and not just the immediate ones.");
-			wrapPrint(out, 80, 40, "      add [name] [dependency]           Adds [dependency] as a dependency of WAD [name] (will be loaded automatically, and before [name1]).");
-			out.println();
-			wrapPrint(out, 80, 40, "      remove [name] [dependency]        Removes [dependency] as a dependency of WAD [name].");
-			out.println();
-			wrapPrint(out, 80, 40, "      clear [name]                      Removes all dependencies of WAD [name].");
-			out.println();
 		}
 		if (commandName == null || DoomyCommand.PRESET.equalsIgnoreCase(commandName))
 		{
