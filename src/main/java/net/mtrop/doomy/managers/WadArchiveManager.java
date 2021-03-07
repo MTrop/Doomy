@@ -155,7 +155,7 @@ public final class WadArchiveManager
 		public String sha1;
 		/** Size of WAD in bytes. */
 		public long size;
-		/** Type of WAD (PWAD/IWAD/PK3/PK7). */
+		/** Type of WAD (PWAD/IWAD/PK3/PKE/PK7). */
 		public String type;
 		/** Ports that are compatible. */
 		public String port;
@@ -180,7 +180,7 @@ public final class WadArchiveManager
 	{
 		/** Size of WAD in bytes. */
 		public long size;
-		/** Type of WAD (PWAD/IWAD/PK3/PK7). */
+		/** Type of WAD (PWAD/IWAD/PK3/PKE/PK7). */
 		public String type;
 		/** Ports that are compatible. */
 		public String[] port;

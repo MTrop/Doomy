@@ -27,7 +27,7 @@ public class IWADScanCommand implements DoomyCommand
 	private static final String SWITCH_PREFIX2 = "-p";
 	private static final String SWITCH_FORCEADD = "--force-add-existing";
 
-	private static final String[] FILETYPES = {"IPK3", "IPK7", "IWAD", "PK3", "PK7", "WAD"};
+	private static final String[] FILETYPES = {"IPK3", "IPK7", "IWAD", "PK3", "PK7", "PKE", "WAD"};
 	
 	private static final FileFilter IWADFILTER = (file) ->
 	{

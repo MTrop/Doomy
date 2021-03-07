@@ -343,7 +343,7 @@ public final class DoomyCommon
 			out.println();
 			wrapPrint(out, 80, 40, "    set [name] [path]                   Change the path of the IWAD named [name] to [path].");
 			out.println();
-			wrapPrint(out, 80, 40, "    scan [path]                         Adds all IWADs in directory [path] (can be WAD/PK3/PK7/IPK3/IPK7/IWAD). Filename becomes [name].");
+			wrapPrint(out, 80, 40, "    scan [path]                         Adds all IWADs in directory [path] (can be WAD/PK3/PKE/PK7/IPK3/IPK7/IWAD). Filename becomes [name].");
 			wrapPrint(out, 80, 45, "      --recurse, -r                       ...and search recursively from [path].");
 			wrapPrint(out, 80, 45, "      --prefix, -p [string]               ...and prepend [string] to each WAD entry name.");
 			wrapPrint(out, 80, 45, "      --force-add-existing                ...and update the names of known paths (otherwise, this does not add existing).");
@@ -371,7 +371,7 @@ public final class DoomyCommon
 			out.println();
 			wrapPrint(out, 80, 40, "    set [name] [path]                   Change the path of the WAD named [name] to [path].");
 			out.println();
-			wrapPrint(out, 80, 40, "    scan [path]                         Adds all WADs in directory [path] (can be WAD/PK3/PK7/ZIPs). Filename becomes [name].");
+			wrapPrint(out, 80, 40, "    scan [path]                         Adds all WADs in directory [path] (can be WAD/PKE/PK3/PK7/ZIPs). Filename becomes [name].");
 			wrapPrint(out, 80, 45, "      --recurse, -r                       ...and search recursively from [path].");
 			wrapPrint(out, 80, 45, "      --prefix, -p [string]               ...and prepend [string] to each WAD entry name.");
 			wrapPrint(out, 80, 45, "      --force-add-existing                ...and update the names of known paths (otherwise, this does not add existing).");

@@ -38,6 +38,7 @@ public final class LauncherManager
 		String ext = FileUtils.getFileExtension(entry.getName(), ".");
 		return ext.equalsIgnoreCase("wad")
 			|| ext.equalsIgnoreCase("pk3")
+			|| ext.equalsIgnoreCase("pke")
 			|| ext.equalsIgnoreCase("pk7");
 	};
 	
@@ -240,7 +241,7 @@ public final class LauncherManager
 			File wadPath = new File(wad.path);
 			String ext = FileUtils.getFileExtension(wadPath);
 			
-			if (ext.equalsIgnoreCase("wad") || ext.equalsIgnoreCase("pk3") || ext.equalsIgnoreCase("pk7"))
+			if (ext.equalsIgnoreCase("wad") || ext.equalsIgnoreCase("pk3") || ext.equalsIgnoreCase("pke") || ext.equalsIgnoreCase("pk7"))
 			{
 				// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
 				if (wadPath.isAbsolute() || context.dosboxExecutable != null)

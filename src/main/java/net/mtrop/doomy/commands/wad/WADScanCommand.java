@@ -29,7 +29,7 @@ public class WADScanCommand implements DoomyCommand
 	private static final String SWITCH_PREFIX2 = "-p";
 	private static final String SWITCH_FORCEADD = "--force-add-existing";
 
-	private static final String[] FILETYPES = {"PK3", "PK7", "WAD", "ZIP"};
+	private static final String[] FILETYPES = {"PK3", "PK7", "PKE", "WAD", "ZIP"};
 	
 	private static final FileFilter WADFILTER = (file) ->
 	{
