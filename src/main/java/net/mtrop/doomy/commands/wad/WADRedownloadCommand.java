@@ -66,7 +66,7 @@ public class WADRedownloadCommand implements DoomyCommand
 
 		if (instance.getException() != null)
 		{
-			Exception e = instance.getException();
+			Throwable e = instance.getException();
 			err.println("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return ERROR_IO_ERROR;
 		}

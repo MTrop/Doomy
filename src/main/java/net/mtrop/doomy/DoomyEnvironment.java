@@ -60,7 +60,6 @@ public final class DoomyEnvironment
 
     /**
      * Gets the path to a specific preset.
-     * @param presetHash the preset hash.
      * @return the canonical directory path to the preset.
      */
     public static String getDownloadDirectoryPath()
@@ -70,7 +69,6 @@ public final class DoomyEnvironment
 
     /**
      * Gets the path to a specific preset.
-     * @param presetHash the preset hash.
      * @return the canonical directory path to the preset.
      */
     public static String getDatabasePath()
