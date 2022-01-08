@@ -3,6 +3,7 @@ package net.mtrop.doomy.managers;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.blackrook.json.JSONReader;
 import com.blackrook.json.annotation.JSONMapType;
@@ -11,7 +12,9 @@ import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.HTTPUtils;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPReader;
+import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPResponse;
+import net.mtrop.doomy.struct.HTTPUtils.TransferMonitor;
 
 /**
  * Wad-Archive Manager class.
@@ -19,16 +22,15 @@ import net.mtrop.doomy.struct.HTTPUtils.HTTPResponse;
  */
 public final class WadArchiveManager
 {
-	private static JSONResponseReader<WadArchiveResult> WADARCHIVERESULT_READER 
+	private static final JSONResponseReader<WadArchiveResult> WADARCHIVERESULT_READER 
 		= new JSONResponseReader<WadArchiveResult>(WadArchiveResult.class);
 
-	private static JSONResponseReader<WadseekerResult[]> WADSEEKERRESULT_READER 
+	private static final JSONResponseReader<WadseekerResult[]> WADSEEKERRESULT_READER 
 		= new JSONResponseReader<WadseekerResult[]>(WadseekerResult[].class);
 	
-	private static HTTPHeaders HEADERS = HTTPUtils.headers()
+	private static final HTTPHeaders HEADERS = HTTPUtils.headers()
 		// Wad-Archive blocks bots by Agent - send a browser string.
 		.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
-		;
 		
 	/** Singleton instance. */
 	private static WadArchiveManager INSTANCE;
@@ -85,7 +87,10 @@ public final class WadArchiveManager
 	 */
 	public WadArchiveResult getByHash(String hash) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getAPIURL() + hash, HEADERS, getTimeout(), WADARCHIVERESULT_READER);
+		return HTTPRequest.get(getAPIURL() + hash)
+			.setHeaders(HEADERS)
+			.timeout(getTimeout())
+			.send(WADARCHIVERESULT_READER);
 	}
 	
 	/**
@@ -97,7 +102,10 @@ public final class WadArchiveManager
 	 */
 	public WadseekerResult[] getByName(String name) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HEADERS, getTimeout(), WADSEEKERRESULT_READER);
+		return HTTPRequest.get(getWadseekerAPIURL() + name)
+			.setHeaders(HEADERS)
+			.timeout(getTimeout())
+			.send(WADSEEKERRESULT_READER);
 	}
 	
 	/**
@@ -110,7 +118,11 @@ public final class WadArchiveManager
 	 */
 	public WadseekerResult[] getByNameAndIWAD(String name, String iwad) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HEADERS, HTTPUtils.parameters().setParameter("iwad", iwad), getTimeout(), WADSEEKERRESULT_READER);
+		return HTTPRequest.get(getWadseekerAPIURL() + name)
+			.setHeaders(HEADERS)
+			.parameters(HTTPUtils.entry("iwad", iwad))
+			.timeout(getTimeout())
+			.send(WADSEEKERRESULT_READER);
 	}
 	
 	/**
@@ -123,7 +135,11 @@ public final class WadArchiveManager
 	 */
 	public WadseekerResult[] getByNameAndPort(String name, String port) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getWadseekerAPIURL() + name, HEADERS, HTTPUtils.parameters().setParameter("port", port), getTimeout(), WADSEEKERRESULT_READER);
+		return HTTPRequest.get(getWadseekerAPIURL() + name)
+			.setHeaders(HEADERS)
+			.parameters(HTTPUtils.entry("port", port))
+			.timeout(getTimeout())
+			.send(WADSEEKERRESULT_READER);
 	}
 	
 	private static class JSONResponseReader<T> implements HTTPReader<T>
@@ -136,9 +152,9 @@ public final class WadArchiveManager
 		}
 		
 		@Override
-		public T onHTTPResponse(HTTPResponse response) throws IOException
+		public T onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException 
 		{
-			return JSONReader.readJSON(classType, response.getInputStream());
+			return JSONReader.readJSON(classType, response.getContentStream());
 		}
 	}
 	

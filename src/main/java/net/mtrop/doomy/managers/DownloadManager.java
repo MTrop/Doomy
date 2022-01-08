@@ -12,6 +12,7 @@ import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.AsyncFactory.Cancellable;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
+import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.HTTPUtils;
 
@@ -25,9 +26,8 @@ public final class DownloadManager
 	private static DownloadManager INSTANCE;
 
 	private static HTTPHeaders HEADERS = HTTPUtils.headers()
-			// Some services block Java's default agent - send a browser string.
-			.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
-			;
+		// Some services block Java's default agent - send a browser string.
+		.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -178,7 +178,7 @@ public final class DownloadManager
 		{
 			File out;
 			try {
-				out = HTTPUtils.httpGet(url, HEADERS, timeoutMillis, response ->
+				out = HTTPRequest.get(url).setHeaders(HEADERS).timeout(timeoutMillis).send((response, cancelSwitch, monitor) ->
 				{
 					File target = new File(targetFile);
 					if (!FileUtils.createPathForFile(target))
@@ -189,7 +189,7 @@ public final class DownloadManager
 					listener.onProgress(0, len, len > 0 ? 0 / len : -1);
 					
 					byte[] buffer = new byte[8192];
-					InputStream in = response.getInputStream();
+					InputStream in = response.getContentStream();
 					
 					try (FileOutputStream fos = new FileOutputStream(target))
 					{

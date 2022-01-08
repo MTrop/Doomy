@@ -3,6 +3,7 @@ package net.mtrop.doomy.managers;
 import java.io.File;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.blackrook.json.JSONObject;
 import com.blackrook.json.JSONReader;
@@ -13,7 +14,9 @@ import net.mtrop.doomy.struct.HTTPUtils;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPParameters;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPReader;
+import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPResponse;
+import net.mtrop.doomy.struct.HTTPUtils.TransferMonitor;
 
 /**
  * idGames Manager class.
@@ -21,25 +24,25 @@ import net.mtrop.doomy.struct.HTTPUtils.HTTPResponse;
  */
 public final class IdGamesManager
 {
-	private static JSONResponseReader<IdGamesStatusResponse> IDGAMESSTATUS_READER 
+	private static final JSONResponseReader<IdGamesStatusResponse> IDGAMESSTATUS_READER 
 		= new JSONResponseReader<IdGamesStatusResponse>(IdGamesStatusResponse.class);
 
-	private static JSONResponseReader<IdGamesAboutResponse> IDGAMESABOUT_READER 
+	private static final JSONResponseReader<IdGamesAboutResponse> IDGAMESABOUT_READER 
 		= new JSONResponseReader<IdGamesAboutResponse>(IdGamesAboutResponse.class);
 
-	private static JSONResponseReader<IdGamesComicResponse> IDGAMESCOMIC_READER 
+	private static final JSONResponseReader<IdGamesComicResponse> IDGAMESCOMIC_READER 
 		= new JSONResponseReader<IdGamesComicResponse>(IdGamesComicResponse.class);
 
-	private static JSONResponseReader<IdGamesFileResponse> IDGAMESFILE_READER 
+	private static final JSONResponseReader<IdGamesFileResponse> IDGAMESFILE_READER 
 		= new JSONResponseReader<IdGamesFileResponse>(IdGamesFileResponse.class);
 
-	private static JSONResponseReader<IdGamesSearchResponse> IDGAMESSEARCH_READER 
+	private static final JSONResponseReader<IdGamesSearchResponse> IDGAMESSEARCH_READER 
 		= new JSONResponseReader<IdGamesSearchResponse>(IdGamesSearchResponse.class);
 
-	private static HTTPParameters COMMON_PARAMS = HTTPUtils.parameters()
+	private static final HTTPParameters COMMON_PARAMS = HTTPUtils.parameters()
 		.addParameter("out", "json");
 
-	private static HTTPParameters SEARCH_PARAMS = COMMON_PARAMS.copy()
+	private static final HTTPParameters SEARCH_PARAMS = COMMON_PARAMS.copy()
 		.addParameter("action", "search");
 
 	/** Singleton instance. */
@@ -117,9 +120,9 @@ public final class IdGamesManager
 		}
 		
 		@Override
-		public T onHTTPResponse(HTTPResponse response) throws IOException
+		public T onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException 
 		{
-			return JSONReader.readJSON(classType, response.getInputStream());
+			return JSONReader.readJSON(classType, response.getContentStream());
 		}
 	}
 	
@@ -131,7 +134,10 @@ public final class IdGamesManager
 	 */
 	public IdGamesStatusResponse ping() throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getAPIURL(), COMMON_PARAMS.copy().addParameter("action", "ping"), getTimeout(), IDGAMESSTATUS_READER);
+		return HTTPRequest.get(getAPIURL())
+			.setParameters(COMMON_PARAMS.copy().addParameter("action", "ping"))
+			.timeout(getTimeout())
+			.send(IDGAMESSTATUS_READER);
 	}
 	
 	/**
@@ -142,7 +148,10 @@ public final class IdGamesManager
 	 */
 	public IdGamesAboutResponse about() throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getAPIURL(), COMMON_PARAMS.copy().addParameter("action", "about"), getTimeout(), IDGAMESABOUT_READER);
+		return HTTPRequest.get(getAPIURL())
+			.setParameters(COMMON_PARAMS.copy().addParameter("action", "about"))
+			.timeout(getTimeout())
+			.send(IDGAMESABOUT_READER);
 	}
 	
 	/**
@@ -153,7 +162,10 @@ public final class IdGamesManager
 	 */
 	public IdGamesComicResponse comic() throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getAPIURL(), COMMON_PARAMS.copy().addParameter("action", "comic"), getTimeout(), IDGAMESCOMIC_READER);
+		return HTTPRequest.get(getAPIURL())
+			.setParameters(COMMON_PARAMS.copy().addParameter("action", "comic"))
+			.timeout(getTimeout())
+			.send(IDGAMESCOMIC_READER);
 	}
 	
 	/**
@@ -166,13 +178,18 @@ public final class IdGamesManager
 	 */
 	public IdGamesFileResponse getById(long id) throws SocketTimeoutException, IOException
 	{
-		return HTTPUtils.httpGet(getAPIURL(), COMMON_PARAMS.copy().addParameter("action", "get").addParameter("id", id), getTimeout(), IDGAMESFILE_READER);
+		return HTTPRequest.get(getAPIURL())
+			.setParameters(COMMON_PARAMS.copy().addParameter("action", "get").addParameter("id", id))
+			.timeout(getTimeout())
+			.send(IDGAMESFILE_READER);
 	}
 
 	private IdGamesSearchResponse search(HTTPParameters parameters) throws SocketTimeoutException, IOException
 	{
-		IdGamesSearchResponse response = HTTPUtils.httpGet(getAPIURL(), parameters, getTimeout(), IDGAMESSEARCH_READER);
-		return response;
+		return HTTPRequest.get(getAPIURL())
+			.setParameters(parameters)
+			.timeout(getTimeout())
+			.send(IDGAMESSEARCH_READER);
 	}
 	
 	/**
