@@ -41,20 +41,6 @@ public final class TaskManager
 	}
 
 	/**
-	 * Spawns a Process with the attached streams, returning its return value.
-	 * <p>This will spawn a Runnable for each provided stream, which will each be responsible for piping data into the process and
-	 * reading from it. The runnables terminate when the streams close. The streams also do not attach if the I/O is redirected
-	 * ({@link Process#getInputStream()}, {@link Process#getErrorStream()}, or {@link Process#getOutputStream()} return <code>null</code>).
-	 * <p>If the end of the provided input stream is reached or an error occurs, the pipe into the process is closed.
-	 * @param process the process to monitor - it should already be started.
-	 * @return the new instance.
-	 */
-	public Instance<Integer> spawn(Process process)
-	{
-		return async.spawn(process);
-	}
-
-	/**
 	 * Spawns a new asynchronous task from a {@link Runnable}.
 	 * @param runnable the runnable to use.
 	 * @return the new instance.

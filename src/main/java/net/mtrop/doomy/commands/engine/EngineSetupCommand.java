@@ -2,13 +2,13 @@ package net.mtrop.doomy.commands.engine;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.managers.EngineConfigManager;
 import net.mtrop.doomy.managers.TaskManager;
+import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
 
@@ -75,16 +75,9 @@ public class EngineSetupCommand implements DoomyCommand
 
 		Instance<Integer> process;
 		
-		try {
-			process = TaskManager.get().spawn((new ProcessBuilder())
-				.command(exe.getPath())
-				.directory(workingDirFile)
-				.start()
-			);
-		} catch (IOException e) {
-			err.println("ERROR: Could not start '" + exe.getPath() + "': " + e.getMessage());
-			return ERROR_BAD_EXE;
-		}
+		ProcessCallable callable = ProcessCallable.create(exe.getPath())
+			.setWorkingDirectory(workingDirFile);
+		process = TaskManager.get().spawn(callable);
 		process.join();
 		
 		return ERROR_NONE;

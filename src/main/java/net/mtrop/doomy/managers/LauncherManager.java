@@ -20,6 +20,7 @@ import net.mtrop.doomy.managers.PresetManager.Preset;
 import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.IOUtils;
+import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.UnzipSet;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 
@@ -408,7 +409,6 @@ public final class LauncherManager
 			if (context.dosboxExecutable != null)
 			{
 				List<String> commandList = new LinkedList<>();
-				commandList.add(context.dosboxExecutable.getPath());
 				commandList.add("-c");
 				commandList.add("mount C: " + "'" + context.engineExecutable.getParentFile() + "'");
 				commandList.add("-c");
@@ -424,30 +424,15 @@ public final class LauncherManager
 				if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
 					commandList.add(s);
 				
-				try {
-					process = TaskManager.get().spawn((new ProcessBuilder())
-						.command(commandList)
-						.directory(context.dosboxExecutable.getParentFile())
-						.start()
-					);
-				} catch (IOException e) {
-					throw new LaunchException("Could not start '" + context.dosboxExecutable.getPath() + "': " + e.getMessage());
-				}
+				ProcessCallable callable = ProcessCallable.create(context.dosboxExecutable.getPath(), commandList.toArray(new String[commandList.size()]))
+					.setWorkingDirectory(context.dosboxExecutable.getParentFile());
+				process = TaskManager.get().spawn(callable);
 			}
 			else
 			{
-				try {
-					process = TaskManager.get().spawn((new ProcessBuilder())
-						.command(
-							context.engineExecutable.getPath(),
-							"@" + cmdlineFile.getPath()
-						)
-						.directory(context.workingDirectory)
-						.start()
-					);
-				} catch (IOException e) {
-					throw new LaunchException("Could not start '" + context.engineExecutable.getPath() + "': " + e.getMessage());
-				}
+				ProcessCallable callable = ProcessCallable.create(context.engineExecutable.getPath(), "@" + cmdlineFile.getPath())
+					.setWorkingDirectory(context.workingDirectory);
+				process = TaskManager.get().spawn(callable);
 			}
 			
 			retval = process.result();

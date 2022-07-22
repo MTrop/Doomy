@@ -1,13 +1,10 @@
 /*******************************************************************************
- * Copyright (c) 2019-2020 Black Rook Software
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
 package net.mtrop.doomy.struct;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -21,7 +18,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 /**
  * Factory for creating a thread pool that handles asynchronous tasks.
@@ -49,12 +45,6 @@ public final class AsyncFactory
 	/** Async factory counter. */
 	private static final AtomicLong AsyncFactoryID = new AtomicLong(0L);
 
-	// No Process Error Listeners
-	private static final ProcessStreamErrorListener[] NO_LISTENERS = new ProcessStreamErrorListener[0];
-
-
-	/** Process ids. */
-	private AtomicLong processId;
 	/** Thread pool. */
 	private ThreadPoolExecutor threadPool;
 	
@@ -152,86 +142,9 @@ public final class AsyncFactory
 	 */
 	public AsyncFactory(ThreadPoolExecutor threadPool)
 	{
-		this.processId = new AtomicLong(0L);
 		this.threadPool = threadPool;
 	}
 
-	/**
-	 * Spawns a Process, returning its return value.
-	 * @param process the process to monitor - it should already be started.
-	 * @return the new instance.
-	 */
-	public Instance<Integer> spawn(Process process)
-	{
-		return spawn(process, null, null, null, NO_LISTENERS);
-	}
-	
-	/**
-	 * Spawns a Process with Standard Input attached, returning its return value.
-	 * <p>This will spawn a Runnable for each provided stream, which will each be responsible for piping data into the process and
-	 * reading from it. The runnables terminate when the streams close. The streams also do not attach if the I/O is redirected
-	 * ({@link Process#getOutputStream()} returns <code>null</code>).
-	 * <p>It is important to close the input stream, or else the process may hang, waiting forever for input.
-	 * @param process the process to monitor - it should already be started.
-	 * @param stdin the Standard IN stream. If null, no input is provided.
-	 * @param stdout the Standard OUT/ERROR stream. If null, no output is provided.
-	 * @param listeners the error listeners to add, if any.
-	 * @return the new instance.
-	 */
-	public Instance<Integer> spawn(Process process, InputStream stdin, OutputStream stdout, ProcessStreamErrorListener ... listeners)
-	{
-		return spawn(process, stdin, stdout, stdout, listeners);
-	}
-	
-	/**
-	 * Spawns a Process with the attached streams, returning its return value.
-	 * <p>This will spawn a Runnable for each provided stream, which will each be responsible for piping data into the process and
-	 * reading from it. The runnables terminate when the streams close. The streams also do not attach if the I/O is redirected
-	 * ({@link Process#getInputStream()}, {@link Process#getErrorStream()}, or {@link Process#getOutputStream()} return <code>null</code>).
-	 * <p>If the end of the provided input stream is reached or an error occurs, the pipe into the process is closed.
-	 * @param process the process to monitor - it should already be started.
-	 * @param stdin the Standard IN stream. If null, no input is provided.
-	 * @param stdout the Standard OUT stream. If null, no output is provided.
-	 * @param stderr the Standard ERROR stream. If null, no error output is provided.
-	 * @param listeners the error listeners to add, if any.
-	 * @return the new instance.
-	 */
-	public Instance<Integer> spawn(
-		Process process, 
-		final InputStream stdin,
-		final OutputStream stdout, 
-		final OutputStream stderr, 
-		final ProcessStreamErrorListener ... listeners
-	)
-	{
-		final long id = processId.getAndIncrement();
-		final OutputStream stdInPipe = process.getOutputStream();
-		final InputStream stdOutPipe = process.getInputStream();
-		final InputStream stdErrPipe = process.getErrorStream();
-		
-		// Standard In
-		(new PipeInToOutThread(id + "-In", stdin, stdInPipe, (e) -> {
-			for (int i = 0; i < listeners.length; i++)
-				listeners[i].onStreamError(ProcessStreamErrorListener.StreamType.STDIN, e);
-		})).start();
-
-		// Standard Out
-		(new PipeInToOutThread(id + "Out", stdOutPipe, stdout, (e) -> {
-			for (int i = 0; i < listeners.length; i++)
-				listeners[i].onStreamError(ProcessStreamErrorListener.StreamType.STDOUT, e);
-		})).start();
-		
-		// Standard Error
-		(new PipeInToOutThread(id + "Error", stdErrPipe, stderr, (e) -> {
-			for (int i = 0; i < listeners.length; i++)
-				listeners[i].onStreamError(ProcessStreamErrorListener.StreamType.STDERR, e);
-		})).start();
-		
-		Instance<Integer> out = new ProcessInstance(process);
-		threadPool.execute(out);
-		return out;
-	}
-	
 	/**
 	 * Spawns a new asynchronous task from a {@link Runnable}.
 	 * @param listener the listener to immediately attach.
@@ -405,27 +318,6 @@ public final class AsyncFactory
 		return threadPool.shutdownNow();
 	}
 	
-	private static int relay(InputStream in, OutputStream out) throws IOException
-	{
-		int total = 0;
-		int buf = 0;
-			
-		byte[] RELAY_BUFFER = new byte[8192];
-		
-		while ((buf = in.read(RELAY_BUFFER)) > 0)
-		{
-			out.write(RELAY_BUFFER, 0, buf);
-			total += buf;
-		}
-		return total;
-	}
-
-	private static void close(AutoCloseable c)
-	{
-		if (c == null) return;
-		try { c.close(); } catch (Exception e){}
-	}
-
 	/**
 	 * A listener interface for all instances.
 	 * @param <T> instance return type.
@@ -461,28 +353,6 @@ public final class AsyncFactory
 		 * @param message the message.
 		 */
 		void onProgressChange(boolean indeterminate, double current, double maximum, String message);
-	}
-
-	/**
-	 * A listener interface for {@link Process} tasks. 
-	 */
-	@FunctionalInterface
-	public static interface ProcessStreamErrorListener
-	{
-		/** The stream type that produced the error. */
-		enum StreamType
-		{
-			STDIN,
-			STDOUT,
-			STDERR
-		}
-		
-		/**
-		 * Called when a Process task reports an error.
-		 * @param type the {@link StreamType}.
-		 * @param exception the exception that happened.
-		 */
-		void onStreamError(StreamType type, Exception exception);
 	}
 
 	/**
@@ -655,7 +525,7 @@ public final class AsyncFactory
 		/**
 		 * Flags this Cancellable for cancellation.
 		 */
-		public final void cancel()
+		public void cancel()
 		{
 			isCancelled = true;
 		}
@@ -692,8 +562,8 @@ public final class AsyncFactory
 		private Object listenerMutex;
 		
 		// === State
-		private boolean done;
-		private boolean running;
+		private volatile boolean done;
+		private volatile boolean running;
 		
 		// === Results
 		private Throwable exception;
@@ -899,7 +769,7 @@ public final class AsyncFactory
 
 	/**
 	 * The thread factory used for the Thread Pool.
-	 * Makes daemon threads that start with the name <code>"AsyncUtilsThread-"</code>.
+	 * Makes non-daemon threads that start with the name <code>"AsyncUtilsThread-"</code>.
 	 */
 	private static class DefaultThreadFactory implements ThreadFactory
 	{
@@ -917,82 +787,13 @@ public final class AsyncFactory
 		{
 			Thread out = new Thread(r);
 			out.setName(threadNamePrefix + threadId.getAndIncrement());
-			out.setDaemon(true);
+			out.setDaemon(false);
 			out.setPriority(Thread.NORM_PRIORITY);
 			return out;
 		}
 		
 	}
 
-	/**
-	 * A thread that just pipes input to output.
-	 */
-	private static class PipeInToOutThread extends Thread
-	{
-		private InputStream in;
-		private OutputStream out;
-		private Consumer<IOException> exceptionConsumer;
-		
-		private PipeInToOutThread(String suffix, InputStream in, OutputStream out, Consumer<IOException> exceptionConsumer)
-		{
-			setDaemon(false);
-			setName("ProcessPipe-" + suffix);
-			this.in = in;
-			this.out = out;
-			this.exceptionConsumer = exceptionConsumer;
-		}
-		
-		@Override
-		public void run() 
-		{
-			try {
-				relay(in, out);
-			} catch (IOException e) {
-				exceptionConsumer.accept(e);
-			} finally {
-				close(in);
-				close(out);
-			}
-		}
-	}
-
-	/**
-	 * Process encapsulation. 
-	 */
-	private static class ProcessInstance extends Instance<Integer>
-	{
-		private Process process;
-		private boolean cancelled;
-
-		private ProcessInstance(Process process) 
-		{
-			this.process = process;
-			this.cancelled = false;
-		}
-		
-		@Override
-		public boolean cancel(boolean mayInterruptIfRunning) 
-		{
-			process.destroy();
-			cancelled = true;
-			return true;
-		}
-
-		@Override
-		public boolean isCancelled() 
-		{
-			return cancelled;
-		}
-
-		@Override
-		protected Integer execute() throws Exception 
-		{
-			process.waitFor();
-			return process.exitValue();
-		}
-		
-	}
-	
 	/**
 	 * Cancellable encapsulation. 
 	 * @param <T> result type.
