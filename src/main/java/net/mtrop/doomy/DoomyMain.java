@@ -21,8 +21,6 @@ public final class DoomyMain
 	/** Doomy Version */
 	public static final String VERSION = DoomyCommon.getVersionString("doomy");
 	
-	/** Start REPL switch. */
-	public static final String SWITCH_SHELL = "--shell";
 	/** Start REPL in script mode. */
 	public static final String SWITCH_SCRIPT = "--script";
 
@@ -201,7 +199,7 @@ public final class DoomyMain
 		int returnValue = DoomyCommand.ERROR_NONE;
 		Deque<String> arguments = new LinkedList<String>(Arrays.asList(args));
 		
-		if (DoomyCommand.matchArgument(arguments, SWITCH_SHELL))
+		if (arguments.isEmpty())
 		{
 			returnValue = runShell(System.out, System.err, in);
 		}
