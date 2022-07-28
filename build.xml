@@ -19,13 +19,13 @@
 
 	<!-- Project Libs -->
 	
-	<property name="json.lib.version" value="1.1.2" />
+	<property name="json.lib.version" value="1.2.0" />
 	<property name="json.tag" value="${json.lib.version}-RELEASE" />
 	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
 	<property name="json.jar" value="${json.project}.jar" />
 	<property name="json.jar.src" value="${json.project}-sources.jar" />
 
-	<property name="sql.lib.version" value="1.2.0" />
+	<property name="sql.lib.version" value="1.3.0" />
 	<property name="sql.tag" value="${sql.lib.version}-RELEASE" />
 	<property name="sql.project" value="blackrook-sql-${sql.lib.version}" />	
 	<property name="sql.jar" value="${sql.project}.jar" />
@@ -67,6 +67,9 @@
 	<target name="init.versions" depends="clean.versions">
 		<mkdir dir="${build.versions.dir}" />
 		<echo file="${build.versions.dir}/doomy.version" message="${doomy.version}" />
+		<echo file="${build.versions.dir}/json.version" message="${json.lib.version}" />
+		<echo file="${build.versions.dir}/sql.version" message="${sql.lib.version}" />
+		<echo file="${build.versions.dir}/sqlite.version" message="${sqlite.lib.version}" />
 	</target>
 
 
