@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.preset;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.PresetManager;
 
 /**
@@ -28,35 +27,35 @@ public class PresetNameCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		PresetManager mgr = PresetManager.get();
 		
 		if (mgr.containsPreset(name))
 		{
-			err.println("ERROR: Preset '" + name + "' already exists. Choose a different name.");
+			handler.errln("ERROR: Preset '" + name + "' already exists. Choose a different name.");
 			return ERROR_NOT_UPDATED;
 		}
 		
 		if (mgr.countPreset(hash) < 1)
 		{
-			err.println("ERROR: No matching presets by hash '" + hash + "'.");
+			handler.errln("ERROR: No matching presets by hash '" + hash + "'.");
 			return ERROR_NOT_FOUND;
 		}
 
 		if (mgr.countPreset(hash) > 1)
 		{
-			err.println("ERROR: Too many preset hashes start with '" + hash + "'.");
+			handler.errln("ERROR: Too many preset hashes start with '" + hash + "'.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!mgr.setPresetName(hash, name))
 		{
-			err.println("ERROR: Preset could not be updated.");
+			handler.errln("ERROR: Preset could not be updated.");
 			return ERROR_NOT_UPDATED;
 		}
 		
-		out.println("Named preset '" + name + "'.");
+		handler.outln("Named preset '" + name + "'.");
 		return ERROR_NONE;
 	}
 

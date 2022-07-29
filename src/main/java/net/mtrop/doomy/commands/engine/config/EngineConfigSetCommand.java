@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine.config;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineConfigManager;
 import net.mtrop.doomy.managers.EngineManager;
 
@@ -33,11 +32,11 @@ public class EngineConfigSetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		if (!EngineManager.get().containsEngine(engine))
 		{
-			err.println("ERROR: No such engine: " + engine);
+			handler.errln("ERROR: No such engine: " + engine);
 			return ERROR_NOT_FOUND;
 		}
 
@@ -46,13 +45,13 @@ public class EngineConfigSetCommand implements DoomyCommand
 		String readValue;
 		if (!config.setSetting(engine, name, value))
 		{
-			err.println("ERROR: Could not set: " + name);
+			handler.errln("ERROR: Could not set: " + name);
 			return ERROR_NOT_ADDED;
 		}
 		else
 		{
 			readValue = config.getSetting(engine, name);
-			out.println("'" + name + "' is '" + readValue + "'");
+			handler.outln("'" + name + "' is '" + readValue + "'");
 		}
 		
 		return ERROR_NONE;

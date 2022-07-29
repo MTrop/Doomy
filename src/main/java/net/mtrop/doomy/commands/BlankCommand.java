@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 
 /**
  * A command that [DOES NOTHING].
@@ -20,7 +19,7 @@ public class BlankCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		// TODO: Finish this.
 		return ERROR_NONE;

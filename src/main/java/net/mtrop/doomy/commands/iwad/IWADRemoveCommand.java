@@ -1,11 +1,9 @@
 package net.mtrop.doomy.commands.iwad;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.IWADManager;
 
 import static net.mtrop.doomy.DoomyCommand.*;
@@ -39,29 +37,29 @@ public class IWADRemoveCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		IWADManager mgr = IWADManager.get();
 		
 		if (!mgr.containsIWAD(name))
 		{
-			err.println("ERROR: IWAD '" + name + "' does not exist.");
+			handler.errln("ERROR: IWAD '" + name + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(DoomyCommon.prompt(out, in, "Are you sure that you want to remove IWAD '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(handler.prompt("Are you sure that you want to remove IWAD '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		
 		if (!mgr.removeIWAD(name))
 		{
-			err.println("ERROR: IWAD '" + name + "' could not be removed.");
+			handler.errln("ERROR: IWAD '" + name + "' could not be removed.");
 			return ERROR_NOT_REMOVED;
 		}
 		
-		out.println("Removed IWAD '" + name + "'.");
+		handler.outln("Removed IWAD '" + name + "'.");
 		return ERROR_NONE;
 	}
 

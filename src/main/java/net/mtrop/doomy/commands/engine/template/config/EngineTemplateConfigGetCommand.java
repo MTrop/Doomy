@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine.template.config;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineTemplateConfigManager;
 import net.mtrop.doomy.managers.EngineTemplateManager;
 
@@ -29,11 +28,11 @@ public class EngineTemplateConfigGetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		if (!EngineTemplateManager.get().containsTemplate(template))
 		{
-			err.println("ERROR: No such template: " + template);
+			handler.errln("ERROR: No such template: " + template);
 			return ERROR_NOT_FOUND;
 		}
 
@@ -41,12 +40,12 @@ public class EngineTemplateConfigGetCommand implements DoomyCommand
 		
 		if (value == null)
 		{
-			err.println("ERROR: No such setting: " + name);
+			handler.errln("ERROR: No such setting: " + name);
 			return ERROR_NOT_FOUND;
 		}
 		else
 		{
-			out.println(value);
+			handler.outln(value);
 		}
 		
 		return ERROR_NONE;

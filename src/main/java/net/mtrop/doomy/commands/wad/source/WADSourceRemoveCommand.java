@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.wad.source;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 
 /**
@@ -24,23 +23,23 @@ public class WADSourceRemoveCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WADManager mgr = WADManager.get();
 
 		if (!mgr.containsWAD(name))
 		{
-			err.println("ERROR: WAD '" + name + "' does not exist.");
+			handler.errln("ERROR: WAD '" + name + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!mgr.setWADSourceURL(name, null))
 		{
-			err.println("ERROR: WAD '" + name + "' could not be removed.");
+			handler.errln("ERROR: WAD '" + name + "' could not be removed.");
 			return ERROR_NOT_REMOVED;
 		}
 
-		out.println("Removed WAD Source for '" + name + "'.");
+		handler.outln("Removed WAD Source for '" + name + "'.");
 		return ERROR_NONE;
 	}
 

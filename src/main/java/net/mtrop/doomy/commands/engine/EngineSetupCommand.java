@@ -1,11 +1,10 @@
 package net.mtrop.doomy.commands.engine;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineConfigManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.struct.ProcessCallable;
@@ -29,25 +28,25 @@ public class EngineSetupCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		EngineSettings settings = EngineConfigManager.get().getEngineSettings(name);
 		
 		if (settings == null)
 		{
-			err.println("ERROR: Engine '" + name + "' does not exist.");
+			handler.errln("ERROR: Engine '" + name + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 
 		if (settings.setupFileName == null)
 		{
-			err.println("ERROR: Engine '" + name + "' has no setup executable specified (" + EngineConfigManager.SETTING_SETUPFILENAME + ").");
+			handler.errln("ERROR: Engine '" + name + "' has no setup executable specified (" + EngineConfigManager.SETTING_SETUPFILENAME + ").");
 			return ERROR_NOT_FOUND;
 		}
 
 		if (settings.exePath == null)
 		{
-			err.println("ERROR: Engine '" + name + "' has no main executable specified (" + EngineConfigManager.SETTING_EXEPATH + "). This is used to find the setup exe.");
+			handler.errln("ERROR: Engine '" + name + "' has no main executable specified (" + EngineConfigManager.SETTING_EXEPATH + "). This is used to find the setup exe.");
 			return ERROR_NOT_FOUND;
 		}
 
@@ -57,7 +56,7 @@ public class EngineSetupCommand implements DoomyCommand
 
 		if (!exe.exists())
 		{
-			err.println("ERROR: Setup EXE '" + exe.getPath() + "' not found.");
+			handler.errln("ERROR: Setup EXE '" + exe.getPath() + "' not found.");
 			return ERROR_NOT_FOUND;
 		}
 
@@ -69,7 +68,7 @@ public class EngineSetupCommand implements DoomyCommand
 		
 		if (!workingDirFile.exists())
 		{
-			err.println("ERROR: Working directory '" + workingDirFile.getPath() + "' not found.");
+			handler.errln("ERROR: Working directory '" + workingDirFile.getPath() + "' not found.");
 			return ERROR_NOT_FOUND;
 		}
 

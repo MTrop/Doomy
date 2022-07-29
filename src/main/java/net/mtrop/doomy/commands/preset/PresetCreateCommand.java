@@ -2,13 +2,12 @@ package net.mtrop.doomy.commands.preset;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.PresetManager;
@@ -111,7 +110,7 @@ public class PresetCreateCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		long engineId;
 		Long iwadId;
@@ -120,7 +119,7 @@ public class PresetCreateCommand implements DoomyCommand
 		Engine e;
 		if ((e = EngineManager.get().getEngine(engine)) == null)
 		{
-			err.println("ERROR: Engine '" + engine + "' not found.");
+			handler.errln("ERROR: Engine '" + engine + "' not found.");
 			return ERROR_NOT_FOUND;
 		}
 		else
@@ -133,7 +132,7 @@ public class PresetCreateCommand implements DoomyCommand
 		{
 			if ((iw = IWADManager.get().getIWAD(iwad)) == null)
 			{
-				err.println("ERROR: IWAD '" + iwad + "' not found.");
+				handler.errln("ERROR: IWAD '" + iwad + "' not found.");
 				return ERROR_NOT_FOUND;
 			}
 			else
@@ -152,7 +151,7 @@ public class PresetCreateCommand implements DoomyCommand
 			WAD w;
 			if ((w = WADManager.get().getWAD(wn)) == null)
 			{
-				err.println("ERROR: WAD '" + wn + "' not found.");
+				handler.errln("ERROR: WAD '" + wn + "' not found.");
 				return ERROR_NOT_FOUND;
 			}
 			else
@@ -171,7 +170,7 @@ public class PresetCreateCommand implements DoomyCommand
 		
 		if (presetManager.getPresetByHash(hash).length > 0)
 		{
-			err.println("ERROR: Preset already exists for this combination of engine/IWAD/WADs.");
+			handler.errln("ERROR: Preset already exists for this combination of engine/IWAD/WADs.");
 			return ERROR_NOT_ADDED;
 		}
 		
@@ -193,17 +192,17 @@ public class PresetCreateCommand implements DoomyCommand
 
 		if (presetManager.getPresetByName(name) != null)
 		{
-			err.println("ERROR: Preset already exists called '" + name + "'.");
+			handler.errln("ERROR: Preset already exists called '" + name + "'.");
 			return ERROR_NOT_ADDED;
 		}
 		
 		if (presetManager.addPreset(name, engineId, iwadId, wadIds) == null)
 		{
-			err.println("ERROR: Could not add preset.");
+			handler.errln("ERROR: Could not add preset.");
 			return ERROR_NOT_ADDED;
 		}
 		
-		out.println("Created preset named '" + name + "'.");
+		handler.outln("Created preset named '" + name + "'.");
 		return ERROR_NONE;
 	}
 

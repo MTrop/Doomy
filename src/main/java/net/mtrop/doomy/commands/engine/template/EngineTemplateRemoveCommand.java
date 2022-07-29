@@ -1,11 +1,9 @@
 package net.mtrop.doomy.commands.engine.template;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineTemplateManager;
 
 import static net.mtrop.doomy.DoomyCommand.*;
@@ -39,29 +37,29 @@ public class EngineTemplateRemoveCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		EngineTemplateManager mgr = EngineTemplateManager.get();
 		
 		if (!mgr.containsTemplate(name))
 		{
-			err.println("ERROR: Engine template '" + name + "' does not exist.");
+			handler.errln("ERROR: Engine template '" + name + "' does not exist.");
 			return ERROR_NOT_REMOVED;
 		}
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(DoomyCommon.prompt(out, in, "Are you sure that you want to remove template '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(handler.prompt("Are you sure that you want to remove template '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		
 		if (!mgr.removeTemplate(name))
 		{
-			err.println("ERROR: Engine template '" + name + "' could not be removed.");
+			handler.errln("ERROR: Engine template '" + name + "' could not be removed.");
 			return ERROR_NOT_REMOVED;
 		}
 		
-		out.println("Removed engine template '" + name + "'.");
+		handler.outln("Removed engine template '" + name + "'.");
 		return ERROR_NONE;
 	}
 

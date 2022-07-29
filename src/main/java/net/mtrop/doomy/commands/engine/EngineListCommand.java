@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 
@@ -23,12 +22,12 @@ public class EngineListCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		Engine[] records = EngineManager.get().getAllEngines(phrase);
 		for (int i = 0; i < records.length; i++)
-			out.println(records[i].name);
-		out.println(records.length + " engines found.");
+			handler.outln(records[i].name);
+		handler.outln(records.length + " engines found.");
 		return ERROR_NONE;
 	}
 

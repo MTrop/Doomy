@@ -2,11 +2,10 @@ package net.mtrop.doomy.commands.wad.source;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 
@@ -37,7 +36,7 @@ public class WADSourceListCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WAD[] records = blankOnly 
 			? WADManager.get().getAllWADsWithNoSource(phrase) 
@@ -49,12 +48,12 @@ public class WADSourceListCommand implements DoomyCommand
 			for (int i = 0; i < records.length; i++)
 				len = Math.max(records[i].name.length() + 1, len);
 			String format = "%-" + len + "s %s\n";
-			out.printf(format, "Name", "Source");
-			out.printf(format, "====", "======");
+			handler.outf(format, "Name", "Source");
+			handler.outf(format, "====", "======");
 			for (int i = 0; i < records.length; i++)
-				out.printf(format, records[i].name, records[i].sourceUrl != null ? records[i].sourceUrl : "");
+				handler.outf(format, records[i].name, records[i].sourceUrl != null ? records[i].sourceUrl : "");
 		}
-		out.println(records.length + " WADs found.");
+		handler.outln(records.length + " WADs found.");
 		return ERROR_NONE;
 	}
 

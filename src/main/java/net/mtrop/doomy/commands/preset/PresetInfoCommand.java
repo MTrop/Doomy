@@ -1,13 +1,12 @@
 package net.mtrop.doomy.commands.preset;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.PresetInfo;
 
@@ -28,7 +27,7 @@ public class PresetInfoCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		PresetManager mgr = PresetManager.get();
 		
@@ -47,34 +46,34 @@ public class PresetInfoCommand implements DoomyCommand
 			}
 			else
 			{
-				err.println("ERROR: Hash '" + name + "' matches more than one preset.");
+				handler.errln("ERROR: Hash '" + name + "' matches more than one preset.");
 				return ERROR_NOT_FOUND;
 			}
 		}
 		else
 		{
-			err.println("ERROR: '" + name + "' does not match a preset name nor hash.");
+			handler.errln("ERROR: '" + name + "' does not match a preset name nor hash.");
 			return ERROR_NOT_FOUND;
 		}
 
-		out.println("Preset name:   " + preset.name);
-		out.println("Preset hash:   " + preset.hash);
-		out.println("Preset engine: " + preset.engineName);
+		handler.outln("Preset name:   " + preset.name);
+		handler.outln("Preset hash:   " + preset.hash);
+		handler.outln("Preset engine: " + preset.engineName);
 		if (preset.iwadName != null)
-			out.println("Preset IWAD:   " + preset.iwadName);
+			handler.outln("Preset IWAD:   " + preset.iwadName);
 		if (preset.wads.length > 0)
 		{
 			String wadliststr = Arrays.toString(preset.wads);
-			out.println("Preset WADs:   " + wadliststr.substring(1, wadliststr.length() - 1));
+			handler.outln("Preset WADs:   " + wadliststr.substring(1, wadliststr.length() - 1));
 		}
 		
 		File presetDir = new File(DoomyEnvironment.getPresetDirectoryPath(preset.hash));
 		
-		out.println("    Directory: " + presetDir.getAbsolutePath());
+		handler.outln("    Directory: " + presetDir.getAbsolutePath());
 		
 		if (presetDir.exists()) for (File f : presetDir.listFiles())
 		{
-			out.println("        " + f.getPath() + ", " + f.length() + " bytes");
+			handler.outln("        " + f.getPath() + ", " + f.length() + " bytes");
 		}
 		
 		return ERROR_NONE;

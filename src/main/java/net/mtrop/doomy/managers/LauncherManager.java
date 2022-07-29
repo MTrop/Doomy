@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -14,6 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.PresetManager.Preset;
@@ -180,10 +180,10 @@ public final class LauncherManager
 		}
 	}
 
-	private static File tempFileCopy(PrintStream out, File sourcePath, File tempDirectory, Deque<File> cleanupList, boolean dosBox) throws LaunchException
+	private static File tempFileCopy(IOHandler handler, File sourcePath, File tempDirectory, Deque<File> cleanupList, boolean dosBox) throws LaunchException
 	{
 		File outFile = new File(tempDirectory + File.separator + sourcePath.getName());
-		out.println("Copying "+sourcePath.getName()+"...");
+		handler.outln("Copying "+sourcePath.getName()+"...");
 		try (FileInputStream fis = new FileInputStream(sourcePath); FileOutputStream fos = new FileOutputStream(outFile))
 		{
 			IOUtils.relay(fis, fos, 8192);
@@ -224,14 +224,14 @@ public final class LauncherManager
 		return outList;
 	}
 
-	private static void setUpWADs(PrintStream out, LaunchContext context, Long iwadId, long[] wadIds, File tempDirectory) throws LaunchException
+	private static void setUpWADs(IOHandler handler, LaunchContext context, Long iwadId, long[] wadIds, File tempDirectory) throws LaunchException
 	{
 		if (iwadId != null)
 		{
 			File iwadPath = new File(IWADManager.get().getIWAD(iwadId).path);
 			// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
 			if (iwadPath.isAbsolute() || context.dosboxExecutable != null)
-				context.iwadFile = tempFileCopy(out, iwadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null);
+				context.iwadFile = tempFileCopy(handler, iwadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null);
 			else
 				context.iwadFile = iwadPath;
 		}
@@ -246,7 +246,7 @@ public final class LauncherManager
 			{
 				// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
 				if (wadPath.isAbsolute() || context.dosboxExecutable != null)
-					context.wads.add(tempFileCopy(out, wadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null));
+					context.wads.add(tempFileCopy(handler, wadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null));
 				else
 					context.wads.add(wadPath);
 			}
@@ -254,7 +254,7 @@ public final class LauncherManager
 			{
 				// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
 				if (wadPath.isAbsolute() || context.dosboxExecutable != null)
-					context.dehs.add(tempFileCopy(out, wadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null));
+					context.dehs.add(tempFileCopy(handler, wadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null));
 				else
 					context.dehs.add(wadPath);
 			}
@@ -265,7 +265,7 @@ public final class LauncherManager
 					UnzipSet uzs = new UnzipSet(wadPath, tempDirectory);
 					List<File> unzipped; 
 					
-					out.println("Extract WADs...");
+					handler.outln("Extract WADs...");
 					unzipped = uzs.unzipAll(WAD_ZIPFILTER);
 					for (File f : unzipped)
 					{
@@ -275,7 +275,7 @@ public final class LauncherManager
 							context.wads.add(f);
 					}
 					
-					out.println("Extract DEHs...");
+					handler.outln("Extract DEHs...");
 					unzipped = uzs.unzipAll(DEH_ZIPFILTER);
 					for (File f : unzipped)
 					{
@@ -346,15 +346,14 @@ public final class LauncherManager
 
 	/**
 	 * Runs a preset.
-	 * @param out 
-	 * @param err 
+	 * @param handler the handler to use.
 	 * @param preset the preset to run.
 	 * @param extraArgs the extra literal args to pass.
 	 * @param skipCleanup if true, skip temp directory cleanup.
 	 * @return the return code from the program.
 	 * @throws LaunchException 
 	 */
-	public static int run(PrintStream out, PrintStream err, Preset preset, String[] extraArgs, boolean skipCleanup) throws LaunchException
+	public static int run(IOHandler handler, Preset preset, String[] extraArgs, boolean skipCleanup) throws LaunchException
 	{
 		EngineManager engineManager = EngineManager.get();
 		EngineConfigManager engineSettingsManager = EngineConfigManager.get();
@@ -372,8 +371,8 @@ public final class LauncherManager
 		LaunchContext context = new LaunchContext();
 		setExecutables(context, settings);
 		setDirectories(context, preset, settings);
-		out.println("Prepare WADS...");
-		setUpWADs(out, context, preset.iwadId, preset.wadIds, tempDirectory);
+		handler.outln("Prepare WADS...");
+		setUpWADs(handler, context, preset.iwadId, preset.wadIds, tempDirectory);
 		
 		int retval;
 		
@@ -389,22 +388,22 @@ public final class LauncherManager
 			// Pre-Launch (copy screenshots, demos)
 			if (settings.saveDirectorySwitch == null && settings.saveGameRegex != null)
 			{
-				out.println("Copying save files...");
+				handler.outln("Copying save files...");
 				copyMatchingFiles(presetDirectory, engineDir, false, createFileNamePatternFilter(settings.saveGameRegex));
 			}
 			if (settings.screenshotDirectorySwitch == null && settings.screenshotRegex != null)
 			{
-				out.println("Copying screenshot files...");
+				handler.outln("Copying screenshot files...");
 				copyMatchingFiles(presetDirectory, engineDir, false, createFileNamePatternFilter(settings.screenshotRegex));
 			}
 			if (settings.demoRegex != null)
 			{
-				out.println("Copying demo files...");
+				handler.outln("Copying demo files...");
 				copyMatchingFiles(presetDirectory, engineDir, false, createFileNamePatternFilter(settings.demoRegex));
 			}
 			
 			// Launch.
-			out.println("Launching...");
+			handler.outln("Launching...");
 			Instance<Integer> process; 
 			if (context.dosboxExecutable != null)
 			{
@@ -440,17 +439,17 @@ public final class LauncherManager
 			// Post-Launch (copy screenshots, demos)
 			if (settings.saveDirectorySwitch == null && settings.saveGameRegex != null)
 			{
-				out.println("Copying save files...");
+				handler.outln("Copying save files...");
 				copyMatchingFiles(engineDir, presetDirectory, true, createFileNamePatternFilter(settings.saveGameRegex));
 			}
 			if (settings.screenshotDirectorySwitch == null && settings.screenshotRegex != null)
 			{
-				out.println("Copying screenshot files...");
+				handler.outln("Copying screenshot files...");
 				copyMatchingFiles(engineDir, presetDirectory, true, createFileNamePatternFilter(settings.screenshotRegex));
 			}
 			if (settings.demoRegex != null)
 			{
-				out.println("Copying demo files...");
+				handler.outln("Copying demo files...");
 				copyMatchingFiles(engineDir, presetDirectory, true, createFileNamePatternFilter(settings.demoRegex));
 			}
 		}
@@ -459,7 +458,7 @@ public final class LauncherManager
 			// Temp Cleanup.
 			if (!skipCleanup)
 			{
-				out.println("Cleaning up temp...");
+				handler.outln("Cleaning up temp...");
 				for (UnzipSet uzs : context.zipSets)
 					uzs.cleanUp();
 				for (File f : context.cleanup)

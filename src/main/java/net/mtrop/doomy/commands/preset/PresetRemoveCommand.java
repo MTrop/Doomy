@@ -2,12 +2,10 @@ package net.mtrop.doomy.commands.preset;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.Preset;
 
@@ -40,7 +38,7 @@ public class PresetRemoveCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		PresetManager mgr = PresetManager.get();
 		
@@ -59,30 +57,30 @@ public class PresetRemoveCommand implements DoomyCommand
 			}
 			else
 			{
-				err.println("ERROR: Hash '" + name + "' matches more than one preset.");
+				handler.errln("ERROR: Hash '" + name + "' matches more than one preset.");
 				return ERROR_NOT_FOUND;
 			}
 			
 		}
 		else
 		{
-			err.println("ERROR: '" + name + "' does not match a preset name nor hash.");
+			handler.errln("ERROR: '" + name + "' does not match a preset name nor hash.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(DoomyCommon.prompt(out, in, "Are you sure that you want to remove preset '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(handler.prompt("Are you sure that you want to remove preset '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		
 		if (!mgr.deletePresetById(preset.id))
 		{
-			err.println("ERROR: Preset '" + preset.name + "' could not be removed.");
+			handler.errln("ERROR: Preset '" + preset.name + "' could not be removed.");
 			return ERROR_NOT_REMOVED;
 		}
 		
-		out.println("Removed preset '" + name + "'.");
+		handler.outln("Removed preset '" + name + "'.");
 		return ERROR_NONE;
 	}
 

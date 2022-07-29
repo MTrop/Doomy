@@ -2,11 +2,10 @@ package net.mtrop.doomy.commands.preset;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.LauncherManager;
 import net.mtrop.doomy.managers.LauncherManager.LaunchException;
 import net.mtrop.doomy.managers.PresetManager;
@@ -57,7 +56,7 @@ public class PresetRunCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		PresetManager mgr = PresetManager.get();
 		
@@ -76,20 +75,20 @@ public class PresetRunCommand implements DoomyCommand
 			}
 			else
 			{
-				err.println("ERROR: Hash '" + name + "' matches more than one preset.");
+				handler.errln("ERROR: Hash '" + name + "' matches more than one preset.");
 				return ERROR_NOT_FOUND;
 			}
 		}
 		else
 		{
-			err.println("ERROR: '" + name + "' does not match a preset name nor hash.");
+			handler.errln("ERROR: '" + name + "' does not match a preset name nor hash.");
 			return ERROR_NOT_FOUND;
 		}
 
 		try {
-			return LauncherManager.run(out, err, preset, additionalArgs, skipCleanup);
+			return LauncherManager.run(handler, preset, additionalArgs, skipCleanup);
 		} catch (LaunchException e) {
-			err.println("ERROR: " + e.getMessage());
+			handler.errln("ERROR: " + e.getMessage());
 			return ERROR_LAUNCH_ERROR;
 		}
 	}

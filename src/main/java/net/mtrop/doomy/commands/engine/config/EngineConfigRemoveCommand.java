@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine.config;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineConfigManager;
 import net.mtrop.doomy.managers.EngineManager;
 
@@ -29,11 +28,11 @@ public class EngineConfigRemoveCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		if (!EngineManager.get().containsEngine(engine))
 		{
-			err.println("ERROR: No such engine: " + engine);
+			handler.errln("ERROR: No such engine: " + engine);
 			return ERROR_NOT_FOUND;
 		}
 
@@ -41,17 +40,17 @@ public class EngineConfigRemoveCommand implements DoomyCommand
 		
 		if (!config.containsSetting(engine, name))
 		{
-			err.println("ERROR: Could not remove engine setting: '" + name + "'. It does not exist.");
+			handler.errln("ERROR: Could not remove engine setting: '" + name + "'. It does not exist.");
 			return ERROR_NOT_REMOVED;
 		}
 		
 		if (!config.removeSetting(engine, name))
 		{
-			err.println("ERROR: Could not remove engine setting: '" + name + "'. An error may have occurred.");
+			handler.errln("ERROR: Could not remove engine setting: '" + name + "'. An error may have occurred.");
 			return ERROR_NOT_REMOVED;
 		}
 		
-		out.println("Removed engine setting: " + name);
+		handler.outln("Removed engine setting: " + name);
 		return ERROR_NONE;
 	}
 

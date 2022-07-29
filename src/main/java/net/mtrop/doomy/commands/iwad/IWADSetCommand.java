@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.iwad;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.IWADManager.IWAD;;
 
@@ -29,19 +28,19 @@ public class IWADSetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		IWADManager manager = IWADManager.get();
 		
 		if (!manager.setIWADPath(name, path))
 		{
-			err.println("ERROR: Could not set IWAD path for '" + name + "'.");
+			handler.errln("ERROR: Could not set IWAD path for '" + name + "'.");
 			return ERROR_NOT_UPDATED;
 		}
 		else
 		{
 			IWAD readValue = manager.getIWAD(name);
-			out.println("IWAD '" + name + "' is now '" + readValue.path + "'");
+			handler.outln("IWAD '" + name + "' is now '" + readValue.path + "'");
 		}
 		
 		return ERROR_NONE;

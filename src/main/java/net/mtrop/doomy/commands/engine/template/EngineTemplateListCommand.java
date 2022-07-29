@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine.template;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineTemplateManager;
 import net.mtrop.doomy.managers.EngineTemplateManager.EngineTemplate;
 
@@ -23,12 +22,12 @@ public class EngineTemplateListCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		EngineTemplate[] records = EngineTemplateManager.get().getAllTemplates(phrase);
 		for (int i = 0; i < records.length; i++)
-			out.println(records[i].name);
-		out.println(records.length + " templates found.");
+			handler.outln(records[i].name);
+		handler.outln(records.length + " templates found.");
 		return ERROR_NONE;
 	}
 

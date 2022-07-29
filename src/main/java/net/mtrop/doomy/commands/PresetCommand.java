@@ -1,11 +1,10 @@
 package net.mtrop.doomy.commands;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.IOHandler;
 
 /**
  * A command that prints the preset help output.
@@ -22,12 +21,12 @@ public class PresetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		if (badCommand != null)
-			err.println("ERROR: Unknown command: " + badCommand);
+			handler.errln("ERROR: Unknown command: " + badCommand);
 			
-		DoomyCommon.help(out, PRESET);
+		DoomyCommon.help(handler, PRESET);
 		return ERROR_NONE;
 	}
 

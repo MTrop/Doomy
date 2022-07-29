@@ -2,13 +2,12 @@ package net.mtrop.doomy.commands.run;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.LauncherManager;
@@ -131,7 +130,7 @@ public class RunCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		long engineId;
 		Long iwadId;
@@ -140,7 +139,7 @@ public class RunCommand implements DoomyCommand
 		Engine e;
 		if ((e = EngineManager.get().getEngine(engine)) == null)
 		{
-			err.println("ERROR: Engine '" + engine + "' not found.");
+			handler.errln("ERROR: Engine '" + engine + "' not found.");
 			return ERROR_NOT_FOUND;
 		}
 		else
@@ -153,7 +152,7 @@ public class RunCommand implements DoomyCommand
 		{
 			if ((iw = IWADManager.get().getIWAD(iwad)) == null)
 			{
-				err.println("ERROR: IWAD '" + iwad + "' not found.");
+				handler.errln("ERROR: IWAD '" + iwad + "' not found.");
 				return ERROR_NOT_FOUND;
 			}
 			else
@@ -172,7 +171,7 @@ public class RunCommand implements DoomyCommand
 			WAD w;
 			if ((w = WADManager.get().getWAD(wn)) == null)
 			{
-				err.println("ERROR: WAD '" + wn + "' not found.");
+				handler.errln("ERROR: WAD '" + wn + "' not found.");
 				return ERROR_NOT_FOUND;
 			}
 			else
@@ -215,26 +214,26 @@ public class RunCommand implements DoomyCommand
 
 			if (presetManager.getPresetByName(name) != null)
 			{
-				err.println("ERROR: Preset already exists called '" + name + "'.");
+				handler.errln("ERROR: Preset already exists called '" + name + "'.");
 				return ERROR_NOT_ADDED;
 			}
 			
 			Long pid;
 			if ((pid = presetManager.addPreset(name, engineId, iwadId, wadIds)) == null)
 			{
-				err.println("ERROR: Could not add preset.");
+				handler.errln("ERROR: Could not add preset.");
 				return ERROR_NOT_ADDED;
 			}
 			
 			preset = presetManager.getPreset(pid);
 			
-			out.println("Created preset named '" + name + "'.");
+			handler.outln("Created preset named '" + name + "'.");
 		}
 		
 		try {
-			return LauncherManager.run(out, err, preset, additionalArgs, skipCleanup);
+			return LauncherManager.run(handler, preset, additionalArgs, skipCleanup);
 		} catch (LaunchException ex) {
-			err.println("ERROR: " + ex.getMessage());
+			handler.errln("ERROR: " + ex.getMessage());
 			return ERROR_LAUNCH_ERROR;
 		}
 	}

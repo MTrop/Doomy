@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.config;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.ConfigManager;
 
 /**
@@ -24,18 +23,18 @@ public class ConfigGetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		String value = ConfigManager.get().getValue(name);
 		
 		if (value == null)
 		{
-			err.println("ERROR: No such setting: " + name);
+			handler.errln("ERROR: No such setting: " + name);
 			return ERROR_NOT_FOUND;
 		}
 		else
 		{
-			out.println(value);
+			handler.outln(value);
 		}
 		
 		return ERROR_NONE;

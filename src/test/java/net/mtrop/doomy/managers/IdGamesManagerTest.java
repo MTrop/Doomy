@@ -3,6 +3,7 @@ package net.mtrop.doomy.managers;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesAboutResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesComicResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileResponse;
@@ -22,6 +23,6 @@ public final class IdGamesManagerTest
 		IdGamesComicResponse resp3 = manager.comic();
 		IdGamesFileResponse resp4 = manager.getById(15156);
 		IdGamesSearchResponse resp5 = manager.searchByTextFile("mtrop", SortType.DATE, SortDirection.ASC);
-		System.out.println();
+		IOHandler.stdio().outln();
 	}
 }

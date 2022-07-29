@@ -2,17 +2,15 @@ package net.mtrop.doomy.commands.idgames.search;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.DownloadManager;
 import net.mtrop.doomy.managers.IdGamesManager;
 import net.mtrop.doomy.managers.WADManager;
@@ -156,13 +154,11 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 	
 	/**
 	 * Downloads a file.
-	 * @param out the standard out stream.
-	 * @param err the error out stream.
-	 * @param in the buffered input stream reader to use.
+	 * @param handler the handler to use.
 	 * @param idGamesFileId the idGames file id.
 	 * @return command return code.
 	 */
-	protected int download(final PrintStream out, final PrintStream err, final BufferedReader in, long idGamesFileId) 
+	protected int download(IOHandler handler, long idGamesFileId) 
 	{
 		IdGamesManager idgm = IdGamesManager.get();
 		
@@ -170,23 +166,23 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 		try {
 			response = idgm.getById(idGamesFileId);
 		} catch (SocketTimeoutException e) {
-			err.println("ERROR: Call to idGames timed out.");
+			handler.errln("ERROR: Call to idGames timed out.");
 			return ERROR_SOCKET_TIMEOUT;
 		} catch (IOException e) {
-			err.println("ERROR: I/O error on call to idGames.");
+			handler.errln("ERROR: I/O error on call to idGames.");
 			return ERROR_IO_ERROR;
 		}
 		
 		if (response.error != null)
 		{
-			err.println("ERROR: Error from idGames: " + response.error);
+			handler.errln("ERROR: Error from idGames: " + response.error);
 			return ERROR_SERVICE_ERROR;
 		}
 		
 		// fetch text file and print.
 		if (!download)
 		{
-			out.println(response.content.textfile.replace("\t", "       "));
+			handler.outln(response.content.textfile.replace("\t", "       "));
 			return ERROR_NONE;
 		}
 		
@@ -201,14 +197,14 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 			while (wadmgr.containsWAD(name))
 				name = basename + (next++);
 			
-			String input = DoomyCommon.prompt(out, in, "Add to WAD database as (press ENTER for \"" + name +"\"):");
+			String input = handler.prompt("Add to WAD database as (press ENTER for \"" + name +"\"):");
 			if (!input.isEmpty())
 				name = input;
 		}
 		
 		if (wadmgr.containsWAD(name))
 		{
-			err.println("ERROR: WAD entry '" + name + "' already exists.");
+			handler.errln("ERROR: WAD entry '" + name + "' already exists.");
 			return ERROR_NOT_ADDED;
 		}
 
@@ -219,15 +215,15 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 		
 		if (downloadTargetFile.exists())
 		{
-			out.println("The target file, '" + downloadTarget + "', already exists.");
-			if (!"y".equals(DoomyCommon.prompt(out, in, "Overwrite (Y/N)?")))
+			handler.outln("The target file, '" + downloadTarget + "', already exists.");
+			if (!"y".equals(handler.prompt("Overwrite (Y/N)?")))
 			{
-				out.println("Aborted add.");
+				handler.outln("Aborted add.");
 				return ERROR_NONE;
 			}
 		}
 		
-		out.println("Connecting to idGames Mirror (" + idgm.getMirrorURL() + ")...");
+		handler.outln("Connecting to idGames Mirror (" + idgm.getMirrorURL() + ")...");
 
 		final long refdate = System.currentTimeMillis();
 
@@ -236,56 +232,56 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 			long timeMillis = System.currentTimeMillis() - refdate;
 			long speed = timeMillis > 0L ? cur / timeMillis * 1000L / 1024 : 0;
 			if (len < 0)
-				out.printf("\rDownloading: %d (%d KB/s)...", cur, speed);
+				handler.outf("\rDownloading: %d (%d KB/s)...", cur, speed);
 			else
-				out.printf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
+				handler.outf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
 		}));
 
 		if (instance.getException() != null)
 		{
 			Throwable e = instance.getException();
-			err.println("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			handler.errln("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return ERROR_IO_ERROR;
 		}
 
-		out.println("\nAdding to database as '" + name + "'...");
+		handler.outln("\nAdding to database as '" + name + "'...");
 
 		File downloadedFile = instance.result();
 
 		if (wadmgr.addWAD(name, downloadTarget, idgm.getMirrorURL() + uri) == null)
 		{
-			err.println("ERROR: Could not add WAD entry '" + name + "'.");
+			handler.errln("ERROR: Could not add WAD entry '" + name + "'.");
 			downloadedFile.delete(); // cleanup
 			return ERROR_NOT_ADDED;
 		}
 
 		if (downloadTargetFile.exists())
 		{
-			out.println("Removing old file...");
+			handler.outln("Removing old file...");
 			if (!downloadTargetFile.delete())
 			{
-				err.println("ERROR: Could not delete old file.");
+				handler.errln("ERROR: Could not delete old file.");
 				downloadedFile.delete(); // cleanup
 				wadmgr.removeWAD(name);
 				return ERROR_NOT_ADDED;
 			}
 		}
 
-		out.println("Finalizing download...");
+		handler.outln("Finalizing download...");
 
 		if (!downloadedFile.renameTo(downloadTargetFile))
 		{
-			err.println("ERROR: Could not move downloaded file.");
+			handler.errln("ERROR: Could not move downloaded file.");
 			wadmgr.removeWAD(name); // cleanup
 			return ERROR_NOT_ADDED;
 		}
 
-		out.println("Done.");
+		handler.outln("Done.");
 		return ERROR_NONE;
 	}
 
 	@Override
-	public int call(final PrintStream out, final PrintStream err, final BufferedReader in) throws Exception
+	public int call(IOHandler handler) throws Exception
 	{
 		int selectedLimit = Math.min(limit != null ? limit : MAX_LIMIT, MAX_LIMIT);
 		IdGamesSearchResponse searchResponse = search(query, selectedLimit);
@@ -295,7 +291,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 
 		if (searchResponse.warning != null)
 		{
-			out.println("idGames: " + searchResponse.warning.type + ": " + searchResponse.warning.message);
+			handler.outln("idGames: " + searchResponse.warning.type + ": " + searchResponse.warning.message);
 			if (searchResponse.content == null)
 				return ERROR_NONE;
 		}
@@ -323,29 +319,29 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 			String format = "%2d | %-" + titlelen + "s | %-" + pathlen + "s\n";
 			
 			for (int i = 0; i < results.length; i++)
-				out.printf(format, i + 1, ObjectUtils.isNull(results[i].title, ""), results[i].dir + results[i].filename);
+				handler.outf(format, i + 1, ObjectUtils.isNull(results[i].title, ""), results[i].dir + results[i].filename);
 			
 			if (results.length > 1)
 			{
-				String input = DoomyCommon.prompt(out, in, "Select which result (1-" + results.length + ")?");
+				String input = handler.prompt("Select which result (1-" + results.length + ")?");
 				if (input.isEmpty())
 				{
-					err.println("ERROR: No input.");
+					handler.errln("ERROR: No input.");
 					return ERROR_BAD_ARGUMENT;
 				}
 				try {
 					resultNumber = Integer.parseInt(input);
 				} catch (NumberFormatException e) {
-					err.println("ERROR: Not a number: " + input);
+					handler.errln("ERROR: Not a number: " + input);
 					return ERROR_BAD_ARGUMENT;
 				}
 			}
 			else
 			{
-				String input = DoomyCommon.prompt(out, in, "One result. Is this OK (Y/N)?");
+				String input = handler.prompt("One result. Is this OK (Y/N)?");
 				if (input != null && !input.substring(0, 1).equalsIgnoreCase("y"))
 				{
-					out.println("Aborted add.");
+					handler.outln("Aborted add.");
 					return ERROR_NONE;
 				}
 				resultNumber = 1;
@@ -354,7 +350,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 		
 		if (resultNumber < 1 || resultNumber > results.length)
 		{
-			err.println("ERROR: Chosen result value out of range (1 - " + results.length + ").");
+			handler.errln("ERROR: Chosen result value out of range (1 - " + results.length + ").");
 			return ERROR_BAD_ARGUMENT;
 		}
 		
@@ -362,10 +358,10 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 
 		if (download == null)
 		{
-			String input = DoomyCommon.prompt(out, in, "Download or Text (D/T)?");
+			String input = handler.prompt("Download or Text (D/T)?");
 			if (input == null || input.isEmpty())
 			{
-				err.println("ERROR: No input.");
+				handler.errln("ERROR: No input.");
 				return ERROR_BAD_ARGUMENT;
 			}
 			
@@ -377,12 +373,12 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 				download = false;
 			else
 			{
-				err.println("ERROR: Not D or T.");
+				handler.errln("ERROR: Not D or T.");
 				return ERROR_BAD_ARGUMENT;
 			}
 		}
 
-		return download(out, err, in, selected.id);
+		return download(handler, selected.id);
 	}
 
 }

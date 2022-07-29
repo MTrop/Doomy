@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineManager;
 
 /**
@@ -28,29 +27,29 @@ public class EngineRenameCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		EngineManager mgr = EngineManager.get();
 		
 		if (!mgr.containsEngine(name))
 		{
-			err.println("ERROR: Engine '" + name + "' does not exist.");
+			handler.errln("ERROR: Engine '" + name + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (mgr.containsEngine(newName))
 		{
-			err.println("ERROR: Engine '" + newName + "' already exists. Choose a different name.");
+			handler.errln("ERROR: Engine '" + newName + "' already exists. Choose a different name.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!mgr.renameEngine(name, newName))
 		{
-			err.println("ERROR: Engine '" + name + "' could not be renamed to '" + newName + "'.");
+			handler.errln("ERROR: Engine '" + name + "' could not be renamed to '" + newName + "'.");
 			return ERROR_NOT_RENAMED;
 		}
 
-		out.println("Renamed engine '" + name + "' to '" + newName + "'.");
+		handler.outln("Renamed engine '" + name + "' to '" + newName + "'.");
 		return ERROR_NONE;
 	}
 

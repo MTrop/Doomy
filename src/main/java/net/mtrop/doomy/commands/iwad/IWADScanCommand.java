@@ -1,15 +1,14 @@
 package net.mtrop.doomy.commands.iwad;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileFilter;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.struct.FileUtils;
 
@@ -87,13 +86,13 @@ public class IWADScanCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(final PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		File startDir = new File(path);
 		
 		if (!startDir.exists())
 		{
-			err.println("ERROR: Path '" + startDir.getPath() + "' not found.");
+			handler.errln("ERROR: Path '" + startDir.getPath() + "' not found.");
 			return ERROR_NOT_FOUND;
 		}
 		
@@ -101,17 +100,17 @@ public class IWADScanCommand implements DoomyCommand
 		AtomicInteger updated = new AtomicInteger(0);
 		
 		// Get count.
-		out.print("Finding IWADs.... 0");
+		handler.out("Finding IWADs.... 0");
 		DoomyCommon.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
 		{
 			IWADManager manager = IWADManager.get();
 			String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
 			if (manager.containsIWAD(name) && force)
-				out.print("\rFinding IWADs.... " + updated.incrementAndGet());
+				handler.out("\rFinding IWADs.... " + updated.incrementAndGet());
 			else if (!manager.containsIWAD(name))
-				out.print("\rFinding IWADs.... " + added.incrementAndGet());
+				handler.out("\rFinding IWADs.... " + added.incrementAndGet());
 		});
-		out.println();
+		handler.outln();
 		
 		int totalCount = added.get() + updated.get();
 		
@@ -121,7 +120,7 @@ public class IWADScanCommand implements DoomyCommand
 			AtomicInteger count = new AtomicInteger(0);
 			final String format = "\rAdding IWADs: %-" + (int)(Math.log10(totalCount) + 1.0) + "d of " + totalCount + " (%3d%%)...";
 	
-			out.printf(format, 0, 0);
+			handler.outf(format, 0, 0);
 			DoomyCommon.scanAndListen(startDir, recurse, IWADFILTER, (file) -> 
 			{
 				IWADManager manager = IWADManager.get();
@@ -130,25 +129,25 @@ public class IWADScanCommand implements DoomyCommand
 				{
 					manager.setIWADPath(name, file.getPath());
 					int c = count.incrementAndGet();
-					out.printf(format, c, (c * 100 / totalCount));
+					handler.outf(format, c, (c * 100 / totalCount));
 				}
 				else if (!manager.containsIWAD(name))
 				{
 					manager.addIWAD(name, file.getPath());
 					int c = count.incrementAndGet();
-					out.printf(format, c, (c * 100 / totalCount));
+					handler.outf(format, c, (c * 100 / totalCount));
 				}
 			});
-			out.println();
+			handler.outln();
 		}
 
 		if (added.get() > 0)
-			out.println("Added " + added + " IWADs.");
+			handler.outln("Added " + added + " IWADs.");
 		if (updated.get() > 0)
-			out.println("Updated " + updated + " IWADs.");
+			handler.outln("Updated " + updated + " IWADs.");
 
 		if (added.get() == 0 && updated.get() == 0)
-			out.println("No IWADs added/updated.");
+			handler.outln("No IWADs added/updated.");
 
 		return ERROR_NONE;
 	}

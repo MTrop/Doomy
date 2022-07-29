@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.config;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.ConfigManager;
 import net.mtrop.doomy.managers.ConfigManager.ConfigSettingEntry;
 
@@ -23,7 +22,7 @@ public class ConfigListCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		ConfigSettingEntry[] records = ConfigManager.get().getAllValues(phrase);
 		if (records.length > 0)
@@ -32,12 +31,12 @@ public class ConfigListCommand implements DoomyCommand
 			for (int i = 0; i < records.length; i++)
 				len = Math.max(records[i].name.length() + 1, len);
 			String format = "%-" + len + "s %s\n";
-			out.printf(format, "Name", "Value");
-			out.printf(format, "====", "=====");
+			handler.outf(format, "Name", "Value");
+			handler.outf(format, "====", "=====");
 			for (int i = 0; i < records.length; i++)
-				out.printf(format, records[i].name, records[i].value);
+				handler.outf(format, records[i].name, records[i].value);
 		}
-		out.println(records.length + " settings found.");
+		handler.outln(records.length + " settings found.");
 		return ERROR_NONE;
 	}
 

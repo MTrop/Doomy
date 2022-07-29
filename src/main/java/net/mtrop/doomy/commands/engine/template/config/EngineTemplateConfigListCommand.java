@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine.template.config;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineTemplateConfigManager;
 import net.mtrop.doomy.managers.EngineTemplateConfigManager.EngineTemplateSettingEntry;
 
@@ -27,13 +26,13 @@ public class EngineTemplateConfigListCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		EngineTemplateSettingEntry[] records = EngineTemplateConfigManager.get().getAllSettings(name, phrase);
 		
 		if (records == null)
 		{
-			out.println("Engine template '" + name + "' not found.");
+			handler.outln("Engine template '" + name + "' not found.");
 			return ERROR_NONE;
 		}
 
@@ -43,12 +42,12 @@ public class EngineTemplateConfigListCommand implements DoomyCommand
 			for (int i = 0; i < records.length; i++)
 				len = Math.max(records[i].name.length() + 1, len);
 			String format = "%-" + len + "s %s\n";
-			out.printf(format, "Name", "Value");
-			out.printf(format, "====", "=====");
+			handler.outf(format, "Name", "Value");
+			handler.outf(format, "====", "=====");
 			for (int i = 0; i < records.length; i++)
-				out.printf(format, records[i].name, records[i].value);
+				handler.outf(format, records[i].name, records[i].value);
 		}
-		out.println(records.length + " settings found.");
+		handler.outln(records.length + " settings found.");
 		return ERROR_NONE;
 	}
 

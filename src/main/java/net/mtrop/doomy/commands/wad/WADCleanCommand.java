@@ -2,13 +2,11 @@ package net.mtrop.doomy.commands.wad;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 
@@ -36,7 +34,7 @@ public class WADCleanCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WADManager manager = WADManager.get();
 		
@@ -54,7 +52,7 @@ public class WADCleanCommand implements DoomyCommand
 
 		if (count == 0)
 		{
-			out.println("No IWADs missing.");
+			handler.outln("No IWADs missing.");
 			return ERROR_NONE;
 		}
 
@@ -62,16 +60,16 @@ public class WADCleanCommand implements DoomyCommand
 		
 		if (!quiet)
 		{
-			String response = DoomyCommon.prompt(out, in, "Found " + count + " WADs with missing files. Remove them, or display (Y/N/D)?");
+			String response = handler.prompt("Found " + count + " WADs with missing files. Remove them, or display (Y/N/D)?");
 			if ("d".equalsIgnoreCase(response))
 			{
-				out.printf(format, "Name", "Path");
-				out.printf(format, "====", "====");
+				handler.outf(format, "Name", "Path");
+				handler.outf(format, "====", "====");
 				for (int i = 0; i < records.length; i++)
 				{
 					File file = new File(records[i].path);
 					if (!file.exists())
-						out.printf(format, records[i].name, records[i].path);
+						handler.outf(format, records[i].name, records[i].path);
 				}
 				return ERROR_NONE;
 			}
@@ -86,7 +84,7 @@ public class WADCleanCommand implements DoomyCommand
 				manager.removeWAD(records[i].name);
 		}
 		
-		out.println(count + " WADs removed.");
+		handler.outln(count + " WADs removed.");
 		return ERROR_NONE;
 	}
 

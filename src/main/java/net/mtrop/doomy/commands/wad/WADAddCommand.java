@@ -1,11 +1,10 @@
 package net.mtrop.doomy.commands.wad;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 
 /**
@@ -29,29 +28,29 @@ public class WADAddCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WADManager mgr = WADManager.get();
 		
 		if (mgr.containsWAD(name))
 		{
-			err.println("ERROR: WAD '" + name + "' already exists.");
+			handler.errln("ERROR: WAD '" + name + "' already exists.");
 			return ERROR_NOT_ADDED;
 		}
 		
 		if (!(new File(path)).exists())
 		{
-			err.println("ERROR: WAD '" + path + "' not found.");
+			handler.errln("ERROR: WAD '" + path + "' not found.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (mgr.addWAD(name, path) == null)
 		{
-			err.println("ERROR: WAD '" + name + "' could not be created.");
+			handler.errln("ERROR: WAD '" + name + "' could not be created.");
 			return ERROR_NOT_ADDED;
 		}
 		
-		out.println("Created WAD '" + name + "'.");
+		handler.outln("Created WAD '" + name + "'.");
 		return ERROR_NONE;
 	}
 

@@ -1,11 +1,10 @@
 package net.mtrop.doomy.commands;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyMain;
+import net.mtrop.doomy.IOHandler;
 
 /**
  * A command that prints the version and exits.
@@ -21,9 +20,9 @@ public class VersionCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
-		out.println(DoomyMain.VERSION);
+		handler.outln(DoomyMain.VERSION);
 		return ERROR_NONE;
 	}
 

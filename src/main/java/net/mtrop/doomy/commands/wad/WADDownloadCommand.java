@@ -1,15 +1,13 @@
 package net.mtrop.doomy.commands.wad;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.DownloadManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.struct.FileUtils;
@@ -34,13 +32,13 @@ public class WADDownloadCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		URL urlPath;
 		try {
 			urlPath = new URL(url);
 		} catch (MalformedURLException e) {
-			err.println("ERROR: Malformed URL.");
+			handler.errln("ERROR: Malformed URL.");
 			return ERROR_BAD_ARGUMENT;
 		}
 		
@@ -51,7 +49,7 @@ public class WADDownloadCommand implements DoomyCommand
 
 		if (wadmgr.containsWAD(name))
 		{
-			err.println("ERROR: WAD entry '" + name + "' already exists.");
+			handler.errln("ERROR: WAD entry '" + name + "' already exists.");
 			return ERROR_NOT_ADDED;
 		}
 
@@ -61,15 +59,15 @@ public class WADDownloadCommand implements DoomyCommand
 		
 		if (downloadTargetFile.exists())
 		{
-			out.println("The target file, '" + downloadTarget + "', already exists.");
-			if (!"y".equals(DoomyCommon.prompt(out, in, "Overwrite (Y/N)?")))
+			handler.outln("The target file, '" + downloadTarget + "', already exists.");
+			if (!"y".equals(handler.prompt("Overwrite (Y/N)?")))
 			{
-				out.println("Aborted add.");
+				handler.outln("Aborted add.");
 				return ERROR_NONE;
 			}
 		}
 		
-		out.println("Connecting (" + urlPath + ")...");
+		handler.outln("Connecting (" + urlPath + ")...");
 
 		final long refdate = System.currentTimeMillis();
 
@@ -78,51 +76,51 @@ public class WADDownloadCommand implements DoomyCommand
 			long timeMillis = System.currentTimeMillis() - refdate;
 			long speed = timeMillis > 0L ? cur / timeMillis * 1000L / 1024 : 0;
 			if (len < 0)
-				out.printf("\rDownloading: %d (%d KB/s)...", cur, speed);
+				handler.outf("\rDownloading: %d (%d KB/s)...", cur, speed);
 			else
-				out.printf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
+				handler.outf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
 		}));
 
 		if (instance.getException() != null)
 		{
 			Throwable e = instance.getException();
-			err.println("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			handler.errln("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return ERROR_IO_ERROR;
 		}
 
-		out.println("\nAdding to database as '" + name + "'...");
+		handler.outln("\nAdding to database as '" + name + "'...");
 
 		File downloadedFile = instance.result();
 
 		if (wadmgr.addWAD(name, downloadTarget, url) == null)
 		{
-			err.println("ERROR: Could not add WAD entry '" + name + "'.");
+			handler.errln("ERROR: Could not add WAD entry '" + name + "'.");
 			downloadedFile.delete(); // cleanup
 			return ERROR_NOT_ADDED;
 		}
 
 		if (downloadTargetFile.exists())
 		{
-			out.println("Removing old file...");
+			handler.outln("Removing old file...");
 			if (!downloadTargetFile.delete())
 			{
-				err.println("ERROR: Could not delete old file.");
+				handler.errln("ERROR: Could not delete old file.");
 				downloadedFile.delete(); // cleanup
 				wadmgr.removeWAD(name);
 				return ERROR_NOT_ADDED;
 			}
 		}
 
-		out.println("Finalizing download...");
+		handler.outln("Finalizing download...");
 
 		if (!downloadedFile.renameTo(downloadTargetFile))
 		{
-			err.println("ERROR: Could not move downloaded file.");
+			handler.errln("ERROR: Could not move downloaded file.");
 			wadmgr.removeWAD(name); // cleanup
 			return ERROR_NOT_ADDED;
 		}
 
-		out.println("Done.");
+		handler.outln("Done.");
 		return ERROR_NONE;
 	}
 

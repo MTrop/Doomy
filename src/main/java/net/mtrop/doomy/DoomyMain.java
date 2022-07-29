@@ -1,9 +1,5 @@
 package net.mtrop.doomy;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
@@ -27,13 +23,13 @@ public final class DoomyMain
 	/** Exit command. */
 	public static final String COMMAND_EXIT = "exit";
 
-	private static int executeCommand(Deque<String> arguments, PrintStream out, PrintStream err, BufferedReader in)
+	private static int executeCommand(Deque<String> arguments, IOHandler handler)
 	{
 		DoomyCommand command;
 		try {
 			command = DoomyCommand.getCommand(arguments);
 		} catch (BadCommandException e) {
-			err.println("ERROR: " + e.getMessage());
+			handler.errln("ERROR: " + e.getMessage());
 			return DoomyCommand.ERROR_BAD_COMMAND;
 		}
 		
@@ -41,12 +37,12 @@ public final class DoomyMain
 		
 		try {
 			command.init(arguments);
-			retval = command.call(out, err, in);
+			retval = command.call(handler);
 		} catch (BadArgumentException e) {
-			err.println("ERROR: " + e.getMessage());
+			handler.errln("ERROR: " + e.getMessage());
 			return DoomyCommand.ERROR_BAD_ARGUMENT;
 		} catch (Exception e) {
-			err.println("ERROR: " + e.getMessage());
+			handler.errln("ERROR: " + e.getMessage());
 			return DoomyCommand.ERROR_BAD_ARGUMENT;
 		}
 		
@@ -142,80 +138,76 @@ public final class DoomyMain
 		return out;
 	}
 	
-	private static int doShellLoop(PrintStream out, PrintStream err, BufferedReader in)
+	private static int doShellLoop(IOHandler handler)
 	{
 		String line;
-		DoomyCommon.splash(out, VERSION);
-		out.println("Type '" + COMMAND_EXIT + "' to exit.");
+		DoomyCommon.splash(handler, VERSION);
+		handler.outln("Type '" + COMMAND_EXIT + "' to exit.");
 		int returnValue = DoomyCommand.ERROR_NONE;
-		while ((line = DoomyCommon.prompt(out, in, "Doomy>")) != null)
+		while ((line = handler.prompt("Doomy>")) != null)
 		{
 			if (COMMAND_EXIT.equalsIgnoreCase(line))
 				break;
 			if (!line.isEmpty())
-				returnValue = executeCommand(parseInput(line), out, err, in);
+				returnValue = executeCommand(parseInput(line), handler);
 		}
 		return returnValue;
 	}
 	
-	private static int doScriptLoop(PrintStream out, PrintStream err, BufferedReader in)
+	private static int doScriptLoop(IOHandler handler)
 	{
 		String line;
 		int returnValue = DoomyCommand.ERROR_NONE;
-		try {
-			while ((line = in.readLine()) != null && returnValue == DoomyCommand.ERROR_NONE)
-			{
-				line = line.trim();
-				if (COMMAND_EXIT.equalsIgnoreCase(line))
-					break;
-				if (!line.isEmpty())
-					returnValue = executeCommand(parseInput(line), out, err, in);
-			}
-		} catch (IOException e) {
-			returnValue = DoomyCommand.ERROR_IO_ERROR;
+		while ((line = handler.readLine()) != null && returnValue == DoomyCommand.ERROR_NONE)
+		{
+			line = line.trim();
+			if (COMMAND_EXIT.equalsIgnoreCase(line))
+				break;
+			if (!line.isEmpty())
+				returnValue = executeCommand(parseInput(line), handler);
 		}
 		return returnValue;
 	}
 	
-	private static int runShell(PrintStream out, PrintStream err, BufferedReader in)
+	private static int runShell(IOHandler handler)
 	{
 		// Pre-warm DB connection.
 		DatabaseManager.get();
-		return doShellLoop(out, err, in);
+		return doShellLoop(handler);
 	}
 	
 	public static void main(String[] args) 
 	{
+		IOHandler handler = IOHandler.stdio();
+		
 		if (!DatabaseManager.databaseExists())
 		{
-			System.out.println("Preparing for first use...");
-			System.out.println("Creating database...");
+			handler.outln("Preparing for first use...");
+			handler.outln("Creating database...");
 			DatabaseManager.get();
-			System.out.println("Done.");
+			handler.outln("Done.");
 		}
 
-		BufferedReader in = new BufferedReader(new InputStreamReader(System.in));
-		
 		int returnValue = DoomyCommand.ERROR_NONE;
 		Deque<String> arguments = new LinkedList<String>(Arrays.asList(args));
 		
 		if (arguments.isEmpty())
 		{
-			returnValue = runShell(System.out, System.err, in);
+			returnValue = runShell(handler);
 		}
 		else if (DoomyCommand.matchArgument(arguments, SWITCH_SCRIPT))
 		{
 			// Pre-warm DB connection.
 			DatabaseManager.get();
-			returnValue = doScriptLoop(System.out, System.err, in);
+			returnValue = doScriptLoop(handler);
 		}
 		else
 		{
 			String arg = arguments.pollFirst();
 			if (arg == null)
-				returnValue = runShell(System.out, System.err, in);
+				returnValue = runShell(handler);
 			else
-				returnValue = executeCommand(arguments, System.out, System.err, in);
+				returnValue = executeCommand(arguments, handler);
 		}
 		
 		System.exit(returnValue);

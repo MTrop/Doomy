@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine.template;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineTemplateManager;
 
 /**
@@ -26,13 +25,13 @@ public class EngineTemplateAddCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		EngineTemplateManager mgr = EngineTemplateManager.get();
 		
 		if (mgr.containsTemplate(name))
 		{
-			err.println("ERROR: Engine template '" + name + "' already exists.");
+			handler.errln("ERROR: Engine template '" + name + "' already exists.");
 			return ERROR_NOT_ADDED;
 		}
 		
@@ -40,27 +39,27 @@ public class EngineTemplateAddCommand implements DoomyCommand
 		{
 			if (!mgr.containsTemplate(template))
 			{
-				err.println("ERROR: Source engine template '" + template + "' does not exist.");
+				handler.errln("ERROR: Source engine template '" + template + "' does not exist.");
 				return ERROR_NOT_FOUND;
 			}
 			
 			if (mgr.addTemplateFrom(name, template) == null)
 			{
-				err.println("ERROR: Engine template '" + name + "' could not be copied from '" + template + "'.");
+				handler.errln("ERROR: Engine template '" + name + "' could not be copied from '" + template + "'.");
 				return ERROR_NOT_ADDED;
 			}
 
-			out.println("Created engine template '" + name + "' from '" + template + "'.");
+			handler.outln("Created engine template '" + name + "' from '" + template + "'.");
 			return ERROR_NONE;
 		}
 		
 		if (mgr.addTemplate(name) == null)
 		{
-			err.println("ERROR: Engine template '" + name + "' could not be created.");
+			handler.errln("ERROR: Engine template '" + name + "' could not be created.");
 			return ERROR_NOT_ADDED;
 		}
 		
-		out.println("Created engine template '" + name + "'.");
+		handler.outln("Created engine template '" + name + "'.");
 		return ERROR_NONE;
 	}
 

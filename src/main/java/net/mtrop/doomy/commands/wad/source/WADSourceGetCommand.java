@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.wad.source;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 
@@ -25,18 +24,18 @@ public class WADSourceGetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WAD wad = WADManager.get().getWAD(name);
 		
 		if (wad == null)
 		{
-			err.println("ERROR: No such WAD: " + name);
+			handler.errln("ERROR: No such WAD: " + name);
 			return ERROR_NOT_FOUND;
 		}
 		else
 		{
-			out.println(wad.sourceUrl);
+			handler.outln(wad.sourceUrl);
 		}
 		
 		return ERROR_NONE;

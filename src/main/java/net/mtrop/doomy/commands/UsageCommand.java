@@ -1,12 +1,11 @@
 package net.mtrop.doomy.commands;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyMain;
+import net.mtrop.doomy.IOHandler;
 
 /**
  * A command that prints the basic usage and exits.
@@ -23,13 +22,13 @@ public class UsageCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		if (badCommand != null)
-			err.println("ERROR: Unknown command: " + badCommand);
+			handler.errln("ERROR: Unknown command: " + badCommand);
 			
-		DoomyCommon.splash(out, DoomyMain.VERSION);
-		DoomyCommon.usage(out);
+		DoomyCommon.splash(handler, DoomyMain.VERSION);
+		DoomyCommon.usage(handler);
 		return ERROR_NONE;
 	}
 

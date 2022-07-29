@@ -1,7 +1,5 @@
 package net.mtrop.doomy;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.commands.ConfigCommand;
@@ -389,12 +387,10 @@ public interface DoomyCommand
 
 	/**
 	 * Processes this command.
-	 * @param out the STDOUT stream.
-	 * @param err the STDERR stream.
-	 * @param in the STDIN stream.
+	 * @param handler the handler to use.
 	 * @return the return code from running the command.
 	 * @throws Exception
 	 */
-	int call(PrintStream out, PrintStream err, BufferedReader in) throws Exception;
+	int call(IOHandler handler) throws Exception;
 	
 }

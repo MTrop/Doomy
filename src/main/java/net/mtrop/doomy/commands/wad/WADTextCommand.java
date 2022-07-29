@@ -1,19 +1,17 @@
 package net.mtrop.doomy.commands.wad;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.io.PrintStream;
 import java.util.Deque;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.struct.IOUtils;
 import net.mtrop.doomy.struct.ObjectUtils;
 
 /**
@@ -33,19 +31,19 @@ public class WADTextCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WAD wad = WADManager.get().getWAD(name);
 		
 		if (wad == null)
 		{
-			err.println("ERROR: No such WAD: " + name);
+			handler.errln("ERROR: No such WAD: " + name);
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!(new File(wad.path)).exists())
 		{
-			err.println("ERROR: WAD '" + wad.path + "' not found. It should probably be removed.");
+			handler.errln("ERROR: WAD '" + wad.path + "' not found. It should probably be removed.");
 			return ERROR_NOT_FOUND;
 		}
 		
@@ -64,23 +62,23 @@ public class WADTextCommand implements DoomyCommand
 				{
 					try (InputStream textIn = zf.getInputStream(entry))
 					{
-						IOUtils.relay(textIn, out, 8192);
+						handler.relay(textIn);
 					} 
 					catch (Exception e) 
 					{
-						err.println("ERROR: " + e.getMessage());
+						handler.errln("ERROR: " + e.getMessage());
 						return ERROR_IO_ERROR;
 					} 
-					out.println();
+					handler.outln();
 				}
 				else
 				{
-					out.println("No text file called '" + textFileName + "' found.");
+					handler.outln("No text file called '" + textFileName + "' found.");
 				}
 			} 
 			catch (Exception e) 
 			{
-				err.println("ERROR: " + e.getMessage());
+				handler.errln("ERROR: " + e.getMessage());
 				return ERROR_IO_ERROR;
 			} 
 		}
@@ -88,14 +86,14 @@ public class WADTextCommand implements DoomyCommand
 		{
 			try (InputStream textIn = new FileInputStream(text))
 			{
-				IOUtils.relay(textIn, out, 8192);
+				handler.relay(textIn);
 			} 
 			catch (Exception e) 
 			{
-				err.println("ERROR: " + e.getMessage());
+				handler.errln("ERROR: " + e.getMessage());
 				return ERROR_IO_ERROR;
 			} 
-			out.println();
+			handler.outln();
 		}
 		
 		return ERROR_NONE;

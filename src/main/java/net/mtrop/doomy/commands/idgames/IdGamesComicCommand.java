@@ -1,12 +1,11 @@
 package net.mtrop.doomy.commands.idgames;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.net.SocketTimeoutException;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.IdGamesManager;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesComicResponse;
 
@@ -24,22 +23,22 @@ public class IdGamesComicCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		IdGamesComicResponse response;
 		try {
 			response = IdGamesManager.get().comic();
 		} catch (SocketTimeoutException e) {
-			err.println("ERROR: Call to idGames timed out.");
+			handler.errln("ERROR: Call to idGames timed out.");
 			return ERROR_SOCKET_TIMEOUT;
 		} catch (IOException e) {
-			err.println("ERROR: Could not read from idGames: " + e.getMessage());
+			handler.errln("ERROR: Could not read from idGames: " + e.getMessage());
 			return ERROR_IO_ERROR;
 		}
 		
-		out.println("Received from idGames:");
-		out.println("Quote: " + response.content.quote);
-		out.println("Order: " + response.content.order);
+		handler.outln("Received from idGames:");
+		handler.outln("Quote: " + response.content.quote);
+		handler.outln("Order: " + response.content.order);
 		return ERROR_NONE;
 	}
 

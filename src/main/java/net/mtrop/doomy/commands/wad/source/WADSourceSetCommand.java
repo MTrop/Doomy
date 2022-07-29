@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.wad.source;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;;
 
@@ -29,19 +28,19 @@ public class WADSourceSetCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WADManager manager = WADManager.get();
 		
 		if (!manager.setWADSourceURL(name, url))
 		{
-			err.println("ERROR: Could not set WAD Source URL for '" + name + "'.");
+			handler.errln("ERROR: Could not set WAD Source URL for '" + name + "'.");
 			return ERROR_NOT_UPDATED;
 		}
 		else
 		{
 			WAD readValue = manager.getWAD(name);
-			out.println("WAD Source for '" + name + "' is now '" + readValue.sourceUrl + "'");
+			handler.outln("WAD Source for '" + name + "' is now '" + readValue.sourceUrl + "'");
 		}
 		
 		return ERROR_NONE;

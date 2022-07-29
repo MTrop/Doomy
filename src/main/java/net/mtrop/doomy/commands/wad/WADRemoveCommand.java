@@ -1,12 +1,10 @@
 package net.mtrop.doomy.commands.wad;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
-import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 
@@ -46,19 +44,19 @@ public class WADRemoveCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WADManager mgr = WADManager.get();
 		
 		if (!mgr.containsWAD(name))
 		{
-			err.println("ERROR: WAD '" + name + "' does not exist.");
+			handler.errln("ERROR: WAD '" + name + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!quiet)
 		{
-			if (!"y".equalsIgnoreCase(DoomyCommon.prompt(out, in, "Are you sure that you want to remove WAD '" + name +"' (Y/N)?")))
+			if (!"y".equalsIgnoreCase(handler.prompt("Are you sure that you want to remove WAD '" + name +"' (Y/N)?")))
 				return ERROR_NONE;
 		}
 		
@@ -66,17 +64,17 @@ public class WADRemoveCommand implements DoomyCommand
 		
 		if (!mgr.removeWAD(name))
 		{
-			err.println("ERROR: WAD '" + name + "' could not be removed.");
+			handler.errln("ERROR: WAD '" + name + "' could not be removed.");
 			return ERROR_NOT_REMOVED;
 		}
 
 		if (removeFile && wad.path != null)
 		{
 			if ((new File(wad.path)).delete())
-				out.println("Removed WAD file.");
+				handler.outln("Removed WAD file.");
 		}
 
-		out.println("Removed WAD '" + name + "'.");
+		handler.outln("Removed WAD '" + name + "'.");
 		return ERROR_NONE;
 	}
 

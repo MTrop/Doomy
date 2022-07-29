@@ -3,6 +3,8 @@ package net.mtrop.doomy.managers;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 
+import net.mtrop.doomy.IOHandler;
+
 public final class WadArchiveManagerTest
 {
 	@SuppressWarnings("unused")
@@ -13,6 +15,6 @@ public final class WadArchiveManagerTest
 		WadArchiveManager.WadseekerResult[] seekerResult = manager.getByName("dot");
 		WadArchiveManager.WadseekerResult[] seekerResult2 = manager.getByNameAndIWAD("dot", "doom2");
 		WadArchiveManager.WadseekerResult[] seekerResult3 = manager.getByNameAndPort("xexis", "zdoom");
-		System.out.println();
+		IOHandler.stdio().outln();
 	}
 }

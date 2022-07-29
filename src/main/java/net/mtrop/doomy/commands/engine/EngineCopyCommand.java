@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.engine;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineManager;
 
 /**
@@ -28,29 +27,29 @@ public class EngineCopyCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		EngineManager mgr = EngineManager.get();
 		
 		if (mgr.containsEngine(name))
 		{
-			err.println("ERROR: Engine '" + name + "' already exists.");
+			handler.errln("ERROR: Engine '" + name + "' already exists.");
 			return ERROR_NOT_ADDED;
 		}
 		
 		if (!mgr.containsEngine(engine))
 		{
-			err.println("ERROR: Source engine '" + engine + "' does not exist.");
+			handler.errln("ERROR: Source engine '" + engine + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (mgr.addEngineUsingEngine(name, engine) == null)
 		{
-			err.println("ERROR: Engine '" + name + "' could not be created from '" + engine + "'.");
+			handler.errln("ERROR: Engine '" + name + "' could not be created from '" + engine + "'.");
 			return ERROR_NOT_ADDED;
 		}
 
-		out.println("Created engine '" + name + "' from '" + engine + "'.");
+		handler.outln("Created engine '" + name + "' from '" + engine + "'.");
 		return ERROR_NONE;
 	}
 

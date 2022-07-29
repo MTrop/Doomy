@@ -1,12 +1,11 @@
 package net.mtrop.doomy.commands.wad;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyMain;
+import net.mtrop.doomy.IOHandler;
 
 /**
  * A command that prints the WAD help output and exits.
@@ -23,14 +22,14 @@ public class WADSourceCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		if (badCommand != null)
-			err.println("ERROR: Unknown command: " + badCommand);
+			handler.errln("ERROR: Unknown command: " + badCommand);
 			
 		if (badCommand == null)
-			DoomyCommon.splash(out, DoomyMain.VERSION);
-		DoomyCommon.help(out, WAD);
+			DoomyCommon.splash(handler, DoomyMain.VERSION);
+		DoomyCommon.help(handler, WAD);
 		return ERROR_NONE;
 	}
 

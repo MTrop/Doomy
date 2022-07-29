@@ -1,11 +1,10 @@
 package net.mtrop.doomy.commands.preset;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.PresetInfo;
 import net.mtrop.doomy.struct.ObjectUtils;
@@ -53,7 +52,7 @@ public class PresetListCommand implements DoomyCommand
 	}
 	
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		PresetInfo[] records = PresetManager.get().getAllPresetsByNameOrHash(phrase);
 		if (records.length > 0)
@@ -72,15 +71,15 @@ public class PresetListCommand implements DoomyCommand
 			}
 			
 			String format = "%-" + namelen + "s %-" + (hashlen + 3) + "s %-" + enginelen + "s %-" + iwadlen + "s %s\n";
-			out.printf(format, "Name", "Hash", "Engine", "IWAD", "Wads");
-			out.printf(format, "====", "====", "======", "====", "====");
+			handler.outf(format, "Name", "Hash", "Engine", "IWAD", "Wads");
+			handler.outf(format, "====", "====", "======", "====", "====");
 			for (int i = 0; i < records.length; i++)
 			{
 				String wadliststr = Arrays.toString(records[i].wads);
-				out.printf(format, records[i].name, records[i].hash.substring(0, hashlen) + "...", records[i].engineName, ObjectUtils.isNull(records[i].iwadName, ""), wadliststr.substring(1, wadliststr.length() - 1));
+				handler.outf(format, records[i].name, records[i].hash.substring(0, hashlen) + "...", records[i].engineName, ObjectUtils.isNull(records[i].iwadName, ""), wadliststr.substring(1, wadliststr.length() - 1));
 			}
 		}
-		out.println(records.length + " presets found.");
+		handler.outln(records.length + " presets found.");
 		return ERROR_NONE;
 	}
 

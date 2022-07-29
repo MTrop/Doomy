@@ -1,11 +1,10 @@
 package net.mtrop.doomy.commands.wad;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.DownloadManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
@@ -28,7 +27,7 @@ public class WADRedownloadCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		WADManager wadmgr = WADManager.get();
 
@@ -36,13 +35,13 @@ public class WADRedownloadCommand implements DoomyCommand
 		
 		if (wad == null)
 		{
-			err.println("ERROR: WAD entry '" + name + "' not found.");
+			handler.errln("ERROR: WAD entry '" + name + "' not found.");
 			return ERROR_NOT_FOUND;
 		}
 
 		if (wad.sourceUrl == null)
 		{
-			err.println("ERROR: WAD entry '" + name + "' does not have a remote address.");
+			handler.errln("ERROR: WAD entry '" + name + "' does not have a remote address.");
 			return ERROR_NOT_FOUND;
 		}
 		
@@ -50,7 +49,7 @@ public class WADRedownloadCommand implements DoomyCommand
 		File downloadTargetFile = new File(wad.path);
 		String downloadTempTarget = downloadTarget + ".temp";
 		
-		out.println("Connecting (" + wad.sourceUrl + ")...");
+		handler.outln("Connecting (" + wad.sourceUrl + ")...");
 
 		final long refdate = System.currentTimeMillis();
 
@@ -59,42 +58,42 @@ public class WADRedownloadCommand implements DoomyCommand
 			long timeMillis = System.currentTimeMillis() - refdate;
 			long speed = timeMillis > 0L ? cur / timeMillis * 1000L / 1024 : 0;
 			if (len < 0)
-				out.printf("\rDownloading: %d (%d KB/s)...", cur, speed);
+				handler.outf("\rDownloading: %d (%d KB/s)...", cur, speed);
 			else
-				out.printf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
+				handler.outf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
 		}));
 
 		if (instance.getException() != null)
 		{
 			Throwable e = instance.getException();
-			err.println("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+			handler.errln("ERROR: File download: " + e.getClass().getSimpleName() + ": " + e.getMessage());
 			return ERROR_IO_ERROR;
 		}
 
 		File downloadedFile = instance.result();
 
-		out.println();
+		handler.outln();
 
 		if (downloadTargetFile.exists())
 		{
-			out.println("Removing old file...");
+			handler.outln("Removing old file...");
 			if (!downloadTargetFile.delete())
 			{
-				err.println("ERROR: Could not delete old file.");
+				handler.errln("ERROR: Could not delete old file.");
 				downloadedFile.delete(); // cleanup
 				return ERROR_NOT_ADDED;
 			}
 		}
 
-		out.println("Finalizing download...");
+		handler.outln("Finalizing download...");
 
 		if (!downloadedFile.renameTo(downloadTargetFile))
 		{
-			err.println("ERROR: Could not move downloaded file.");
+			handler.errln("ERROR: Could not move downloaded file.");
 			return ERROR_NOT_ADDED;
 		}
 
-		out.println("Done.");
+		handler.outln("Done.");
 		return ERROR_NONE;
 	}
 

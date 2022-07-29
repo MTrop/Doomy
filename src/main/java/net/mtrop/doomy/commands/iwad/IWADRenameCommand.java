@@ -1,10 +1,9 @@
 package net.mtrop.doomy.commands.iwad;
 
-import java.io.BufferedReader;
-import java.io.PrintStream;
 import java.util.Deque;
 
 import net.mtrop.doomy.DoomyCommand;
+import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.IWADManager;
 
 /**
@@ -28,29 +27,29 @@ public class IWADRenameCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(PrintStream out, PrintStream err, BufferedReader in)
+	public int call(IOHandler handler)
 	{
 		IWADManager mgr = IWADManager.get();
 		
 		if (!mgr.containsIWAD(name))
 		{
-			err.println("ERROR: IWAD '" + name + "' does not exist.");
+			handler.errln("ERROR: IWAD '" + name + "' does not exist.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (mgr.containsIWAD(newName))
 		{
-			err.println("ERROR: Source IWAD '" + newName + "' already exists. Choose a different name.");
+			handler.errln("ERROR: Source IWAD '" + newName + "' already exists. Choose a different name.");
 			return ERROR_NOT_FOUND;
 		}
 		
 		if (!mgr.renameIWAD(name, newName))
 		{
-			err.println("ERROR: IWAD '" + name + "' could not be created from '" + newName + "'.");
+			handler.errln("ERROR: IWAD '" + name + "' could not be created from '" + newName + "'.");
 			return ERROR_NOT_RENAMED;
 		}
 
-		out.println("Renamed IWAD '" + name + "' to '" + newName + "'.");
+		handler.outln("Renamed IWAD '" + name + "' to '" + newName + "'.");
 		return ERROR_NONE;
 	}
 
