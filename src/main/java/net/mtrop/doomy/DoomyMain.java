@@ -203,7 +203,7 @@ public final class DoomyMain
 		}
 		else
 		{
-			String arg = arguments.pollFirst();
+			String arg = arguments.peekFirst();
 			if (arg == null)
 				returnValue = runShell(handler);
 			else

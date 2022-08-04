@@ -34,11 +34,14 @@
 	<property name="sqlite.lib.version" value="3.21.0.1" />
 	<property name="sqlite.jar" value="sqlite-jdbc-${sqlite.lib.version}.jar" />
 
+	<property name="flatlaf.lib.version" value="2.0.2" />
+	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
+
 	<!-- Project Info -->
 	
 	<property name="project.archive" value="doomy" />
 	<property name="project.javadoc.title" value="Doomy" />
-	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${sql.jar}${S}${dev.base}/${sqlite.jar}" />
+	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${sql.jar}${S}${dev.base}/${sqlite.jar}${S}${dev.base}/${flatlaf.jar}" />
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -70,6 +73,7 @@
 		<echo file="${build.versions.dir}/json.version" message="${json.lib.version}" />
 		<echo file="${build.versions.dir}/sql.version" message="${sql.lib.version}" />
 		<echo file="${build.versions.dir}/sqlite.version" message="${sqlite.lib.version}" />
+		<echo file="${build.versions.dir}/flatlaf.version" message="${flatlaf.lib.version}" />
 	</target>
 
 
@@ -129,8 +133,12 @@
 		<maven-jar-dl group-path="org/xerial" artifact="sqlite-jdbc" version="${sqlite.lib.version}" />
 		<maven-jar-sources-dl group-path="org/xerial" artifact="sqlite-jdbc" version="${sqlite.lib.version}" />
 	</target>
-	
-	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.sql, dependency.sqlite, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependency.flatlaf">
+		<maven-jar-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
+		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
+	</target>
+
+	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.sql, dependency.sqlite, dependency.flatlaf, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<!-- Scripts -->
