@@ -1,2 +1,0 @@
-wad scan H:\Games\MyIdGames\wads\levels -r
-iwad scan H:\Games\MyIdGames\iwads -r

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
 import net.mtrop.doomy.managers.EngineManager.Engine;
@@ -21,6 +22,7 @@ import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.IOUtils;
 import net.mtrop.doomy.struct.ProcessCallable;
+import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.UnzipSet;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 
@@ -49,6 +51,21 @@ public final class LauncherManager
 		return ext.equalsIgnoreCase("deh")
 			|| ext.equalsIgnoreCase("bex");
 	};
+
+	// =======================================================================
+	
+	// Singleton instance.
+	private static final SingletonProvider<LauncherManager> INSTANCE = new SingletonProvider<>(() -> new LauncherManager());
+
+	/**
+	 * Initializes/Returns the singleton manager instance.
+	 * @return the single manager.
+	 * @throws DoomySetupException if the manager could not be set up.
+	 */
+	public static LauncherManager get()
+	{
+		return INSTANCE.get();
+	}
 
 	public static class LaunchException extends Exception
 	{
@@ -91,12 +108,14 @@ public final class LauncherManager
 		}
 	}
 
-	private static FileFilter createFileNamePatternFilter(final Pattern pattern)
+	private LauncherManager() {}
+
+	private FileFilter createFileNamePatternFilter(final Pattern pattern)
 	{
 		return (file) -> pattern.matcher(file.getName()).matches();
 	}
 	
-	private static File checkTempDirectory() throws LaunchException
+	private File checkTempDirectory() throws LaunchException
 	{
 		File tempDirectory = new File(DoomyEnvironment.getTempDirectoryPath());
 		
@@ -109,7 +128,7 @@ public final class LauncherManager
 		return tempDirectory;
 	}
 
-	private static File checkPresetDirectory(Preset preset) throws LaunchException
+	private File checkPresetDirectory(Preset preset) throws LaunchException
 	{
 		File presetDirectory = new File(DoomyEnvironment.getPresetDirectoryPath(preset.hash));
 		
@@ -122,7 +141,7 @@ public final class LauncherManager
 		return presetDirectory;
 	}
 
-	private static void checkPresetValidity(Preset preset, Engine engine, EngineSettings settings) throws LaunchException
+	private void checkPresetValidity(Preset preset, Engine engine, EngineSettings settings) throws LaunchException
 	{
 		if (settings.exePath == null)
 			throw new LaunchException("Engine '" + engine.name + "' has no main executable specified (" + EngineConfigManager.SETTING_EXEPATH + ").");
@@ -139,7 +158,7 @@ public final class LauncherManager
 		}
 	}
 
-	private static void setExecutables(LaunchContext context, EngineSettings settings) throws LaunchException
+	private void setExecutables(LaunchContext context, EngineSettings settings) throws LaunchException
 	{
 		if (settings.dosboxPath != null)
 		{
@@ -161,7 +180,7 @@ public final class LauncherManager
 			throw new LaunchException("Working directory '" + context.workingDirectory.getPath() + "' not found.");
 	}
 
-	private static void setDirectories(LaunchContext context, Preset preset, EngineSettings settings) throws LaunchException
+	private void setDirectories(LaunchContext context, Preset preset, EngineSettings settings) throws LaunchException
 	{
 		// DOSBox
 		if (context.dosboxExecutable != null)
@@ -180,7 +199,7 @@ public final class LauncherManager
 		}
 	}
 
-	private static File tempFileCopy(IOHandler handler, File sourcePath, File tempDirectory, Deque<File> cleanupList, boolean dosBox) throws LaunchException
+	private File tempFileCopy(IOHandler handler, File sourcePath, File tempDirectory, Deque<File> cleanupList, boolean dosBox) throws LaunchException
 	{
 		File outFile = new File(tempDirectory + File.separator + sourcePath.getName());
 		handler.outln("Copying "+sourcePath.getName()+"...");
@@ -202,7 +221,7 @@ public final class LauncherManager
 			return outFile;
 	}
 
-	private static List<File> copyMatchingFiles(File sourceDirectory, File targetDirectory, boolean cleanup, FileFilter filter) throws LaunchException
+	private List<File> copyMatchingFiles(File sourceDirectory, File targetDirectory, boolean cleanup, FileFilter filter) throws LaunchException
 	{
 		List<File> outList = new LinkedList<>();
 		for (File matchingFile : sourceDirectory.listFiles(filter))
@@ -224,7 +243,7 @@ public final class LauncherManager
 		return outList;
 	}
 
-	private static void setUpWADs(IOHandler handler, LaunchContext context, Long iwadId, long[] wadIds, File tempDirectory) throws LaunchException
+	private void setUpWADs(IOHandler handler, LaunchContext context, Long iwadId, long[] wadIds, File tempDirectory) throws LaunchException
 	{
 		if (iwadId != null)
 		{
@@ -295,12 +314,12 @@ public final class LauncherManager
 		}
 	}
 
-	private static String quoteEscape(String input)
+	private String quoteEscape(String input)
 	{
 		return input.contains(" ") ? '"' + input + '"' : input;
 	}
 	
-	private static File createCommandLineFile(LaunchContext context, EngineSettings settings, File tempDirectory, String[] extraArgs) throws LaunchException
+	private File createCommandLineFile(LaunchContext context, EngineSettings settings, File tempDirectory, String[] extraArgs) throws LaunchException
 	{
 		File cmdlineFile = new File(tempDirectory + File.separator + CMDLINE_FILE);
 		try (PrintWriter cmdWriter = new PrintWriter(cmdlineFile))
@@ -353,7 +372,7 @@ public final class LauncherManager
 	 * @return the return code from the program.
 	 * @throws LaunchException 
 	 */
-	public static int run(IOHandler handler, Preset preset, String[] extraArgs, boolean skipCleanup) throws LaunchException
+	public int run(IOHandler handler, Preset preset, String[] extraArgs, boolean skipCleanup) throws LaunchException
 	{
 		EngineManager engineManager = EngineManager.get();
 		EngineConfigManager engineSettingsManager = EngineConfigManager.get();

@@ -11,6 +11,7 @@ import com.blackrook.sql.util.SQLRuntimeException;
 import com.blackrook.sql.SQLResult;
 
 import net.mtrop.doomy.DoomySetupException;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * Preset manager singleton.
@@ -72,7 +73,7 @@ public final class PresetManager
 	// =======================================================================
 	
 	// Singleton instance.
-	private static PresetManager INSTANCE;
+	private static final SingletonProvider<PresetManager> INSTANCE = new SingletonProvider<>(() -> new PresetManager());
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -81,9 +82,7 @@ public final class PresetManager
 	 */
 	public static PresetManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new PresetManager(DatabaseManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	/** Hex nybbles. */
@@ -111,9 +110,9 @@ public final class PresetManager
 	/** Open database connection. */
 	private SQLConnection connection;
 	
-	private PresetManager(DatabaseManager db)
+	private PresetManager()
 	{
-		this.connection = db.getConnection();
+		this.connection = DatabaseManager.get().getConnection();
 	}
 
 	private void getPresetWADIds(Preset preset) 

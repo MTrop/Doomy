@@ -8,6 +8,7 @@ import com.blackrook.sql.SQLRow;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.struct.ObjectUtils;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * Engine config manager singleton.
@@ -67,7 +68,7 @@ public final class EngineConfigManager
 	// =======================================================================
 	
 	// Singleton instance.
-	private static EngineConfigManager INSTANCE;
+	private static final SingletonProvider<EngineConfigManager> INSTANCE = new SingletonProvider<>(() -> new EngineConfigManager());
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -76,9 +77,7 @@ public final class EngineConfigManager
 	 */
 	public static EngineConfigManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new EngineConfigManager(DatabaseManager.get(), EngineManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================
@@ -88,10 +87,10 @@ public final class EngineConfigManager
 	/** Engine manager. */
 	private EngineManager engineManager;
 	
-	private EngineConfigManager(DatabaseManager db, EngineManager engineManager)
+	private EngineConfigManager()
 	{
-		this.connection = db.getConnection();
-		this.engineManager = engineManager;
+		this.connection = DatabaseManager.get().getConnection();
+		this.engineManager = EngineManager.get();
 	}
 
 	private EngineSettings createSettings(EngineSettingEntry[] settings)

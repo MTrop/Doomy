@@ -9,6 +9,7 @@ import com.blackrook.sql.SQLResult;
 import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * Engine template manager singleton.
@@ -43,7 +44,7 @@ public final class EngineTemplateManager
 	// =======================================================================
 	
 	// Singleton instance.
-	private static EngineTemplateManager INSTANCE;
+	private static final SingletonProvider<EngineTemplateManager> INSTANCE = new SingletonProvider<>(() -> new EngineTemplateManager());
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -52,9 +53,7 @@ public final class EngineTemplateManager
 	 */
 	public static EngineTemplateManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new EngineTemplateManager(DatabaseManager.get());
-		return INSTANCE;
+		return INSTANCE.get();	
 	}
 
 	// =======================================================================
@@ -62,9 +61,9 @@ public final class EngineTemplateManager
 	/** Open database connection. */
 	private SQLConnection connection;
 	
-	private EngineTemplateManager(DatabaseManager db)
+	private EngineTemplateManager()
 	{
-		this.connection = db.getConnection();
+		this.connection = DatabaseManager.get().getConnection();
 	}
 
 	/**

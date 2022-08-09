@@ -11,6 +11,7 @@ import com.blackrook.json.JSONReader;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.managers.DownloadManager.FileDownloadListener;
 import net.mtrop.doomy.struct.HTTPUtils;
+import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPParameters;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPReader;
@@ -45,9 +46,9 @@ public final class IdGamesManager
 	private static final HTTPParameters SEARCH_PARAMS = COMMON_PARAMS.copy()
 		.addParameter("action", "search");
 
-	/** Singleton instance. */
-	private static IdGamesManager INSTANCE;
-	
+	// Singleton instance.
+	private static final SingletonProvider<IdGamesManager> INSTANCE = new SingletonProvider<>(() -> new IdGamesManager());
+
 	/**
 	 * Initializes/Returns the singleton manager instance.
 	 * @return the single manager.
@@ -55,9 +56,7 @@ public final class IdGamesManager
 	 */
 	public static IdGamesManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new IdGamesManager(ConfigManager.get(), DownloadManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================
@@ -83,10 +82,10 @@ public final class IdGamesManager
 	/** Download manager. */
 	private DownloadManager downloadManager;
 	
-	private IdGamesManager(ConfigManager config, DownloadManager download)
+	private IdGamesManager()
 	{
-		this.config = config;
-		this.downloadManager = download;
+		this.config = ConfigManager.get();
+		this.downloadManager = DownloadManager.get();
 	}
 
 	private String getAPIURL()

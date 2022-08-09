@@ -13,6 +13,7 @@ import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.IOUtils;
 import net.mtrop.doomy.struct.ObjectUtils;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * Database manager singleton.
@@ -21,10 +22,8 @@ import net.mtrop.doomy.struct.ObjectUtils;
 public final class DatabaseManager
 {
 	// Singleton instance.
-	private static DatabaseManager INSTANCE;
-	// Creation mutex.
-	private static Object CREATE_MUTEX = new Object();
-
+	private static final SingletonProvider<DatabaseManager> INSTANCE = new SingletonProvider<>(() -> initializeDatabase());
+	
 	// Query resources.
 	private static String[] INIT_QUERIES = {
 		"sql/v1/init/0001-create-meta.sql",
@@ -106,31 +105,24 @@ public final class DatabaseManager
 	 * @return the single database manager.
 	 * @throws DoomySetupException if the database could not be set up.
 	 */
+	private static DatabaseManager initializeDatabase()
+	{
+		File dbFile = null;
+		try {
+			dbFile = new File(DoomyEnvironment.getDatabasePath());
+			if (!dbFile.exists())
+				initDatabaseFile(dbFile);
+			return new DatabaseManager(dbFile);
+		} catch (SQLException e) {
+			if (dbFile.exists())
+				dbFile.delete();
+			throw new DoomySetupException("Could not set up database: " + e.getMessage(), e);
+		}
+	}
+	
 	public static DatabaseManager get()
 	{
-		if (INSTANCE == null)
-		{
-			synchronized (CREATE_MUTEX)
-			{
-				if (INSTANCE != null)
-					return INSTANCE;
-				else
-				{
-					File dbFile = null;
-					try {
-						dbFile = new File(DoomyEnvironment.getDatabasePath());
-						if (!dbFile.exists())
-							initDatabaseFile(dbFile);
-						return INSTANCE = new DatabaseManager(dbFile);
-					} catch (SQLException e) {
-						if (dbFile.exists())
-							dbFile.delete();
-						throw new DoomySetupException("Could not set up database: " + e.getMessage(), e);
-					}
-				}
-			}
-		}
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 	
 	// =======================================================================

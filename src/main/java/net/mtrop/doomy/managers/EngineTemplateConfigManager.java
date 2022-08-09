@@ -5,6 +5,7 @@ import com.blackrook.sql.SQLRow;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.managers.EngineTemplateManager.EngineTemplate;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * Engine template config manager singleton.
@@ -30,7 +31,7 @@ public final class EngineTemplateConfigManager
 	// =======================================================================
 	
 	// Singleton instance.
-	private static EngineTemplateConfigManager INSTANCE;
+	private static final SingletonProvider<EngineTemplateConfigManager> INSTANCE = new SingletonProvider<>(() -> new EngineTemplateConfigManager());
 
 	/**
 	 * Initializes/Returns the singleton config manager instance.
@@ -39,9 +40,7 @@ public final class EngineTemplateConfigManager
 	 */
 	public static EngineTemplateConfigManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new EngineTemplateConfigManager(DatabaseManager.get(), EngineTemplateManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================
@@ -51,10 +50,10 @@ public final class EngineTemplateConfigManager
 	/** Engine template manager. */
 	private EngineTemplateManager templateManager;
 	
-	private EngineTemplateConfigManager(DatabaseManager db, EngineTemplateManager templateManager)
+	private EngineTemplateConfigManager()
 	{
-		this.connection = db.getConnection();
-		this.templateManager = templateManager;
+		this.connection = DatabaseManager.get().getConnection();
+		this.templateManager = EngineTemplateManager.get();
 	}
 
 	/**

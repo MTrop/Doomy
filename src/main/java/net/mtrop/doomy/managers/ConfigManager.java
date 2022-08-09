@@ -4,6 +4,7 @@ import com.blackrook.sql.SQLConnection;
 import com.blackrook.sql.SQLRow;
 
 import net.mtrop.doomy.DoomySetupException;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * Config manager singleton.
@@ -37,7 +38,7 @@ public final class ConfigManager
 	// =======================================================================
 	
 	// Singleton instance.
-	private static ConfigManager INSTANCE;
+	private static final SingletonProvider<ConfigManager> INSTANCE = new SingletonProvider<>(() -> new ConfigManager());
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -46,9 +47,7 @@ public final class ConfigManager
 	 */
 	public static ConfigManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new ConfigManager(DatabaseManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================
@@ -56,9 +55,9 @@ public final class ConfigManager
 	/** Open database connection. */
 	private SQLConnection connection;
 	
-	private ConfigManager(DatabaseManager db)
+	private ConfigManager()
 	{
-		this.connection = db.getConnection();
+		this.connection = DatabaseManager.get().getConnection();
 	}
 
 	/**

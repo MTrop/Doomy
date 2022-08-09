@@ -86,7 +86,7 @@ public class PresetRunCommand implements DoomyCommand
 		}
 
 		try {
-			return LauncherManager.run(handler, preset, additionalArgs, skipCleanup);
+			return LauncherManager.get().run(handler, preset, additionalArgs, skipCleanup);
 		} catch (LaunchException e) {
 			handler.errln("ERROR: " + e.getMessage());
 			return ERROR_LAUNCH_ERROR;

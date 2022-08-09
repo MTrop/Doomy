@@ -10,6 +10,7 @@ import com.blackrook.sql.SQLConnection.TransactionLevel;
 import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * WAD manager singleton.
@@ -58,7 +59,7 @@ public final class WADManager
 	// =======================================================================
 	
 	// Singleton instance.
-	private static WADManager INSTANCE;
+	private static final SingletonProvider<WADManager> INSTANCE = new SingletonProvider<>(() -> new WADManager());
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -67,9 +68,7 @@ public final class WADManager
 	 */
 	public static WADManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new WADManager(DatabaseManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================
@@ -77,9 +76,9 @@ public final class WADManager
 	/** Open database connection. */
 	private SQLConnection connection;
 	
-	private WADManager(DatabaseManager db)
+	private WADManager()
 	{
-		this.connection = db.getConnection();
+		this.connection = DatabaseManager.get().getConnection();
 	}
 
 	/**

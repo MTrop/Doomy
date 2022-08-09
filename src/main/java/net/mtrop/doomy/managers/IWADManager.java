@@ -9,6 +9,7 @@ import com.blackrook.sql.SQLConnection.TransactionLevel;
 import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * IWAD singleton.
@@ -41,7 +42,7 @@ public final class IWADManager
 	// =======================================================================
 	
 	// Singleton instance.
-	private static IWADManager INSTANCE;
+	private static final SingletonProvider<IWADManager> INSTANCE = new SingletonProvider<>(() -> new IWADManager());
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -50,9 +51,7 @@ public final class IWADManager
 	 */
 	public static IWADManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new IWADManager(DatabaseManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================
@@ -60,9 +59,9 @@ public final class IWADManager
 	/** Open database connection. */
 	private SQLConnection connection;
 	
-	private IWADManager(DatabaseManager db)
+	private IWADManager()
 	{
-		this.connection = db.getConnection();
+		this.connection = DatabaseManager.get().getConnection();
 	}
 
 	/**

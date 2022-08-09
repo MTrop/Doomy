@@ -10,6 +10,7 @@ import com.blackrook.json.annotation.JSONMapType;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.HTTPUtils;
+import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPReader;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
@@ -32,9 +33,9 @@ public final class WadArchiveManager
 		// Wad-Archive blocks bots by Agent - send a browser string.
 		.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36");
 		
-	/** Singleton instance. */
-	private static WadArchiveManager INSTANCE;
-	
+	// Singleton instance.
+	private static final SingletonProvider<WadArchiveManager> INSTANCE = new SingletonProvider<>(() -> new WadArchiveManager());
+
 	/**
 	 * Initializes/Returns the singleton manager instance.
 	 * @return the single manager.
@@ -42,9 +43,7 @@ public final class WadArchiveManager
 	 */
 	public static WadArchiveManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new WadArchiveManager(ConfigManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================
@@ -52,9 +51,9 @@ public final class WadArchiveManager
 	/** Config manager. */
 	private ConfigManager config;
 	
-	private WadArchiveManager(ConfigManager config)
+	private WadArchiveManager()
 	{
-		this.config = config;
+		this.config = ConfigManager.get();
 	}
 
 	private String getAPIURL()

@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.AsyncFactory;
+import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.AsyncFactory.Cancellable;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
 import net.mtrop.doomy.struct.AsyncFactory.Monitorable;
@@ -16,7 +17,7 @@ import net.mtrop.doomy.struct.AsyncFactory.Monitorable;
 public final class TaskManager
 {
 	// Singleton instance.
-	private static TaskManager INSTANCE;
+	private static final SingletonProvider<TaskManager> INSTANCE = new SingletonProvider<>(() -> new TaskManager());
 
 	/**
 	 * Initializes/Returns the singleton manager instance.
@@ -25,9 +26,7 @@ public final class TaskManager
 	 */
 	public static TaskManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new TaskManager();
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	// =======================================================================

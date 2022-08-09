@@ -48,10 +48,21 @@
 	<property name="project.javadoc.packages" value="
 		net.mtrop.doomy,
 		net.mtrop.doomy.commands,
+		net.mtrop.doomy.commands.config,
+		net.mtrop.doomy.commands.engine,
+		net.mtrop.doomy.commands.engine.config,
+		net.mtrop.doomy.commands.engine.template,
+		net.mtrop.doomy.commands.engine.template.config,
+		net.mtrop.doomy.commands.idgames,
+		net.mtrop.doomy.commands.idgames.search,
+		net.mtrop.doomy.commands.iwad,
+		net.mtrop.doomy.commands.preset,
+		net.mtrop.doomy.commands.run,
+		net.mtrop.doomy.commands.wad,
+		net.mtrop.doomy.commands.wad.source,
+		net.mtrop.doomy.gui,
 		net.mtrop.doomy.managers,
-		net.mtrop.doomy.struct,
-		net.mtrop.doomy.tasks,
-		net.mtrop.doomy.util
+		net.mtrop.doomy.struct
 		"
 	/>
 	
@@ -113,6 +124,12 @@
     </target>	
 
 	<target name="jar.one" depends="compile, init.versions">
+		<jar destfile="${jar.dir}/${jar.filename}">
+			<zipgroupfileset file="${dependencies.dir}/${json.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${sql.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${sqlite.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
+		</jar>
 		<copy todir="${bin.dir}/net/mtrop/doomy">
 			<fileset dir="${build.versions.dir}" includes="*.version" />
 		</copy>
@@ -153,9 +170,6 @@
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
-			<zipfileset file="${dev.base}/${json.jar}" prefix="jar" />
-			<zipfileset file="${dev.base}/${sql.jar}" prefix="jar" />
-			<zipfileset file="${dev.base}/${sqlite.jar}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
 			<zipfileset dir="docs" prefix="docs" />
@@ -165,9 +179,6 @@
 	<target name="dist.bash" depends="init.jar, jar.one, scripts, init.dist">
 		<tar destfile="${dist.dir}/${tar.dist.filename}" compression="gzip">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
-			<zipfileset file="${dev.base}/${json.jar}" prefix="jar" />
-			<zipfileset file="${dev.base}/${sql.jar}" prefix="jar" />
-			<zipfileset file="${dev.base}/${sqlite.jar}" prefix="jar" />
 			<tarfileset dir="${build.dir}/shell/bash" filemode="755" />
 			<tarfileset refid="fileset.documents" prefix="docs" />
 			<tarfileset dir="docs" prefix="docs" />
@@ -178,6 +189,12 @@
 	</target>
 
 	<!-- Deployments -->
+
+	<target name="deploy.jar" if="deploy.dir" depends="jar.one" description="Deploys the JAR distribution to a directory.">
+		<copy todir="${deploy.dir}/jar">
+			<fileset file="${jar.dir}/${jar.filename}" />
+		</copy>
+	</target>
 
 	<target name="deploy.cmd" if="deploy.dir" depends="dist.cmd" description="Deploys the CMD distribution to a directory, CLEANING THE DIRECTORY FIRST. USE CAUTION.">
 		<delete dir="${deploy.dir}" failonerror="false" />

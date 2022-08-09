@@ -231,7 +231,7 @@ public class RunCommand implements DoomyCommand
 		}
 		
 		try {
-			return LauncherManager.run(handler, preset, additionalArgs, skipCleanup);
+			return LauncherManager.get().run(handler, preset, additionalArgs, skipCleanup);
 		} catch (LaunchException ex) {
 			handler.errln("ERROR: " + ex.getMessage());
 			return ERROR_LAUNCH_ERROR;

@@ -15,6 +15,7 @@ import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
 import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
 import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.HTTPUtils;
+import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
  * Download manager singleton.
@@ -23,7 +24,7 @@ import net.mtrop.doomy.struct.HTTPUtils;
 public final class DownloadManager
 {
 	// Singleton instance.
-	private static DownloadManager INSTANCE;
+	private static final SingletonProvider<DownloadManager> INSTANCE = new SingletonProvider<>(() -> new DownloadManager());
 
 	private static HTTPHeaders HEADERS = HTTPUtils.headers()
 		// Some services block Java's default agent - send a browser string.
@@ -36,9 +37,7 @@ public final class DownloadManager
 	 */
 	public static DownloadManager get()
 	{
-		if (INSTANCE == null)
-			return INSTANCE = new DownloadManager(TaskManager.get());
-		return INSTANCE;
+		return INSTANCE.get();
 	}
 
 	/**
@@ -58,9 +57,9 @@ public final class DownloadManager
 	/** Task manager. */
 	private TaskManager taskManager;
 
-	private DownloadManager(TaskManager taskManager)
+	private DownloadManager()
 	{
-		this.taskManager = taskManager;
+		this.taskManager = TaskManager.get();
 	}
 	
 	/**

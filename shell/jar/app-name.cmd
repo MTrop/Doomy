@@ -35,6 +35,14 @@ echo The enviroment variables JAVA_HOME, JRE_HOME, or JDK_HOME are not set to
 echo your JRE or JDK directories, nor were Java binaries detected on your PATH.
 echo.
 echo For help, visit https://www.java.com/.
+echo.
+echo Java can be downloaded from the following places:
+echo.
+echo Azul:      https://www.azul.com/downloads/
+echo Adoptium:  https://adoptium.net/temurin/releases/
+echo Microsoft: https://www.microsoft.com/openjdk
+echo Oracle:    https://java.com/en/download/
+echo.
 
 goto _end
 
