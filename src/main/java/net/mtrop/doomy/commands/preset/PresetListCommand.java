@@ -23,36 +23,19 @@ public class PresetListCommand implements DoomyCommand
 		phrase = args.pollFirst();
 	}
 
-	private int getDistinctHashLength(PresetInfo[] records)
-	{
-		String[] hashes = new String[records.length];
-		for (int i = 0; i < records.length; i++)
-			hashes[i] = records[i].hash;
-		Arrays.sort(hashes);
-		
-		int len = 1;
-		int i;
-		String s;
-		while (len < 20)
-		{
-			s = null;
-			for (i = 0; i < hashes.length; i++)
-			{
-				String hc = hashes[i].substring(0, len);
-				if (hc.equals(s))
-					break;
-				s = hc;
-			}
-			if (i >= hashes.length)
-				return len;
-			len++;
-		}
-		
-		return len;
-	}
-	
 	@Override
 	public int call(IOHandler handler)
+	{
+		return execute(handler, phrase);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param phrase the preset name or phrase to search for.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String phrase)
 	{
 		PresetInfo[] records = PresetManager.get().getAllPresetsByNameOrHash(phrase);
 		if (records.length > 0)
@@ -81,6 +64,34 @@ public class PresetListCommand implements DoomyCommand
 		}
 		handler.outln(records.length + " presets found.");
 		return ERROR_NONE;
+	}
+
+	private static int getDistinctHashLength(PresetInfo[] records)
+	{
+		String[] hashes = new String[records.length];
+		for (int i = 0; i < records.length; i++)
+			hashes[i] = records[i].hash;
+		Arrays.sort(hashes);
+		
+		int len = 1;
+		int i;
+		String s;
+		while (len < 20)
+		{
+			s = null;
+			for (i = 0; i < hashes.length; i++)
+			{
+				String hc = hashes[i].substring(0, len);
+				if (hc.equals(s))
+					break;
+				s = hc;
+			}
+			if (i >= hashes.length)
+				return len;
+			len++;
+		}
+		
+		return len;
 	}
 
 }

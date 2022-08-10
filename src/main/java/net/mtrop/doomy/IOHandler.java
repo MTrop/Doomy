@@ -103,6 +103,54 @@ public interface IOHandler extends AutoCloseable
 	 */
 	void relay(InputStream in) throws IOException;
 
+	/**
+	 * @return a new null handler that does nothing on print and returns no input.
+	 */
+	static IOHandler nullHandler()
+	{
+		return new IOHandler() 
+		{
+			@Override
+			public void close() throws Exception 
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public void relay(InputStream in) throws IOException
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public String readLine() 
+			{
+				return null;
+			}
+			
+			@Override
+			public String prompt(String prompt)
+			{
+				return null;
+			}
+			
+			@Override
+			public void out(Object message) 
+			{
+				// Do nothing.
+			}
+			
+			@Override
+			public void err(Object message) 
+			{
+				// Do nothing.
+			}
+		};
+	}
+
+	/**
+	 * @return a standard I/O handler.
+	 */
 	static IOHandler stdio()
 	{
 		return new IOHandler()
@@ -158,6 +206,12 @@ public interface IOHandler extends AutoCloseable
 		};
 	}
 	
+	/**
+	 * Creates a standard I/O handler that reads input from a file.
+	 * @param scriptFile the script file.
+	 * @return a new standard I/O handler that reads from the supplied file.
+	 * @throws IOException if the file cannot be read.
+	 */
 	static IOHandler stdscript(File scriptFile) throws IOException
 	{
 		@SuppressWarnings("resource") // closed in IOHandler#close()
@@ -182,13 +236,7 @@ public interface IOHandler extends AutoCloseable
 			@Override
 			public String prompt(String prompt) 
 			{
-				try {
-					out(prompt + " ");
-					String line = in.readLine();
-					return line != null ? line.trim() : null;
-				} catch (IOException e) {
-					return null;
-				}
+				return readLine();
 			}
 			
 			@Override

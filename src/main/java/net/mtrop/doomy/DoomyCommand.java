@@ -62,17 +62,12 @@ import net.mtrop.doomy.commands.wad.WADAddCommand;
 import net.mtrop.doomy.commands.wad.WADCleanCommand;
 import net.mtrop.doomy.commands.wad.WADGetCommand;
 import net.mtrop.doomy.commands.wad.WADListCommand;
-import net.mtrop.doomy.commands.wad.WADRedownloadCommand;
 import net.mtrop.doomy.commands.wad.WADRemoveCommand;
 import net.mtrop.doomy.commands.wad.WADRenameCommand;
 import net.mtrop.doomy.commands.wad.WADScanCommand;
 import net.mtrop.doomy.commands.wad.WADSetCommand;
-import net.mtrop.doomy.commands.wad.WADSourceCommand;
 import net.mtrop.doomy.commands.wad.WADTextCommand;
-import net.mtrop.doomy.commands.wad.source.WADSourceGetCommand;
-import net.mtrop.doomy.commands.wad.source.WADSourceListCommand;
-import net.mtrop.doomy.commands.wad.source.WADSourceRemoveCommand;
-import net.mtrop.doomy.commands.wad.source.WADSourceSetCommand;
+
 
 /**
  * Commands factory for Doomy.
@@ -103,7 +98,6 @@ public interface DoomyCommand
 	static final String PRESET = "preset";
 	static final String RUN = "run";
 	static final String IDGAMES = "idgames";
-	static final String WADARCHIVE = "wadarchive";
 	static final String LIST = "list";
 	static final String GET = "get";
 	static final String SET = "set";
@@ -119,10 +113,6 @@ public interface DoomyCommand
 	static final String CLEAR = "clear";
 	static final String CREATE = "create";
 	static final String DOWNLOAD = "download";
-	static final String REDOWNLOAD = "redownload";
-	static final String SOURCE = "source";
-	static final String DEPENDENCY1 = "dependency";
-	static final String DEPENDENCY2 = "dep";
 	static final String PING = "ping";
 	static final String ABOUT = "about";
 	static final String COMIC = "comic";
@@ -311,21 +301,6 @@ public interface DoomyCommand
 				return new WADScanCommand();
 			else if (matchArgument(args, TEXT))
 				return new WADTextCommand();
-			else if (matchArgument(args, REDOWNLOAD))
-				return new WADRedownloadCommand();
-			else if (matchArgument(args, SOURCE))
-			{
-				if (matchArgument(args, LIST))
-					return new WADSourceListCommand();
-				else if (matchArgument(args, GET))
-					return new WADSourceGetCommand();
-				else if (matchArgument(args, SET))
-					return new WADSourceSetCommand();
-				else if (matchArgument(args, REMOVE))
-					return new WADSourceRemoveCommand();
-				else
-					return new WADSourceCommand();
-			}
 			else
 				return new WADCommand();
 		}

@@ -25,6 +25,17 @@ public class ConfigRemoveCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the setting name. 
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name)
+	{
 		ConfigManager config = ConfigManager.get();
 		
 		if (!config.containsValue(name))

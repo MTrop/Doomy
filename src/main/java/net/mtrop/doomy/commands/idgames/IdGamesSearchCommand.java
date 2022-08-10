@@ -23,6 +23,17 @@ public class IdGamesSearchCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, badCommand);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param badCommand the unknown command.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String badCommand)
+	{
 		if (badCommand != null)
 			handler.errln("ERROR: Unknown command: " + badCommand);
 			

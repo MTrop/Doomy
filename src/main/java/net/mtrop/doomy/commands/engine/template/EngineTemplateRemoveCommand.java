@@ -39,6 +39,18 @@ public class EngineTemplateRemoveCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, quiet);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the name of the template.
+	 * @param quiet if true, confirm removal without asking.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, boolean quiet)
+	{
 		EngineTemplateManager mgr = EngineTemplateManager.get();
 		
 		if (!mgr.containsTemplate(name))

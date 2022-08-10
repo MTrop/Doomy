@@ -317,15 +317,6 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 45, "      --prefix, -p [string]               ...and prepend [string] to each WAD entry name.");
 			wrapPrint(handler, 80, 45, "      --force-add-existing                ...and update the names of known paths (otherwise, this does not add existing).");
 			wrapPrint(handler, 80, 40, "    text [name]                         Dumps the WAD's text entry, if any (searches same directory for FILENAME.TXT or inside archive).");
-			//wrapPrint(handler, 80, 40, "    download [url] [name]               Downloads a WAD to the main download directory as its path from [url] and adds it as its source under WAD [name].");
-			wrapPrint(handler, 80, 40, "    redownload [name]                   Redownload a downloaded WAD named [name]."); 
-			wrapPrint(handler, 80, 40, "    source                              Print this subsection's help and terminate.");
-			wrapPrint(handler, 80, 40, "      list                              List all URL sources.");
-			wrapPrint(handler, 80, 45, "        [phrase]                          ...whose WAD name contains [phrase].");
-			wrapPrint(handler, 80, 45, "          --blank, -b                     ...that aren't bound to URLs, instead.");
-			wrapPrint(handler, 80, 40, "      get [name]                        Prints the URL source of a downloaded WAD named [name].");
-			wrapPrint(handler, 80, 40, "      set [name] [url]                  Sets the URL source of a downloaded WAD named [name] to [url].");
-			wrapPrint(handler, 80, 40, "      remove [name]                     Removes the URL source of a downloaded WAD named [name].");
 			handler.outln();
 		}
 		if (commandName == null || DoomyCommand.PRESET.equalsIgnoreCase(commandName))
@@ -388,20 +379,6 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 40, "        --limit, -l [amount]            Set max results to [amount].");
 			wrapPrint(handler, 80, 40, "        --download, -d [result]         Download the file at result position [result].");
 			wrapPrint(handler, 80, 40, "        --text, -t [result]             Print text file of result [result].");
-			handler.outln();
-		}
-		if (commandName == null || DoomyCommand.WADARCHIVE.equalsIgnoreCase(commandName))
-		{
-			wrapPrint(handler, 80, 40, "  wadarchive                            Print this subsection's help and terminate.");
-			wrapPrint(handler, 80, 40, "    md5 [hash]                          List results from MD5 file hash [hash].");
-			wrapPrint(handler, 80, 40, "      --download, -d [result]           Download the found file from link [result].");
-			wrapPrint(handler, 80, 40, "      --name, -n [name]                 Specify new alias, if downloaded.");
-			wrapPrint(handler, 80, 40, "    sha1 [hash]                         List results from SHA1 file hash [hash].");
-			wrapPrint(handler, 80, 40, "      --download, -d [result]           Download the found file from link [result].");
-			wrapPrint(handler, 80, 40, "      --name, -n [name]                 Specify new alias, if downloaded.");
-			wrapPrint(handler, 80, 40, "    file [name]                         List results from file [name].");
-			wrapPrint(handler, 80, 40, "      --download, -d [result]           Download the found file from link [result].");
-			wrapPrint(handler, 80, 40, "      --name, -n [name]                 Specify new alias, if downloaded.");
 			handler.outln();
 		}
 	}

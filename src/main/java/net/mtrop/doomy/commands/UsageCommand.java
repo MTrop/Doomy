@@ -24,6 +24,17 @@ public class UsageCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, badCommand);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param badCommand the name of the bad command, if any. Can be null.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String badCommand)
+	{
 		if (badCommand != null)
 			handler.errln("ERROR: Unknown command: " + badCommand);
 			
@@ -31,5 +42,5 @@ public class UsageCommand implements DoomyCommand
 		DoomyCommon.usage(handler);
 		return ERROR_NONE;
 	}
-
+	
 }

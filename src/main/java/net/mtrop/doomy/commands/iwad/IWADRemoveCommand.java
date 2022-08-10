@@ -39,6 +39,18 @@ public class IWADRemoveCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, quiet);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the IWAD name.
+	 * @param quiet if true, confirm without asking.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, boolean quiet)
+	{
 		IWADManager mgr = IWADManager.get();
 		
 		if (!mgr.containsIWAD(name))

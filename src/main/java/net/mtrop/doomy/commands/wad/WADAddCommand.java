@@ -30,6 +30,18 @@ public class WADAddCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, path);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the WAD name.
+	 * @param path the path to the WAD.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String path)
+	{
 		WADManager mgr = WADManager.get();
 		
 		if (mgr.containsWAD(name))

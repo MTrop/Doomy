@@ -27,6 +27,18 @@ public class EngineTemplateAddCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, template);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the name of the template.
+	 * @param template the source template to copy. Can be null.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String template)
+	{
 		EngineTemplateManager mgr = EngineTemplateManager.get();
 		
 		if (mgr.containsTemplate(name))

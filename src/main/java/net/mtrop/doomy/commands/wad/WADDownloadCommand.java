@@ -34,6 +34,18 @@ public class WADDownloadCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, url, name);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param url the URL of the file.
+	 * @param name the WAD name.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String url, String name)
+	{
 		URL urlPath;
 		try {
 			urlPath = new URL(url);

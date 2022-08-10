@@ -29,6 +29,18 @@ public class PresetNameCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, hash, name);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param hash the preset hash.
+	 * @param name the preset name.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String hash, String name)
+	{
 		PresetManager mgr = PresetManager.get();
 		
 		if (mgr.containsPreset(name))

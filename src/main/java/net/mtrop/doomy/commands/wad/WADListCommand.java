@@ -24,6 +24,17 @@ public class WADListCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, phrase);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param phrase the WAD name or phrase to search for.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String phrase)
+	{
 		WAD[] records = WADManager.get().getAllWADs(phrase);
 		if (records.length > 0)
 		{

@@ -24,6 +24,17 @@ public class EngineListCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, phrase);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param phrase the engine name or phrase to search for.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String phrase)
+	{
 		Engine[] records = EngineManager.get().getAllEngines(phrase);
 		for (int i = 0; i < records.length; i++)
 			handler.outln(records[i].name);

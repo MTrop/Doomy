@@ -13,14 +13,14 @@ import net.mtrop.doomy.managers.EngineTemplateConfigManager.EngineTemplateSettin
  */
 public class EngineTemplateConfigListCommand implements DoomyCommand
 {
-	private String name;
+	private String template;
 	private String phrase;
 
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
 	{
-		name = args.pollFirst();
-		if (name == null)
+		template = args.pollFirst();
+		if (template == null)
 			throw new BadArgumentException("Expected name of template.");
 		phrase = args.pollFirst();
 	}
@@ -28,11 +28,23 @@ public class EngineTemplateConfigListCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
-		EngineTemplateSettingEntry[] records = EngineTemplateConfigManager.get().getAllSettings(name, phrase);
+		return execute(handler, template, phrase);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param template the template name.
+	 * @param phrase the name or phrase of the config entry to search for.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String template, String phrase)
+	{
+		EngineTemplateSettingEntry[] records = EngineTemplateConfigManager.get().getAllSettings(template, phrase);
 		
 		if (records == null)
 		{
-			handler.outln("Engine template '" + name + "' not found.");
+			handler.outln("Engine template '" + template + "' not found.");
 			return ERROR_NONE;
 		}
 

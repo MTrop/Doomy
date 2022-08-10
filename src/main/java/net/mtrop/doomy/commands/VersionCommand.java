@@ -22,8 +22,18 @@ public class VersionCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler)
+	{
 		handler.outln(DoomyMain.VERSION);
 		return ERROR_NONE;
 	}
-
+	
 }

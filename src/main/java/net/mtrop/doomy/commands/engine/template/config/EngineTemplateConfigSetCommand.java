@@ -34,6 +34,19 @@ public class EngineTemplateConfigSetCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, template, name, value);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param template the template name.
+	 * @param name the name of the config entry.
+	 * @param value the value of the entry.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String template, String name, String value)
+	{
 		if (!EngineTemplateManager.get().containsTemplate(template))
 		{
 			handler.errln("ERROR: No such template: " + template);

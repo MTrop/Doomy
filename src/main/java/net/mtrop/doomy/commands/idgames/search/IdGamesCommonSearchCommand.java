@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.function.BiFunction;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyEnvironment;
@@ -281,13 +282,51 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 	}
 
 	@Override
-	public int call(IOHandler handler) throws Exception
+	public int call(IOHandler handler)
 	{
-		int selectedLimit = Math.min(limit != null ? limit : MAX_LIMIT, MAX_LIMIT);
-		IdGamesSearchResponse searchResponse = search(query, selectedLimit);
+		return execute(handler, query, name, limit, resultNumber, download, (q, l) -> {
+			try {
+				return search(q, l);
+			} catch (IOException e) {
+				return null;
+			} catch (SecurityException e) {
+				return null;
+			}
+		}, this::download);
+	}
 
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param query 
+	 * @param name 
+	 * @param limit 
+	 * @param resultNumber the pre-selected result number.
+	 * @param download 
+	 * @param searchFunction 
+	 * @param downloadFunction 
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, 
+		String query, String name, Integer limit, 
+		Integer resultNumber, Boolean download, 
+		BiFunction<String, Integer, IdGamesSearchResponse> searchFunction, 
+		BiFunction<IOHandler, Long, Integer> downloadFunction
+	){
+		int selectedLimit = Math.min(limit != null ? limit : MAX_LIMIT, MAX_LIMIT);
+		IdGamesSearchResponse searchResponse = searchFunction.apply(query, selectedLimit);
+
+		if (searchResponse == null)
+		{
+			handler.errln("No response from idGames, or read error.");
+			return ERROR_IO_ERROR;
+		}
+		
 		if (searchResponse.error != null)
-			throw new IOException("idGames returned error: " + searchResponse.error.type + ": " + searchResponse.error.message);
+		{
+			handler.errln("idGames returned error: " + searchResponse.error.type + ": " + searchResponse.error.message);
+			return ERROR_IO_ERROR;
+		}
 
 		if (searchResponse.warning != null)
 		{
@@ -378,7 +417,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 			}
 		}
 
-		return download(handler, selected.id);
+		return downloadFunction.apply(handler, selected.id);
 	}
 
 }

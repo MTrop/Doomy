@@ -29,6 +29,18 @@ public class IWADRenameCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, newName);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the IWAD name.
+	 * @param newName the new IWAD name.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String newName)
+	{
 		IWADManager mgr = IWADManager.get();
 		
 		if (!mgr.containsIWAD(name))

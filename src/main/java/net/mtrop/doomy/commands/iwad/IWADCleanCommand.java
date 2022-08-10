@@ -36,6 +36,17 @@ public class IWADCleanCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, quiet);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param quiet if true, confirm without asking.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, boolean quiet)
+	{
 		IWADManager manager = IWADManager.get();
 		
 		IWAD[] records = manager.getAllIWADs(null);

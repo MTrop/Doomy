@@ -7,6 +7,7 @@ import java.util.LinkedList;
 import net.mtrop.doomy.DoomyCommand.BadArgumentException;
 import net.mtrop.doomy.DoomyCommand.BadCommandException;
 import net.mtrop.doomy.managers.DatabaseManager;
+import net.mtrop.doomy.struct.TokenScanner;
 
 /**
  * Main class for Doomy.
@@ -176,6 +177,10 @@ public final class DoomyMain
 		return doShellLoop(handler);
 	}
 	
+	/**
+	 * Main entry point.
+	 * @param args the command line arguments.
+	 */
 	public static void main(String[] args) 
 	{
 		IOHandler handler = IOHandler.stdio();
@@ -213,4 +218,21 @@ public final class DoomyMain
 		System.exit(returnValue);
 	}
 
+	/**
+	 * Executes a command line.
+	 * @param commandLine the command line.
+	 * @param handler the handler to use.
+	 * @return the return value.
+	 */
+	public static int execute(String commandLine, IOHandler handler)
+	{
+		try (TokenScanner scanner = new TokenScanner(commandLine))
+		{
+			Deque<String> args = new LinkedList<>();
+			while (scanner.hasNext())
+				args.add(scanner.nextString());
+			return executeCommand(args, handler);
+		}
+	}
+	
 }

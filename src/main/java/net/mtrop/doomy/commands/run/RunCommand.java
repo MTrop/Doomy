@@ -132,6 +132,22 @@ public class RunCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, engine, iwad, wads, additionalArgs, skipCleanup);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the preset name.
+	 * @param engine the engine name.
+	 * @param iwad the IWAD name.
+	 * @param wads the names of the WADs to use, in order.
+	 * @param additionalArgs additional arguments.
+	 * @param skipCleanup if true, skip the cleanup after run.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String engine, String iwad, String[] wads, String[] additionalArgs, boolean skipCleanup)
+	{
 		long engineId;
 		Long iwadId;
 		long[] wadIds;

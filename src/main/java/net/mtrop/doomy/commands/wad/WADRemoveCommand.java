@@ -46,6 +46,19 @@ public class WADRemoveCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, quiet, removeFile);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the WAD name.
+	 * @param quiet if true, do not ask to confirm.
+	 * @param removeFile if true, attempt to remove the file as well.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, boolean quiet, boolean removeFile)
+	{
 		WADManager mgr = WADManager.get();
 		
 		if (!mgr.containsWAD(name))

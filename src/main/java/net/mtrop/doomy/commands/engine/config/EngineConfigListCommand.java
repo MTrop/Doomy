@@ -13,14 +13,14 @@ import net.mtrop.doomy.managers.EngineConfigManager.EngineSettingEntry;
  */
 public class EngineConfigListCommand implements DoomyCommand
 {
-	private String name;
+	private String engine;
 	private String phrase;
 
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
 	{
-		name = args.pollFirst();
-		if (name == null)
+		engine = args.pollFirst();
+		if (engine == null)
 			throw new BadArgumentException("Expected name of engine.");
 		phrase = args.pollFirst();
 	}
@@ -28,11 +28,23 @@ public class EngineConfigListCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
-		EngineSettingEntry[] records = EngineConfigManager.get().getAllSettings(name, phrase);
+		return execute(handler, engine, phrase);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param engine the engine name.
+	 * @param phrase the setting name or phrase to search for.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String engine, String phrase)
+	{
+		EngineSettingEntry[] records = EngineConfigManager.get().getAllSettings(engine, phrase);
 		
 		if (records == null)
 		{
-			handler.outln("Engine '" + name + "' not found.");
+			handler.outln("Engine '" + engine + "' not found.");
 			return ERROR_NONE;
 		}
 

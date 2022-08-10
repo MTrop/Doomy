@@ -88,6 +88,20 @@ public class IWADScanCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, path, prefix, recurse, force);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param path the path to scan.
+	 * @param prefix the prefix to add to each name. 
+	 * @param recurse if true, recurse down the path.
+	 * @param force if true, update existing IWADs.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String path, String prefix, boolean recurse, boolean force)
+	{
 		File startDir = new File(path);
 		
 		if (!startDir.exists())

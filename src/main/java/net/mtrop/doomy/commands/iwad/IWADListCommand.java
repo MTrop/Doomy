@@ -24,6 +24,17 @@ public class IWADListCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, phrase);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param phrase the IWAD name or phrase to search for.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String phrase)
+	{
 		IWAD[] records = IWADManager.get().getAllIWADs(phrase);
 		if (records.length > 0)
 		{

@@ -30,6 +30,18 @@ public class EngineConfigRemoveCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, engine, name);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param engine the engine name.
+	 * @param name the setting name to remove.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String engine, String name)
+	{
 		if (!EngineManager.get().containsEngine(engine))
 		{
 			handler.errln("ERROR: No such engine: " + engine);

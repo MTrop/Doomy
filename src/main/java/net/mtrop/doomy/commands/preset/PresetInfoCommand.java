@@ -29,6 +29,17 @@ public class PresetInfoCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the preset name.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name)
+	{
 		PresetManager mgr = PresetManager.get();
 		
 		PresetInfo preset;

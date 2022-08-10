@@ -29,6 +29,18 @@ public class ConfigSetCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, value);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the setting name. 
+	 * @param value the setting value.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String value)
+	{
 		ConfigManager config = ConfigManager.get();
 		
 		String readValue;

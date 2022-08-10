@@ -58,6 +58,19 @@ public class PresetRunCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, additionalArgs, skipCleanup);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the preset name.
+	 * @param additionalArgs additional arguments.
+	 * @param skipCleanup if true, skip the cleanup after run.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String[] additionalArgs, boolean skipCleanup)
+	{
 		PresetManager mgr = PresetManager.get();
 		
 		Preset preset;

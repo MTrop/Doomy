@@ -30,6 +30,18 @@ public class IWADAddCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, path);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the IWAD name.
+	 * @param path the  
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String path)
+	{
 		IWADManager mgr = IWADManager.get();
 		
 		if (mgr.containsIWAD(name))

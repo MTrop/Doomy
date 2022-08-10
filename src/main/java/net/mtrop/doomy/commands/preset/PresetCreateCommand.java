@@ -112,6 +112,20 @@ public class PresetCreateCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
+		return execute(handler, name, engine, iwad, wads);
+	}
+
+	/**
+	 * Executes this command.
+	 * @param handler the handler to use for I/O.
+	 * @param name the preset name.
+	 * @param engine the engine name.
+	 * @param iwad the IWAD name.
+	 * @param wads the names of the WADs to use, in order.
+	 * @return the return code from running the command.
+	 */
+	public static int execute(IOHandler handler, String name, String engine, String iwad, String[] wads)
+	{
 		long engineId;
 		Long iwadId;
 		long[] wadIds;
