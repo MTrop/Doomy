@@ -1,10 +1,14 @@
 package net.mtrop.doomy.managers;
 
+import java.awt.Rectangle;
+
 import com.blackrook.sql.SQLConnection;
 import com.blackrook.sql.SQLRow;
 
 import net.mtrop.doomy.DoomySetupException;
+import net.mtrop.doomy.struct.ArrayUtils;
 import net.mtrop.doomy.struct.SingletonProvider;
+import net.mtrop.doomy.struct.ValueUtils;
 
 /**
  * Config manager singleton.
@@ -12,6 +16,10 @@ import net.mtrop.doomy.struct.SingletonProvider;
  */
 public final class ConfigManager
 {
+	public static final String SETTING_THEME_NAME = "gui.theme.name";
+	public static final String SETTING_WINDOW = "gui.window";
+	public static final String SETTING_WINDOW_MAX = "gui.window.maximized";
+
 	public static final String SETTING_IDGAMES_API_URL = "idgames.api.url";
 	public static final String SETTING_IDGAMES_MIRROR_BASE_URL = "idgames.mirror.base.url";
 	public static final String SETTING_IDGAMES_TIMEOUT_MILLIS = "idgames.timeout.millis";
@@ -85,6 +93,17 @@ public final class ConfigManager
 	}
 	
 	/**
+	 * Sets a config value by name.
+	 * @param name the value name.
+	 * @param value the value.
+	 * @return true if added/updated, false if not.
+	 */
+	public boolean setRectangleValue(String name, Rectangle value)
+	{
+		return setValue(name, value.x + " " + value.y + " " + value.width + " " + value.height);
+	}
+	
+	/**
 	 * Gets a config value by name.
 	 * @param name the value name.
 	 * @return the resultant value, or null if it doesn't exist.
@@ -105,6 +124,26 @@ public final class ConfigManager
 	{
 		String value = getValue(name); 
 		return value != null ? value : def;
+	}
+
+	/**
+	 * Gets a config value by name, or a default value if it doesn't exist.
+	 * @param name the value name.
+	 * @param defaultRectangle the default rectangle, if any component is missing. 
+	 * @return the resultant value, or the default if it doesn't exist.
+	 */
+	public Rectangle getRectangleValue(String name, Rectangle defaultRectangle)
+	{
+		String value = getValue(name); 
+		if (value == null)
+			return null;
+		String[] values = value.split("\\s+");
+		Rectangle out = new Rectangle();
+		out.x = ValueUtils.parseInt(ArrayUtils.arrayElement(values, 0), defaultRectangle.x);
+		out.y = ValueUtils.parseInt(ArrayUtils.arrayElement(values, 1), defaultRectangle.y);
+		out.width = ValueUtils.parseInt(ArrayUtils.arrayElement(values, 2), defaultRectangle.width);
+		out.height = ValueUtils.parseInt(ArrayUtils.arrayElement(values, 3), defaultRectangle.height);
+		return out;
 	}
 
 	/**
