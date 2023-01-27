@@ -3784,7 +3784,8 @@ public final class HTTPUtils
 	{
 		long total = 0;
 		int buf = 0;
-			
+		Long max = maxCharacters;
+		
 		final char[] RELAY_BUFFER = new char[charBufferSize];
 
 		while (!cancelSwitch.get() && (buf = reader.read(RELAY_BUFFER)) >= 0)
@@ -3792,7 +3793,7 @@ public final class HTTPUtils
 			writer.write(RELAY_BUFFER, 0, buf);
 			total += buf;
 			if (monitor != null)
-				monitor.onProgressChange(total, maxCharacters);
+				monitor.onProgressChange(total, max);
 			if (maxCharacters != null && maxCharacters >= 0)
 				maxCharacters -= buf;
 		}
