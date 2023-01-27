@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2021 Black Rook Software
+ * Copyright (c) 2020-2023 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -49,15 +49,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.RunnableFuture;
+import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -96,10 +95,12 @@ public final class HTTPUtils
 		return out;
 	});
 
+	private static final AtomicLong DEFAULT_THREADFACTORY_ID = new AtomicLong(0L);
+	private static final ThreadFactory DEFAULT_THREADFACTORY = 
+		(runnable) -> new Thread(runnable, "HTTPRequest-" + DEFAULT_THREADFACTORY_ID.getAndIncrement());
+
 	/** Default timeout in milliseconds. */
 	private static final AtomicInteger DEFAULT_TIMEOUT_MILLIS = new AtomicInteger(5000); 
-	/** Thread pool for async requests. */
-	private static final AtomicReference<ThreadPoolExecutor> HTTP_THREAD_POOL = new AtomicReference<ThreadPoolExecutor>(null);
 	
 	/** A transfer monitor that does nothing. */
 	private static final TransferMonitor TRANSFERMONITOR_NULL = (current, max) -> {};
@@ -129,7 +130,7 @@ public final class HTTPUtils
 	/** String content reader. */
 	private static final HTTPReader<String> HTTPREADER_STRING_CONTENT = (response, cancelSwitch, monitor) ->
 	{
-		InputStreamReader reader = HTTPReader.openReader(response);
+		InputStreamReader reader = response.getContentReader();
 		StringWriter writer = new StringWriter();
 		relay(reader, writer, 8192, null, cancelSwitch, monitor);
 		return cancelSwitch.get() ? null : writer.toString();
@@ -165,32 +166,6 @@ public final class HTTPUtils
 	
 	// Not instantiable.
 	private HTTPUtils() {}
-	
-	/**
-	 * The default executor to use for sending async requests.
-	 */
-	private static class HTTPThreadPoolExecutor extends ThreadPoolExecutor
-	{
-		private static final String THREADNAME = "HTTPRequestWorker-";
-		
-		private static final int CORE_SIZE = 0;
-		private static final int MAX_SIZE = 20;
-		private static final long KEEPALIVE = 30L;
-		private static final TimeUnit KEEPALIVE_UNIT = TimeUnit.SECONDS;
-
-		private static final AtomicLong REQUEST_ID = new AtomicLong(0L);
-		
-		private HTTPThreadPoolExecutor()
-		{
-			super(CORE_SIZE, MAX_SIZE, KEEPALIVE, KEEPALIVE_UNIT, new LinkedBlockingQueue<>(), (runnable) -> 
-			{
-				Thread out = new Thread(runnable);
-				out.setName(THREADNAME + REQUEST_ID.getAndIncrement());
-				out.setDaemon(true);
-				return out;
-			});
-		}
-	}
 	
 	/**
 	 * A single instance of a spawned, asynchronous executable task.
@@ -648,21 +623,6 @@ public final class HTTPUtils
 		R onHTTPResponse(HTTPResponse response, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException;
 		
 		/**
-		 * Convenience method for wrapping the content stream in a reader for 
-		 * the response's charset encoding.
-		 * @param response the open response object.
-		 * @return an InputStreamReader to read from.
-		 * @throws UnsupportedEncodingException if the response has a charset type that is unknown.
-		 */
-		static InputStreamReader openReader(HTTPResponse response) throws UnsupportedEncodingException
-		{
-			String charset;
-			if ((charset = response.getCharset()) == null)
-				charset = ISO_8859_1.displayName();
-			return new InputStreamReader(response.getContentStream(), charset);
-		}
-
-		/**
 		 * An HTTP Reader that just returns the status code of the response.
 		 * This returns a singleton instance of the reader.
 		 * <p> If the read is cancelled, this returns null.
@@ -818,7 +778,7 @@ public final class HTTPUtils
 				
 				try (OutputStreamWriter writer = new OutputStreamWriter(new FileOutputStream(targetFile), targetCharset))
 				{
-					relay(openReader(response), writer, 8192, null, cancelSwitch, monitor);
+					relay(response.getContentReader(), writer, 8192, null, cancelSwitch, monitor);
 				}
 				if (cancelSwitch.get())
 				{
@@ -842,7 +802,7 @@ public final class HTTPUtils
 		{
 			return (response, cancelSwitch, monitor) ->
 			{
-				BufferedReader br = new BufferedReader(openReader(response));
+				BufferedReader br = new BufferedReader(response.getContentReader());
 				String line;
 				while ((line = br.readLine()) != null)
 					consumer.accept(line);
@@ -1898,7 +1858,7 @@ public final class HTTPUtils
 	{
 		private FormContent(HTTPParameters parameters)
 		{
-			super("x-www-form-urlencoded", UTF8.displayName(), parameters.toString().getBytes(UTF8));
+			super("application/x-www-form-urlencoded", UTF8.displayName(), parameters.toString().getBytes(UTF8));
 		}
 	}
 
@@ -2412,6 +2372,19 @@ public final class HTTPUtils
 		}
 
 		/**
+		 * Convenience method for wrapping the content stream in a reader for this response's charset encoding.
+		 * @return an InputStreamReader to read from.
+		 * @throws UnsupportedEncodingException if the response has a charset type that is unknown.
+		 */
+		public InputStreamReader getContentReader() throws UnsupportedEncodingException
+		{
+			String charset;
+			if ((charset = getCharset()) == null)
+				charset = ISO_8859_1.displayName();
+			return new InputStreamReader(getContentStream(), charset);
+		}
+
+		/**
 		 * @return the response's charset. can be null.
 		 */
 		public String getCharset()
@@ -2521,13 +2494,12 @@ public final class HTTPUtils
 		 */
 		public long relayContent(OutputStream out) throws IOException
 		{
-			return relayContent(out, null);
+			return relayContent(out, 8192, new AtomicBoolean(false), null);
 		}
 		
 		/**
 		 * Convenience function for transferring the entirety of the content 
 		 * stream to another, monitoring the progress as it goes.
-		 * <p>Equivalent to: <code>return relay(getContentStream(), out, 8192, getLength(), monitor);</code>
 		 * @param out the output stream.
 		 * @param monitor the optional monitor. Can be null.
 		 * @return the amount of bytes moved.
@@ -2535,7 +2507,76 @@ public final class HTTPUtils
 		 */
 		public long relayContent(OutputStream out, TransferMonitor monitor) throws IOException
 		{
-			return relay(getContentStream(), out, 8192, getLength(), new AtomicBoolean(false), monitor);
+			return relayContent(out, 8192, new AtomicBoolean(false), monitor);
+		}
+		
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, AtomicBoolean cancelSwitch) throws IOException
+		{
+			return relayContent(out, 8192, cancelSwitch, null);
+		}
+
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @param monitor the optional monitor. Can be null.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
+		{
+			return relayContent(out, 8192, cancelSwitch, monitor);
+		}
+		
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param bufferSize the buffer size for the transfer.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, int bufferSize) throws IOException
+		{
+			return relayContent(out, bufferSize, new AtomicBoolean(false), null);
+		}
+
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param bufferSize the buffer size for the transfer.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, int bufferSize, AtomicBoolean cancelSwitch) throws IOException
+		{
+			return relayContent(out, bufferSize, cancelSwitch, null);
+		}
+
+		/**
+		 * Convenience function for transferring the entirety of the content 
+		 * stream to another, monitoring the progress as it goes.
+		 * @param out the output stream.
+		 * @param bufferSize the buffer size for the transfer.
+		 * @param cancelSwitch the cancel switch for cancelling the transfer. Set to true to stop.
+		 * @param monitor the optional monitor. Can be null.
+		 * @return the amount of bytes moved.
+		 * @throws IOException if an I/O error occurs during transfer.
+		 */
+		public long relayContent(OutputStream out, int bufferSize, AtomicBoolean cancelSwitch, TransferMonitor monitor) throws IOException
+		{
+			return relay(getContentStream(), out, bufferSize, getLength(), cancelSwitch, monitor);
 		}
 		
 		/**
@@ -2868,6 +2909,7 @@ public final class HTTPUtils
 						sb.append(out.url.getUserInfo()).append('@');
 					sb.append(out.url.getAuthority());
 					
+					sb.append("/");
 					sb.append(redirectURI.getPath());
 					
 					if (redirectURI.getQuery() != null)
@@ -3181,6 +3223,9 @@ public final class HTTPUtils
 		/**
 		 * Sends this request and gets an open response.
 		 * <p>
+		 * The request is processed by a non-daemon thread created by a default {@link ThreadFactory}.
+		 * The Thread name is prefixed with <code>"HTTPRequest-"</code>.
+		 * <p>
 		 * The eventual return is best used with a try-with-resources block so that the response input stream auto-closes 
 		 * (but not the connection, which stays alive if possible), like so:
 		 * <pre><code>
@@ -3201,13 +3246,72 @@ public final class HTTPUtils
 		 */
 		public HTTPRequestFuture<HTTPResponse> sendAsync()
 		{
-			HTTPRequestFuture<HTTPResponse> out = new HTTPRequestFuture.Response(this);
-			fetchExecutor().execute(out);
+			return sendAsync(DEFAULT_THREADFACTORY);
+		}
+
+		/**
+		 * Sends this request and gets an open response.
+		 * <p>
+		 * The eventual return is best used with a try-with-resources block so that the response input stream auto-closes 
+		 * (but not the connection, which stays alive if possible), like so:
+		 * <pre><code>
+		 * HTTPRequestFuture<HTTPResponse> future = request.sendAsync(threadFactory);
+		 * 
+		 * // ... code ...
+		 *  
+		 * try (HTTPResponse response = future.get())
+		 * {
+		 *     // ... read response ...
+		 * }
+		 * catch (ExecutionException | InterruptedException e)
+		 * {
+		 *     // ... 
+		 * }
+		 * </code></pre>
+		 * @param threadFactory the ThreadFactory to use for creating the thread that executes the request.
+		 * @return a future for inspecting later, containing the open response object.
+		 */
+		public HTTPRequestFuture<HTTPResponse> sendAsync(ThreadFactory threadFactory)
+		{
+			HTTPRequestFuture<HTTPResponse> out;
+			(threadFactory.newThread(out = new HTTPRequestFuture.Response(this))).start();
+			return out;
+		}
+
+		/**
+		 * Sends this request and gets an open response.
+		 * <p>
+		 * The eventual return is best used with a try-with-resources block so that the response input stream auto-closes 
+		 * (but not the connection, which stays alive if possible), like so:
+		 * <pre><code>
+		 * HTTPRequestFuture<HTTPResponse> future = request.sendAsync(executor);
+		 * 
+		 * // ... code ...
+		 *  
+		 * try (HTTPResponse response = future.get())
+		 * {
+		 *     // ... read response ...
+		 * }
+		 * catch (ExecutionException | InterruptedException e)
+		 * {
+		 *     // ... 
+		 * }
+		 * </code></pre>
+		 * @param executor the ThreadPoolExecutor to use for executing the request.
+		 * @return a future for inspecting later, containing the open response object.
+		 */
+		public HTTPRequestFuture<HTTPResponse> sendAsync(ThreadPoolExecutor executor)
+		{
+			HTTPRequestFuture<HTTPResponse> out;
+			executor.execute(out = new HTTPRequestFuture.Response(this));
 			return out;
 		}
 
 		/**
 		 * Sends this request and gets a decoded response via an {@link HTTPReader}.
+		 * <p>
+		 * The request is processed by a non-daemon thread created by a default {@link ThreadFactory}.
+		 * The Thread name is prefixed with <code>"HTTPRequest-"</code>.
 		 * <p>
 		 * The response input stream auto-closes after read (but not the connection, which stays alive if possible).
 		 * <pre><code>
@@ -3230,13 +3334,71 @@ public final class HTTPUtils
 		 */
 		public <T> HTTPRequestFuture<T> sendAsync(HTTPReader<T> reader)
 		{
-			HTTPRequestFuture<T> out = new HTTPRequestFuture.ObjectResponse<T>(this, reader);
-			fetchExecutor().execute(out);
+			return sendAsync(DEFAULT_THREADFACTORY, reader);
+		}
+
+		/**
+		 * Sends this request and gets a decoded response via an {@link HTTPReader}.
+		 * <p>
+		 * The response input stream auto-closes after read (but not the connection, which stays alive if possible).
+		 * <pre><code>
+		 * HTTPRequestFuture<String> future = request.sendAsync(threadFactory, HTTPReader.STRING_CONTENT_READER);
+		 * 
+		 * // ... code ...
+		 *  
+		 * try
+		 * {
+		 *     String content = future.get();
+		 * }
+		 * catch (ExecutionException | InterruptedException e)
+		 * {
+		 *     // ... 
+		 * }
+		 * </code></pre>
+		 * @param <T> the return type.
+		 * @param threadFactory the ThreadFactory to use for creating the thread that executes the request.
+		 * @param reader the reader to use to read the response.
+		 * @return a future for inspecting later, containing the decoded object.
+		 */
+		public <T> HTTPRequestFuture<T> sendAsync(ThreadFactory threadFactory, HTTPReader<T> reader)
+		{
+			HTTPRequestFuture<T> out;
+			(threadFactory.newThread(out = new HTTPRequestFuture.ObjectResponse<T>(this, reader))).start();
 			return out;
 		}
 
 		/**
-		 * Wraps this request call as a {@link Callable} that returns an {@link HTTPResponse}.
+		 * Sends this request and gets a decoded response via an {@link HTTPReader}.
+		 * <p>
+		 * The response input stream auto-closes after read (but not the connection, which stays alive if possible).
+		 * <pre><code>
+		 * HTTPRequestFuture<String> future = request.sendAsync(executor, HTTPReader.STRING_CONTENT_READER);
+		 * 
+		 * // ... code ...
+		 *  
+		 * try
+		 * {
+		 *     String content = future.get();
+		 * }
+		 * catch (ExecutionException | InterruptedException e)
+		 * {
+		 *     // ... 
+		 * }
+		 * </code></pre>
+		 * @param <T> the return type.
+		 * @param executor the ThreadPoolExecutor to use for executing the request.
+		 * @param reader the reader to use to read the response.
+		 * @return a future for inspecting later, containing the decoded object.
+		 */
+		public <T> HTTPRequestFuture<T> sendAsync(ThreadPoolExecutor executor, HTTPReader<T> reader)
+		{
+			HTTPRequestFuture<T> out;
+			executor.execute(out = new HTTPRequestFuture.ObjectResponse<T>(this, reader));
+			return out;
+		}
+
+		/**
+		 * Wraps this request call as a {@link Callable} that returns an open {@link HTTPResponse}.
 		 * This is for dispatching to a job processor.
 		 * @return a new Callable.
 		 */
@@ -3457,20 +3619,6 @@ public final class HTTPUtils
 	}
 	
 	/**
-	 * Sets the ThreadPoolExecutor to use for asynchronous requests.
-	 * The previous executor, if any, is returned.
-	 * @param executor the thread pool executor to use for async request handling.
-	 * @return the old executor, if any. Can be null.
-	 */
-	public static ThreadPoolExecutor setAsyncExecutor(ThreadPoolExecutor executor)
-	{
-		synchronized (HTTP_THREAD_POOL)
-		{
-			return HTTP_THREAD_POOL.getAndSet(executor);
-		}
-	}
-	
-	/**
 	 * Gets the content from a opening an HTTP URL.
 	 * The response is encapsulated and returned, with an open input stream to read from the body of the return.
 	 * If the response/stream is closed afterward, it will not close the connection (which may be pooled).
@@ -3562,21 +3710,6 @@ public final class HTTPUtils
 		return new HTTPResponse(request, conn, defaultResponseCharset);
 	}
 	
-	// Fetches or creates the thread executor.
-	private static ThreadPoolExecutor fetchExecutor()
-	{
-		ThreadPoolExecutor out;
-		if ((out = HTTP_THREAD_POOL.get()) != null)
-			return out;
-		synchronized (HTTP_THREAD_POOL)
-		{
-			if ((out = HTTP_THREAD_POOL.get()) != null)
-				return out;
-			setAsyncExecutor(out = new HTTPThreadPoolExecutor());
-		}
-		return out;
-	}
-
 	private static final char[] HEX_NYBBLE = "0123456789ABCDEF".toCharArray();
 
 	private static void writePercentChar(StringBuilder target, byte b)
@@ -3612,7 +3745,7 @@ public final class HTTPUtils
 	{
 		long total = 0;
 		int buf = 0;
-			
+		long origMax = maxLength;
 		final byte[] RELAY_BUFFER = new byte[bufferSize];
 		
 		while (!cancelSwitch.get() && (buf = in.read(RELAY_BUFFER, 0, Math.min(maxLength == null ? Integer.MAX_VALUE : (int)Math.min(maxLength, Integer.MAX_VALUE), bufferSize))) > 0)
@@ -3620,7 +3753,7 @@ public final class HTTPUtils
 			out.write(RELAY_BUFFER, 0, buf);
 			total += buf;
 			if (monitor != null)
-				monitor.onProgressChange(total, maxLength);
+				monitor.onProgressChange(total, origMax);
 			if (maxLength != null && maxLength >= 0)
 				maxLength -= buf;
 		}
