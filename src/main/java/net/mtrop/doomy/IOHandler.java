@@ -214,11 +214,11 @@ public interface IOHandler extends AutoCloseable
 	 */
 	static IOHandler stdscript(File scriptFile) throws IOException
 	{
-		@SuppressWarnings("resource") // closed in IOHandler#close()
 		final InputStream fileIn = new FileInputStream(scriptFile);
 		
  		return new IOHandler()
 		{
+ 			@SuppressWarnings("resource") // closed in IOHandler#close()
 			private BufferedReader in = new BufferedReader(new InputStreamReader(fileIn));
 			
 			@Override
