@@ -19,7 +19,7 @@
 
 	<!-- Project Libs -->
 	
-	<property name="json.lib.version" value="1.2.0" />
+	<property name="json.lib.version" value="1.4.1" />
 	<property name="json.tag" value="${json.lib.version}-RELEASE" />
 	<property name="json.project" value="blackrook-json-${json.lib.version}" />	
 	<property name="json.jar" value="${json.project}.jar" />
@@ -31,7 +31,7 @@
 	<property name="sql.jar" value="${sql.project}.jar" />
 	<property name="sql.jar.src" value="${sql.project}-sources.jar" />
 	
-	<property name="sqlite.lib.version" value="3.21.0.1" />
+	<property name="sqlite.lib.version" value="3.50.3.0" />
 	<property name="sqlite.jar" value="sqlite-jdbc-${sqlite.lib.version}.jar" />
 
 	<property name="flatlaf.lib.version" value="2.0.2" />
