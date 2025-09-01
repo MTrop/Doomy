@@ -11,8 +11,8 @@ import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
-import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.struct.ObjectUtils;
+import net.mtrop.doomy.struct.util.FileUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
 
 /**
  * A command that outputs a WAD's TEXT file.

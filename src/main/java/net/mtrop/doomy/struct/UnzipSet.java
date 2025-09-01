@@ -13,6 +13,10 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
+import net.mtrop.doomy.struct.util.FileUtils;
+import net.mtrop.doomy.struct.util.IOUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
+
 /**
  * An unzip set that manages the files unzipped from it.
  * This set is {@link AutoCloseable} - when closed, this will also cal

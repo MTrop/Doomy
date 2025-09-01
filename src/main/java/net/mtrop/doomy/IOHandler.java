@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import net.mtrop.doomy.struct.IOUtils;
+import net.mtrop.doomy.struct.util.IOUtils;
 
 /**
  * An Input-Output handler for messages sent and read from commands.

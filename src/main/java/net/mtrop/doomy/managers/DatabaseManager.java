@@ -10,10 +10,10 @@ import com.blackrook.sql.SQLConnector;
 
 import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.DoomySetupException;
-import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.struct.IOUtils;
-import net.mtrop.doomy.struct.ObjectUtils;
 import net.mtrop.doomy.struct.SingletonProvider;
+import net.mtrop.doomy.struct.util.FileUtils;
+import net.mtrop.doomy.struct.util.IOUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
 
 /**
  * Database manager singleton.

@@ -7,7 +7,7 @@ import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.PresetInfo;
-import net.mtrop.doomy.struct.ObjectUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
 
 /**
  * A command that prints all stored templates.

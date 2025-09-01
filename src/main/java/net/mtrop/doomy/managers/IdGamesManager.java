@@ -10,14 +10,14 @@ import com.blackrook.json.JSONReader;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.managers.DownloadManager.FileDownloadListener;
-import net.mtrop.doomy.struct.HTTPUtils;
 import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPParameters;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPReader;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPResponse;
-import net.mtrop.doomy.struct.HTTPUtils.TransferMonitor;
+import net.mtrop.doomy.struct.util.HTTPUtils;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPParameters;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPReader;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPRequest;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPResponse;
+import net.mtrop.doomy.struct.util.HTTPUtils.TransferMonitor;
 
 /**
  * idGames Manager class.

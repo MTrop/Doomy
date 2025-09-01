@@ -19,8 +19,8 @@ import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileContent;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSearchResponse;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
-import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.struct.ObjectUtils;
+import net.mtrop.doomy.struct.util.FileUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
 
 /**
  * A common implementation of all idGames search functions.

@@ -11,10 +11,10 @@ import java.net.URLConnection;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.AsyncFactory.Cancellable;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
-import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.struct.HTTPUtils;
+import net.mtrop.doomy.struct.util.FileUtils;
+import net.mtrop.doomy.struct.util.HTTPUtils;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPHeaders;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPRequest;
 import net.mtrop.doomy.struct.SingletonProvider;
 
 /**

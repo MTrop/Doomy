@@ -7,8 +7,8 @@ import com.blackrook.sql.SQLRow;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.managers.EngineManager.Engine;
-import net.mtrop.doomy.struct.ObjectUtils;
 import net.mtrop.doomy.struct.SingletonProvider;
+import net.mtrop.doomy.struct.util.ObjectUtils;
 
 /**
  * Engine config manager singleton.

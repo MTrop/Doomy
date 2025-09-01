@@ -19,12 +19,12 @@ import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.PresetManager.Preset;
 import net.mtrop.doomy.managers.WADManager.WAD;
-import net.mtrop.doomy.struct.FileUtils;
-import net.mtrop.doomy.struct.IOUtils;
 import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.UnzipSet;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.util.FileUtils;
+import net.mtrop.doomy.struct.util.IOUtils;
 
 /**
  * Launcher manager.

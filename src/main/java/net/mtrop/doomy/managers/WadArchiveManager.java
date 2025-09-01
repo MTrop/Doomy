@@ -9,13 +9,13 @@ import com.blackrook.json.JSONReader;
 import com.blackrook.json.annotation.JSONMapType;
 
 import net.mtrop.doomy.DoomySetupException;
-import net.mtrop.doomy.struct.HTTPUtils;
 import net.mtrop.doomy.struct.SingletonProvider;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPHeaders;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPReader;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPRequest;
-import net.mtrop.doomy.struct.HTTPUtils.HTTPResponse;
-import net.mtrop.doomy.struct.HTTPUtils.TransferMonitor;
+import net.mtrop.doomy.struct.util.HTTPUtils;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPHeaders;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPReader;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPRequest;
+import net.mtrop.doomy.struct.util.HTTPUtils.HTTPResponse;
+import net.mtrop.doomy.struct.util.HTTPUtils.TransferMonitor;
 
 /**
  * Wad-Archive Manager class.

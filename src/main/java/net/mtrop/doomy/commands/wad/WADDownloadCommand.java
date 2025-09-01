@@ -10,8 +10,8 @@ import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.DownloadManager;
 import net.mtrop.doomy.managers.WADManager;
-import net.mtrop.doomy.struct.FileUtils;
 import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.util.FileUtils;
 
 /**
  * A command that adds a new WAD.

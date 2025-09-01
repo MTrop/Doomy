@@ -10,7 +10,7 @@ import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.IWADManager;
-import net.mtrop.doomy.struct.FileUtils;
+import net.mtrop.doomy.struct.util.FileUtils;
 
 import static net.mtrop.doomy.DoomyCommand.matchArgument;
 
