@@ -11,6 +11,7 @@ import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.SingletonProvider;
+import net.mtrop.doomy.struct.swing.TableFactory.Column;
 
 /**
  * WAD manager singleton.
@@ -240,8 +241,10 @@ public final class WADManager
 		/** Entry id. */
 		public long id;
 		/** WAD name. */
+		@Column(name = "Name", order = 0, sortable = true, editable = false)
 		public String name;
 		/** WAD path. */
+		@Column(name = "Path", order = 1, sortable = false, editable = true)
 		public String path;
 		/** Source URL. */
 		public String sourceUrl;

@@ -22,6 +22,8 @@ public final class DoomyEnvironment
     private static final String TEMP_DIR = "temp";
     /** Doomy DB name. */
     private static final String SETTINGS_DB = "doomy.db";
+    /** Doomy properties name. */
+    private static final String PROPERTIES_FILE = "doomy.properties";
     /** Doomy portable file name. */
     private static final String PORTABLE_FILE = "portable.txt";
     
@@ -44,7 +46,7 @@ public final class DoomyEnvironment
      */
     public static String getTempDirectoryPath()
     {
-    	return (new File(getConfigBasePath() + "/" + TEMP_DIR)).getAbsolutePath();
+    	return (new File(getConfigBasePath() + TEMP_DIR)).getAbsolutePath();
     }
 
     /**
@@ -55,7 +57,7 @@ public final class DoomyEnvironment
     public static String getPresetDirectoryPath(String presetHash)
     {
     	DoomyCommon.checkNotEmpty(presetHash);
-    	return (new File(getConfigBasePath() + "/" + PRESETS_DIR + "/" + presetHash)).getAbsolutePath();
+    	return (new File(getConfigBasePath() + PRESETS_DIR + "/" + presetHash)).getAbsolutePath();
     }
 
     /**
@@ -64,7 +66,7 @@ public final class DoomyEnvironment
      */
     public static String getDownloadDirectoryPath()
     {
-    	return (new File(getConfigBasePath() + "/" + DOWNLOADS_DIR)).getAbsolutePath();
+    	return (new File(getConfigBasePath() + DOWNLOADS_DIR)).getAbsolutePath();
     }
 
     /**
@@ -73,7 +75,16 @@ public final class DoomyEnvironment
      */
     public static String getDatabasePath()
     {
-    	return (new File(getConfigBasePath() + "/" + SETTINGS_DB)).getAbsolutePath();
+    	return (new File(getConfigBasePath() + SETTINGS_DB)).getAbsolutePath();
+    }
+
+    /**
+     * Gets the path to a specific preset.
+     * @return the canonical directory path to the preset.
+     */
+    public static String getPropertiesPath()
+    {
+    	return (new File(getConfigBasePath() + PROPERTIES_FILE)).getAbsolutePath();
     }
 
 }
