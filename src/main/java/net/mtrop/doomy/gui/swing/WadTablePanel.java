@@ -1,15 +1,11 @@
 package net.mtrop.doomy.gui.swing;
 
-import javax.swing.DefaultListSelectionModel;
 import javax.swing.JPanel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableModelEvent;
 
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.TableFactory.JObjectTable;
-import net.mtrop.doomy.struct.swing.TableFactory.JObjectTableModel;
 
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
@@ -19,6 +15,8 @@ import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 
 import java.awt.BorderLayout;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * The WAD table panel.
@@ -36,17 +34,21 @@ public class WadTablePanel extends JPanel
 	
 	/**
 	 * Creates a new WAD Table panel.
+	 * @param selectionListener the listener to call when a selection changes.
 	 */
-	public WadTablePanel()
+	public WadTablePanel(final JObjectTableSelectionListener<WAD> selectionListener)
 	{
 		this.wadManager = WADManager.get();
 		this.filterField = stringField(this::onFilterChange);
 		this.wadTable = objectTable(SelectionPolicy.SINGLE_INTERVAL, 
-			objectTableModel(WAD.class, Arrays.asList(wadManager.getAllWADs("")), this::onTableChange), 
-			this::onSelectionChange
+			objectTableModel(WAD.class, Arrays.asList(wadManager.getAllWADs(""))), 
+			selectionListener
 		);
 		
-		containerOf(this, dimension(350, 250), borderLayout(0, 8),
+		this.wadTable.getColumnModel().getColumn(0).setPreferredWidth(150);
+		this.wadTable.getColumnModel().getColumn(1).setPreferredWidth(300);
+		
+		containerOf(this, dimension(450, 250), borderLayout(0, 8),
 			node(BorderLayout.NORTH, containerOf(borderLayout(8, 0),
 				node(BorderLayout.LINE_START, label("Filter: ")),
 				node(BorderLayout.CENTER, filterField)
@@ -60,20 +62,20 @@ public class WadTablePanel extends JPanel
 		wadTable.setRowFilter((wad) -> wad.name.contains(filter));
 	}
 	
-	private void onTableChange(JObjectTableModel<WAD> model, TableModelEvent event)
+	/**
+	 * @return the current selected WADs.
+	 */
+	public List<WAD> getSelectedWADs()
 	{
-		// TODO: Make better.
-		if (event.getType() == TableModelEvent.UPDATE)
-		{
-			System.out.println(model.getRow(event.getFirstRow()).name);
-		}
+		return wadTable.getSelectedObjects();
 	}
 	
-	private void onSelectionChange(DefaultListSelectionModel model, ListSelectionEvent event)
+	/**
+	 * Reloads and re-populates the table with WADs.
+	 */
+	public void refreshWADs()
 	{
-		// TODO: Make better.
-		if (!event.getValueIsAdjusting())
-			System.out.println(wadTable.getSelectedRow());
+		wadTable.getTableModel().setRows(Arrays.asList(wadManager.getAllWADs("")));
 	}
 	
 }

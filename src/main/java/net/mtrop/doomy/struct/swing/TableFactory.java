@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2025 Black Rook Software
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package net.mtrop.doomy.struct.swing;
 
 import java.lang.annotation.ElementType;
@@ -264,6 +269,61 @@ public final class TableFactory
 			return this;
 		}
 
+		/**
+		 * Gets the list of selected list indices, translated to the model.
+		 * @return the list of model-converted indices.
+		 */
+		public int[] getModelConvertedSelectedRows()
+		{
+			int[] indices = getSelectedRows();
+			int[] out = new int[indices.length];
+			for (int i = 0; i < indices.length; i++)
+				out[i] = convertRowIndexToModel(indices[i]);
+			return out;
+		}
+		
+		/**
+		 * Gets the list of selected objects.
+		 * The indices from {@link #getSelectedRows()} are converted to the model.
+		 * @return the list of selected objects in the table.
+		 * @see #convertRowIndexToModel(int)
+		 */
+		@SuppressWarnings("unchecked")
+		public List<T> getSelectedObjects()
+		{
+			int[] indices = getSelectedRows();
+			ArrayList<T> outList = new ArrayList<>(indices.length);
+			for (int i = 0; i < indices.length; i++)
+			{
+				JObjectTableModel<T> model = (JObjectTableModel<T>)getModel();
+				outList.add(model.getRow(convertRowIndexToModel(indices[i])));
+			}
+			
+			return Collections.unmodifiableList(outList);
+		}
+		
+		/**
+		 * Gets the list of selected objects.
+		 * The indices from {@link #getSelectedRows()} are converted to the model.
+		 * @return the list of selected objects in the table.
+		 * @see #convertRowIndexToModel(int)
+		 */
+		public T getSelectedObject()
+		{
+			if (getSelectedRow() == -1)
+				return null;
+			return getSelectedObjects().get(0);
+		}
+		
+		/**
+		 * @return the {@link JObjectTableModel} that backs this table.
+		 */
+		@SuppressWarnings("unchecked")
+		public JObjectTableModel<T> getTableModel()
+		{
+			return (JObjectTableModel<T>)getModel();
+		}
+		
 	}
 	
 	/** 
@@ -559,6 +619,16 @@ public final class TableFactory
 		}
 		
 		/**
+		 * Sets all the rows in this model to the provided collection of rows.
+		 * @param collection the collection.
+		 */
+		public void setRows(Collection<T> collection)
+		{
+			objects.clear();
+			addAllRowsAt(collection, 0);
+		}
+		
+		/**
 		 * Adds a row to the end of this table.
 		 * @param row the row to add.
 		 */
@@ -582,9 +652,9 @@ public final class TableFactory
 		 * Adds a series of rows to the end of this table.
 		 * @param collection the collection of items.
 		 */
-		public void addAll(Collection<T> collection)
+		public void addAllRows(Collection<T> collection)
 		{
-			addAllAt(collection, objects.size());
+			addAllRowsAt(collection, objects.size());
 		}
 		
 		/**
@@ -592,7 +662,7 @@ public final class TableFactory
 		 * @param collection the collection of items.
 		 * @param index the destination index.
 		 */
-		public void addAllAt(Collection<T> collection, int index)
+		public void addAllRowsAt(Collection<T> collection, int index)
 		{
 			objects.addAll(index, collection);
 			fireInsertEvent(index, collection.size() + index - 1);

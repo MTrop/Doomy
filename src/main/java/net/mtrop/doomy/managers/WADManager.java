@@ -21,6 +21,8 @@ public final class WADManager
 {
 	// ============================== QUERIES ================================
 	
+	private static final String QUERY_GET_COUNT
+		= "SELECT COUNT(*) FROM WADs"; 
 	private static final String QUERY_GET_BY_ID
 		= "SELECT * FROM WADs WHERE id = ?"; 
 	private static final String QUERY_GET_BY_NAME 
@@ -93,9 +95,18 @@ public final class WADManager
 	}
 	
 	/**
+	 * Fetches the amount of WADs.
+	 * @return a WAD,or null if not found.
+	 */
+	public long getWADCount()
+	{
+		return connection.getRow(QUERY_GET_COUNT).getLong(0);
+	}
+	
+	/**
 	 * Fetches a WAD entry.
 	 * @param id the id of the WAD.
-	 * @return a WAD,or null if not found.
+	 * @return a WAD, or null if not found.
 	 */
 	public WAD getWAD(long id)
 	{
@@ -244,7 +255,7 @@ public final class WADManager
 		@Column(name = "Name", order = 0, sortable = true, editable = false)
 		public String name;
 		/** WAD path. */
-		@Column(name = "Path", order = 1, sortable = false, editable = true)
+		@Column(name = "Path", order = 1, sortable = false, editable = false)
 		public String path;
 		/** Source URL. */
 		public String sourceUrl;
