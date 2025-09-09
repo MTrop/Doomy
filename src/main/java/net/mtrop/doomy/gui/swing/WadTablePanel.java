@@ -16,7 +16,6 @@ import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 import java.awt.BorderLayout;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * The WAD table panel.
