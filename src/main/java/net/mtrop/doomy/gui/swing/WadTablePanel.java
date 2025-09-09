@@ -40,7 +40,7 @@ public class WadTablePanel extends JPanel
 		this.wadManager = WADManager.get();
 		this.filterField = stringField(this::onFilterChange);
 		this.wadTable = objectTable(SelectionPolicy.SINGLE_INTERVAL, 
-			objectTableModel(WAD.class, Arrays.asList(wadManager.getAllWADs(""))), 
+			objectTableModel(WAD.class, Arrays.asList(wadManager.getAllWADs())), 
 			selectionListener
 		);
 		
@@ -74,7 +74,7 @@ public class WadTablePanel extends JPanel
 	 */
 	public void refreshWADs()
 	{
-		wadTable.getTableModel().setRows(Arrays.asList(wadManager.getAllWADs("")));
+		wadTable.getTableModel().setRows(Arrays.asList(wadManager.getAllWADs()));
 	}
 	
 }

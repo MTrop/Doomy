@@ -124,9 +124,18 @@ public final class WADManager
 	}
 	
 	/**
+	 * Gets a set of all WADs.
+	 * @return the found WADs.
+	 */
+	public WAD[] getAllWADs()
+	{
+		return getAllWADs("");
+	}
+	
+	/**
 	 * Gets a set of WAD templates by name.
 	 * @param containingPhrase the phrase to search for.
-	 * @return the found templates.
+	 * @return the found WADs.
 	 */
 	public WAD[] getAllWADs(String containingPhrase)
 	{
@@ -136,7 +145,7 @@ public final class WADManager
 	/**
 	 * Gets a set of WAD templates by name that have a source.
 	 * @param containingPhrase the phrase to search for.
-	 * @return the found templates.
+	 * @return the found WADs.
 	 */
 	public WAD[] getAllWADsWithSources(String containingPhrase)
 	{
@@ -146,7 +155,7 @@ public final class WADManager
 	/**
 	 * Gets a set of WAD templates by name that have no source.
 	 * @param containingPhrase the phrase to search for.
-	 * @return the found templates.
+	 * @return the found WADs.
 	 */
 	public WAD[] getAllWADsWithNoSource(String containingPhrase)
 	{
