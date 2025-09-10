@@ -2,6 +2,7 @@ package net.mtrop.doomy.gui.swing;
 
 import javax.swing.JPanel;
 
+import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
@@ -25,6 +26,7 @@ public class WadTablePanel extends JPanel
 	private static final long serialVersionUID = 5567427378826188364L;
 	
 	private WADManager wadManager;
+	private LanguageManager language;
 	
 	/** The WAD filter field. */
 	private JFormField<String> filterField;
@@ -38,6 +40,8 @@ public class WadTablePanel extends JPanel
 	public WadTablePanel(final JObjectTableSelectionListener<WAD> selectionListener)
 	{
 		this.wadManager = WADManager.get();
+		this.language = LanguageManager.get();
+		
 		this.filterField = stringField(this::onFilterChange);
 		this.wadTable = objectTable(SelectionPolicy.SINGLE_INTERVAL, 
 			objectTableModel(WAD.class, Arrays.asList(wadManager.getAllWADs())), 
@@ -49,7 +53,7 @@ public class WadTablePanel extends JPanel
 		
 		containerOf(this, dimension(450, 250), borderLayout(0, 8),
 			node(BorderLayout.NORTH, containerOf(borderLayout(8, 0),
-				node(BorderLayout.LINE_START, label("Filter: ")),
+				node(BorderLayout.LINE_START, label(language.getText("wads.filter"))),
 				node(BorderLayout.CENTER, filterField)
 			)),
 			node(BorderLayout.CENTER, scroll(wadTable))

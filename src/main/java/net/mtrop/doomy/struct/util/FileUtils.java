@@ -1,12 +1,12 @@
 /*******************************************************************************
- * Copyright (c) 2019 Black Rook Software
- * 
+ * Copyright (c) 2020-2025 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
 package net.mtrop.doomy.struct.util;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,6 +16,8 @@ import java.net.URL;
 import java.nio.channels.FileLock;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -30,6 +32,35 @@ public final class FileUtils
 	private FileUtils() {}
 
 	/**
+	 * The null file stream.
+	 */
+	public static final File NULL_FILE = new File(System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null");
+	
+	private static final String TEMP_FILE_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+
+	private static final File TEMP_DIR = new File(System.getProperty("java.io.tmpdir"));
+	
+	private static final Comparator<File> FILELIST_COMPARATOR;
+	private static final Comparator<File> FILE_COMPARATOR;
+
+	static
+	{
+		final Comparator<File> fileNameComparator = System.getProperty("os.name").contains("Windows")
+				? (a, b) -> String.CASE_INSENSITIVE_ORDER.compare(a.getPath(), b.getPath())
+				: (a, b) -> a.getPath().compareTo(b.getPath())
+		;
+		
+		FILELIST_COMPARATOR = (a, b) -> (
+			a.isDirectory() 
+				? (b.isDirectory() ? fileNameComparator.compare(a, b) : -1)
+				: (b.isDirectory() ? 1 : fileNameComparator.compare(a, b))
+		);
+		
+		FILE_COMPARATOR = (a, b) -> fileNameComparator.compare(a, b);
+	}
+	
+
+	/**
 	 * Creates a blank file or updates its last modified date.
 	 * @param filePath	the abstract path to use.
 	 * @return true if the file was made/updated, false otherwise.
@@ -37,9 +68,20 @@ public final class FileUtils
 	 */
 	public static boolean touch(String filePath) throws IOException
 	{
-		File f = new File(filePath);
-		FileOutputStream fos = new FileOutputStream(f,true);
-		fos.close();
+		return touch(new File(filePath));
+	}
+
+	/**
+	 * Creates a blank file or updates its last modified date.
+	 * @param filePath	the abstract path to use.
+	 * @return true if the file was made/updated, false otherwise.
+	 * @throws IOException if creating/modifying the file violates something.
+	 */
+	public static boolean touch(File filePath) throws IOException
+	{
+		RandomAccessFile file = new RandomAccessFile(filePath, "rw");
+		file.setLength(file.length()); // should make a mock write without altering anything.
+		file.close();
 		return true;
 	}
 
@@ -122,25 +164,40 @@ public final class FileUtils
 	 * Creates a file filled with random data with the specified length.
 	 * If <code>file</code> refers to an existing file, it will be OVERWRITTEN.
 	 * @param file the file to write.
+	 * @param random the random number generator to use.
 	 * @param length the length of the file in bytes.
 	 * @throws IOException if an I/O error occurs.
 	 */
-	public static void createJunkFile(File file, int length) throws IOException
+	public static void createJunkFile(File file, Random random, int length) throws IOException
 	{
 		byte[] buffer = new byte[65536];
-		Random r = new Random();
 		int n = 0;
 		
 		FileOutputStream fos = new FileOutputStream(file);
 		while (n < length)
 		{
-			r.nextBytes(buffer);
+			random.nextBytes(buffer);
 			int len = Math.min(buffer.length, length - n);
 			fos.write(buffer, 0, len);
 			fos.flush();
 			n += len;
 		}
 		fos.close();
+	}
+
+	/**
+	 * Creates a temporary file for whatever purpose.
+	 * The returned object can be autoclosed via try-with-resources or some other method, which will
+	 * attempt to delete it from storage.
+	 * @return the file created.
+	 */
+	public static TempFile createTempFile()
+	{
+		Random random = new Random();
+		char[] out = new char[32];
+		for (int i = 0; i < out.length; i++)
+			out[i] = TEMP_FILE_ALPHABET.charAt(random.nextInt(TEMP_FILE_ALPHABET.length()));
+		return new TempFile(canonizeFile(TEMP_DIR) + File.separator + (new String(out)) + ".tmp");
 	}
 
 	/**
@@ -263,6 +320,21 @@ public final class FileUtils
 	}
 
 	/**
+	 * Returns the provided file path into a canonical File path.
+	 * If a call to {@link File#getCanonicalFile()} fails, it will call {@link File#getAbsoluteFile()} instead.
+	 * @param source the source file.
+	 * @return the resultant File with a full path.
+	 */
+	public static File canonizeFile(File source)
+	{
+		try {
+			return source.getCanonicalFile();
+		} catch (IOException e) {
+			return source.getAbsoluteFile();
+		}
+	}
+
+	/**
 	 * Returns the file's name, no extension.
 	 * @param file the file.
 	 * @param extensionSeparator the text or characters that separates file name from extension.
@@ -284,7 +356,7 @@ public final class FileUtils
 		int extindex = filename.lastIndexOf(extensionSeparator);
 		if (extindex >= 0)
 			return filename.substring(0, extindex);
-		return "";
+		return filename;
 	}
 
 	/**
@@ -352,6 +424,88 @@ public final class FileUtils
 	public static String getFileExtension(File file)
 	{
 		return getFileExtension(file.getName(), ".");
+	}
+	
+	/**
+	 * Appends an extension to a file.
+	 * @param file the input file.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addExtension(File file, String extensionSeparator, String extension)
+	{
+		String parent = file.getParent();
+		return new File((parent != null ? file.getParent() + File.separator : "") + file.getName() + extensionSeparator + extension);
+	}
+
+	/**
+	 * Appends an extension to a file.
+	 * Assumes the separator to be ".".
+	 * @param file the input file.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addExtension(File file, String extension)
+	{
+		return addExtension(file, ".", extension);
+	}
+
+	/**
+	 * Appends an extension to a file, if it is missing an extension.
+	 * @param file the input file.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addMissingExtension(File file, String extensionSeparator, String extension)
+	{
+		String ext = getFileExtension(file, extensionSeparator);
+		if (ext.length() == 0)
+			return new File(file.getPath() + extensionSeparator + extension);
+		return file;
+	}
+
+	/**
+	 * Appends an extension to a file.
+	 * Assumes the separator to be ".".
+	 * @param file the input file.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File addMissingExtension(File file, String extension)
+	{
+		return addMissingExtension(file, ".", extension);
+	}
+
+	/**
+	 * Appends an extension to a file, if it already has an extension, replacing its final extension.
+	 * @param file the input file.
+	 * @param extensionSeparator the text or characters that separates file name from extension.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File changeExtension(File file, String extensionSeparator, String extension)
+	{
+		String ext = getFileExtension(file, extensionSeparator);
+		if (ext.length() >= 0)
+		{
+			String fileName = getFileNameWithoutExtension(file);
+			String parent = file.getParent();
+			return new File((parent != null ? file.getParent() + File.separator : "") + fileName + extensionSeparator + extension);
+		}
+		return file;
+	}
+
+	/**
+	 * Appends an extension to a file, if it already has an extension, replacing its final extension.
+	 * @param file the input file.
+	 * @param extension the extension to add.
+	 * @return the new file path.
+	 */
+	public static File changeExtension(File file, String extension)
+	{
+		return changeExtension(file, ".", extension);
 	}
 
 	/**
@@ -592,7 +746,7 @@ public final class FileUtils
 	 * directories, by traversing directory paths.
 	 *
 	 * The returned list is not guaranteed to be in any order
-	 * related to the input list, and may contain files that are
+	 * related to the input list, and will contain files that are
 	 * in the input list if they are not directories.
 	 *
 	 * @param files	the list of files to expand.
@@ -613,7 +767,12 @@ public final class FileUtils
 			if (dequeuedFile.isDirectory())
 			{
 				for (File f : dequeuedFile.listFiles())
-					fileQueue.add(f);
+				{
+					if (f.isDirectory())
+						fileQueue.add(f);
+					else
+						fileList.add(f);
+				}
 			}
 			else
 			{
@@ -624,6 +783,322 @@ public final class FileUtils
 		File[] out = new File[fileList.size()];
 		fileList.toArray(out);
 		return out;
+	}
+	
+	/**
+	 * Expands a list of files into a larger list of files,
+	 * such that all of the files in the resultant list are not
+	 * directories, by traversing directory paths, but unlike
+	 * {@link #explodeFiles(File...)}, this does NOT RECURSE!
+	 *
+	 * The returned list is not guaranteed to be in any order
+	 * related to the input list, and will contain files that are
+	 * in the input list if they are not directories.
+	 *
+	 * @param files	the list of files to expand.
+	 * @return	a list of all files found in the subdirectory search.
+	 * @throws	NullPointerException if files is null.
+	 */
+	public static File[] expandFiles(File ... files)
+	{
+		Queue<File> fileQueue = new LinkedList<File>();
+		List<File> fileList = new ArrayList<File>();
+	
+		for (File f : files)
+			fileQueue.add(f);
+	
+		while (!fileQueue.isEmpty())
+		{
+			File dequeuedFile = fileQueue.poll();
+			if (!dequeuedFile.isDirectory())
+			{
+				for (File f : dequeuedFile.listFiles())
+					if (!f.isDirectory())
+						fileList.add(f);
+			}
+			else
+			{
+				fileList.add(dequeuedFile);
+			}
+		}
+	
+		File[] out = new File[fileList.size()];
+		fileList.toArray(out);
+		return out;
+	}
+
+	/**
+	 * Scans a directory for a file recursively until it finds the desired file (by name).
+	 * @param dir the directory to search.
+	 * @param name the name of the file.
+	 * @param noExt if true, do not use the file's extension, just name.
+	 * @param caseSensitive if true, search case-insensitively.
+	 * @return the found file, or null if not found.
+	 */
+	public static File searchDirectory(File dir, String name, boolean noExt, boolean caseSensitive)
+	{
+		for (File file : dir.listFiles())
+		{
+			if (file.isDirectory())
+			{
+				File found;
+				if ((found = searchDirectory(file, name, noExt, caseSensitive)) != null)
+					return found;
+			}
+			else
+			{
+				if (noExt)
+				{
+					String filename = FileUtils.getFileNameWithoutExtension(file);
+					if (caseSensitive && filename.equals(name))
+					{
+						return file;
+					}
+					else if (!caseSensitive && filename.equalsIgnoreCase(name))
+					{
+						return file;
+					}
+				}
+				else
+				{
+					String filename = file.getName();
+					if (caseSensitive && filename.equals(name))
+					{
+						return file;
+					}
+					else if (!caseSensitive && filename.equalsIgnoreCase(name))
+					{
+						return file;
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Deletes all files under a directory.
+	 * If the provided file is not a directory, it is still deleted.
+	 * This does not search recursively for more files.
+	 * @param directory the directory.
+	 * @return the files deleted.
+	 */
+	public static File[] deleteDirectory(File directory)
+	{
+		return deleteDirectory(directory, false, (file) -> true);
+	}
+	
+	/**
+	 * Deletes all files under a directory.
+	 * If the provided file is not a directory, it is still deleted.
+	 * @param directory the directory.
+	 * @param recurse if true, recurse through directories and delete those.
+	 * @return the files deleted.
+	 */
+	public static File[] deleteDirectory(File directory, boolean recurse)
+	{
+		return deleteDirectory(directory, recurse, (file) -> true);
+	}
+	
+	/**
+	 * Deletes all files under a directory.
+	 * If the provided file is not a directory, it is still deleted.
+	 * @param directory the directory.
+	 * @param recurse if true, recurse through directories and delete those.
+	 * @param filter an optional file filter for what to delete.
+	 * @return the files deleted.
+	 */
+	public static File[] deleteDirectory(File directory, boolean recurse, FileFilter filter)
+	{
+		List<File> aggregator = new LinkedList<File>();
+		deleteDirectoryRecurse(aggregator, directory, recurse, filter);
+		return aggregator.toArray(new File[aggregator.size()]);
+	}
+	
+	/**
+	 * Deletes all files under a directory.
+	 * If the provided file is not a directory, it is still deleted.
+	 * @param aggregator the aggregate list for all deleted files.
+	 * @param directory the directory.
+	 * @param recurse if true, recurse through directories and delete those.
+	 * @param filter an optional file filter for what to delete.
+	 */
+	public static void deleteDirectoryRecurse(List<File> aggregator, File directory, boolean recurse, FileFilter filter)
+	{
+		File[] files = directory.listFiles(filter);
+		if (files == null)
+		{
+			if (directory.delete())
+				aggregator.add(directory);
+			return;
+		}
+		
+		for (int i = 0; i < files.length; i++) 
+		{
+			File file = files[i];
+			if (file.isDirectory() && recurse)
+			{
+				deleteDirectoryRecurse(aggregator, file, recurse, filter);
+			}
+			else
+			{
+				if (file.delete())
+					aggregator.add(file);
+			}
+		}
+		
+		if (directory.delete())
+			aggregator.add(directory);
+	}
+
+	
+	/**
+	 * Gets a list of subdirectories from a top directory.
+	 * @param startDirectory the starting directory.
+	 * @param includeTop if true, the output includes the starting directory.
+	 * @return an array of subdirectory paths under the top directory.
+	 */
+	public static File[] getSubdirectories(File startDirectory, boolean includeTop)
+	{
+		return getSubdirectories(startDirectory, includeTop, (unused) -> true);
+	}
+
+	/**
+	 * Gets a list of subdirectories from a top directory.
+	 * @param startDirectory the starting directory.
+	 * @param includeTop if true, the output includes the starting directory.
+	 * @param dirFilter additional directory filter.
+	 * @return an array of subdirectory paths under the top directory.
+	 */
+	public static File[] getSubdirectories(File startDirectory, boolean includeTop, FileFilter dirFilter)
+	{
+		if (!startDirectory.isDirectory())
+			return null;
+		
+		List<File> dirs = new LinkedList<>();
+		Deque<File> dirQueue = new LinkedList<>();
+		dirQueue.add(startDirectory);
+		
+		if (includeTop)
+			dirs.add(startDirectory);
+		
+		while (!dirQueue.isEmpty())
+		{
+			File dir = dirQueue.pollFirst();
+			File[] files = dir.listFiles((f) -> f.isDirectory());
+			for (int i = 0; i < files.length; i++)
+			{
+				if (dirFilter.accept(files[i]))
+				{
+					dirQueue.add(files[i]);
+					dirs.add(files[i]);
+				}
+			}
+		}
+		
+		return dirs.toArray(new File[dirs.size()]);
+	}
+
+	/**
+	 * Compares two file paths for equality.
+	 * If the OS is Windows, the paths are compared case-insensitively.
+	 * @param a the first file.
+	 * @param b the second file.
+	 * @return true if the two files have the same absolute path, false otherwise.
+	 */
+	public static boolean filePathEquals(File a, File b)
+	{
+		if (a == null)
+			return b == null;
+		else if (b == null)
+			return false;
+		else if (OSUtils.isWindows())
+			return a.getAbsolutePath().equalsIgnoreCase(b.getAbsolutePath());
+		else
+			return a.getAbsolutePath().equals(b.getAbsolutePath());
+	}
+	
+	/**
+	 * Gets a file comparator that sorts files by name, lexicographically.
+	 * Name sort is case-insensitive on operating systems with case-insensitive filesystems. 
+	 * @return the comparator.
+	 */
+	public static Comparator<File> getFileComparator()
+	{
+		return FILE_COMPARATOR;
+	}
+
+	/**
+	 * Gets a file comparator that sorts directories before files, lexicographically.
+	 * Name sort is case-insensitive on operating systems with case-insensitive filesystems. 
+	 * @return the comparator.
+	 */
+	public static Comparator<File> getFileListComparator()
+	{
+		return FILELIST_COMPARATOR;
+	}
+	
+	/**
+	 * Attempts to rename a file, waiting to do so since the file's handle may not be relinquished.
+	 * Guaranteed to at least wait the amount of the timeout in milliseconds.
+	 * @param oldName the file name.
+	 * @param newName the file's new name.
+	 * @param timeout the timeout in milliseconds.
+	 * @return true if the file was renamed, false if not.
+	 */
+	public static boolean renameTimeout(File oldName, File newName, final int timeout)
+	{
+		int t = 0;
+		while (!oldName.renameTo(newName) && t <= timeout)
+		{
+			t++;
+			try {
+				Thread.sleep(1);
+			} catch (InterruptedException e) {
+				// Do nothing.
+			}
+		}
+		
+		return t < timeout;
+	}
+
+	/**
+	 * Attempts to match a file's magic number (initial bytes).
+	 * @param f the file to test.
+	 * @param magicNumber the magic number bytes to test for.
+	 * @return true if matched, false if not.
+	 * @throws IOException if a read error occurs.
+	 */
+	public static boolean matchMagicNumber(File f, byte[] magicNumber) throws IOException
+	{
+		try (RandomAccessFile raf = new RandomAccessFile(f, "r"))
+		{
+			byte[] buf = new byte[magicNumber.length];
+			int len = raf.read(buf);
+			if (len != magicNumber.length)
+				return false;
+			return Arrays.equals(magicNumber, buf);
+		}
+	}
+	
+	/**
+	 * A path to a temporary file that is deleted on close.
+	 */
+	public static final class TempFile extends File implements AutoCloseable
+	{
+		private static final long serialVersionUID = -4447892228054673063L;
+
+		private TempFile(String path) 
+		{
+			super(path);
+		}
+		
+		@Override
+		public void close()
+		{
+			if (exists())
+				delete();
+		}
 	}
 	
 }

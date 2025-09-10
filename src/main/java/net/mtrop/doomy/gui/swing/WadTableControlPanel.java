@@ -10,6 +10,8 @@ import javax.swing.JTextArea;
 import javax.swing.event.ListSelectionEvent;
 
 import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.managers.GUIManager;
+import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
@@ -48,8 +50,10 @@ public class WadTableControlPanel extends JPanel
 {
 	private static final long serialVersionUID = -8553950836856607413L;
 	
+	private GUIManager gui;
 	private WADManager wadManager;
 	private TaskManager taskManager;
+	private LanguageManager language;
 	
 	private Action addAction;
 	private Action removeAction;
@@ -62,13 +66,15 @@ public class WadTableControlPanel extends JPanel
 	 */
 	public WadTableControlPanel()
 	{
+		this.gui = GUIManager.get();
 		this.wadManager = WADManager.get();
 		this.taskManager = TaskManager.get();
+		this.language = LanguageManager.get();
 		
-		this.addAction = actionItem("Add...", (e) -> onAdd());
-		this.removeAction = actionItem("Remove", (e) -> onRemove());
-		this.scanAction = actionItem("Scan...", (e) -> onScan());
-		this.cleanupAction = actionItem("Cleanup...", (e) -> onCleanup());
+		this.addAction = actionItem(language.getText("wads.add"), (e) -> onAdd());
+		this.removeAction = actionItem(language.getText("wads.remove"), (e) -> onRemove());
+		this.scanAction = actionItem(language.getText("wads.scan"), (e) -> onScan());
+		this.cleanupAction = actionItem(language.getText("wads.cleanup"), (e) -> onCleanup());
 		this.wadTable = new WadTablePanel(this::onSelection);
 		
 		this.removeAction.setEnabled(false);
@@ -92,9 +98,9 @@ public class WadTableControlPanel extends JPanel
 	private void onAdd()
 	{
 		final JFormField<String> wadNameField = stringField(false, true);
-		final JFormField<File> wadPathField = fileField(null, "Browse...", 
+		final JFormField<File> wadPathField = fileField(null, language.getText("file.browse"), 
 			(current) -> {
-				File chosen = chooseFile(this, "Browse...", "Select", fileExtensionFilter("Doom Archives", "wad", "pk3", "pke", "zip", "pk7"));
+				File chosen = chooseFile(this, language.getText("file.browse.file.title"), language.getText("file.browse.select"), gui.createDoomArchivesFilter());
 				return chosen != null ? chosen : current;
 			}, 
 			(selected) -> {
@@ -103,14 +109,14 @@ public class WadTableControlPanel extends JPanel
 			}
 		);
 		
-		Boolean doAdd = modal(this, "Add WAD", containerOf(dimension(350, 64),
-				node(form(LabelSide.LEADING, LabelJustification.LEADING, 50)
-					.addField("Name", wadNameField)
-					.addField("Path", wadPathField)
-				)
-			), 
-			choice("Add", KeyEvent.VK_A, (Boolean)true),
-			choice("Cancel", KeyEvent.VK_C, (Boolean)false)
+		Boolean doAdd = modal(this, language.getText("wads.add.title"), containerOf(dimension(350, 64),
+				node(gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("wads.add.form.width")), 
+					gui.formField("wads.add.form.name", wadNameField),
+					gui.formField("wads.add.form.path", wadPathField)
+				))
+			),
+			gui.createChoiceFromLanguageKey("wads.add.choice.add", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
 		).openThenDispose();
 		
 		if (doAdd != Boolean.TRUE)
@@ -121,25 +127,25 @@ public class WadTableControlPanel extends JPanel
 		
 		if (ObjectUtils.isEmpty(name))
 		{
-			SwingUtils.error(this, "Name cannot be blank!");
+			SwingUtils.error(this, language.getText("wads.add.error.name.blank"));
 			return;
 		}
 
 		if (ObjectUtils.isEmpty(path))
 		{
-			SwingUtils.error(this, "Path cannot be blank!");
+			SwingUtils.error(this, language.getText("wads.add.error.path.blank"));
 			return;
 		}
 
 		if (path.isDirectory())
 		{
-			SwingUtils.error(this, "Path cannot be a directory!");
+			SwingUtils.error(this, language.getText("wads.add.error.path.notdir"));
 			return;
 		}
 
 		if (!path.exists())
 		{
-			SwingUtils.error(this, "Path does not exist!");
+			SwingUtils.error(this, language.getText("wads.add.error.path.noexist"));
 			return;
 		}
 		
@@ -151,7 +157,7 @@ public class WadTableControlPanel extends JPanel
 	private void onRemove()
 	{
 		final List<WAD> selected = wadTable.getSelectedWADs(); 
-		if (SwingUtils.noTo(this, "Are you sure that you want to remove " + selected.size() + " WAD(s)?"))
+		if (SwingUtils.noTo(this, language.getText("wads.remove.message", selected.size())))
 			return;
 		
 		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
@@ -159,12 +165,12 @@ public class WadTableControlPanel extends JPanel
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 
-		final Modal<Boolean> cancelProgressModal = modal(this, "Removing WADs...", ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("wads.remove.title"), ModalityType.APPLICATION_MODAL, 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.CENTER, progressBar),
 				node(BorderLayout.LINE_END, progressLabel)
 			),
-			choice("Cancel", (Boolean)true)
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 		);
 			
 		SwingUtils.invoke(() -> {
@@ -206,24 +212,24 @@ public class WadTableControlPanel extends JPanel
 		final JFormField<String> prefixField = stringField("", false, true);
 		final JFormField<Boolean> recurseField = checkBoxField(checkBox(true));
 		final JFormField<Boolean> updateExistingField = checkBoxField(checkBox(false));
-		final JFormField<File> directoryField = fileField(null, "Browse...", 
+		final JFormField<File> directoryField = fileField(null, language.getText("file.browse"), 
 			(current) -> {
-				File chosen = chooseDirectory(this, "Browse Diectory", "Select");
+				File chosen = chooseDirectory(this, language.getText("file.browse.dir.title"), language.getText("file.browse.select"));
 				return chosen != null ? chosen : current;
 			}
 		);
 		
-		Boolean doScan = modal(this, "Scan for WADs",
+		Boolean doScan = modal(this, language.getText("wads.scan.form.title"),
 			containerOf(dimension(400, 120), borderLayout(0, 0),
-				node(BorderLayout.NORTH, form(LabelSide.LEADING, LabelJustification.LEADING, 75)
-					.addField("Path", directoryField)
-					.addField("Prefix", prefixField)
-					.addField("Recurse", recurseField)
-					.addField("Update", updateExistingField)
-				)
+				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("wads.scan.form.width")),
+					gui.formField("wads.scan.form.path", directoryField),
+					gui.formField("wads.scan.form.prefix", prefixField),
+					gui.formField("wads.scan.form.recurse", recurseField),
+					gui.formField("wads.scan.form.update", updateExistingField)
+				))
 			),
-			choice("Add", (Boolean)true),
-			choice("Cancel", (Boolean)false)
+			gui.createChoiceFromLanguageKey("wads.scan.choice.add", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
 		).openThenDispose();
 		
 		if (doScan != Boolean.TRUE)
@@ -233,17 +239,17 @@ public class WadTableControlPanel extends JPanel
 		
 		if (startDir == null)
 		{
-			SwingUtils.info(this, "No directory selected for scanning!");
+			SwingUtils.info(this, language.getText("wads.scan.error.path.blank"));
 			return;
 		}
 		else if (!startDir.exists())
 		{
-			SwingUtils.info(this, "Directory for scanning does not exist!");
+			SwingUtils.info(this, language.getText("wads.scan.error.path.noexist"));
 			return;
 		}
 		else if (!startDir.isDirectory())
 		{
-			SwingUtils.info(this, "Selected path is not a directory");
+			SwingUtils.info(this, language.getText("wads.scan.error.path.notdir"));
 			return;
 		}
 		
@@ -268,11 +274,11 @@ public class WadTableControlPanel extends JPanel
 		
 		final JLabel progressLabel = label("");
 
-		final Modal<Boolean> cancelProgressModal = modal(this, "Scanning WADs...", ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("wads.scan.title"), ModalityType.APPLICATION_MODAL, 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.NORTH, progressLabel)
 			),
-			choice("Cancel", (Boolean)true)
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 		);
 		
 		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
@@ -322,13 +328,13 @@ public class WadTableControlPanel extends JPanel
 		
 		if (totalCount > 0)
 		{
-			final Modal<Boolean> cancelProgressModal2 = modal(this, "Adding/Updating WADs...", ModalityType.APPLICATION_MODAL, 
+			final Modal<Boolean> cancelProgressModal2 = modal(this, language.getText("wads.scan.adding.title"), ModalityType.APPLICATION_MODAL, 
 				containerOf(dimension(350, 48), borderLayout(8, 0),
 					node(BorderLayout.NORTH, progressMessage),
 					node(BorderLayout.CENTER, progressBar),
 					node(BorderLayout.LINE_END, progressLabel)
 				),
-				choice("Cancel", (Boolean)true)
+				gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 			);
 			
 			taskManager.spawn(() -> 
@@ -349,7 +355,7 @@ public class WadTableControlPanel extends JPanel
 						wadManager.setWADPath(name, file.getPath());
 						int c = count.incrementAndGet();
 						SwingUtils.invoke(() -> {
-							progressMessage.setText("Updating " + file.getPath());
+							progressMessage.setText(language.getText("wads.scan.adding.updating", file.getPath()));
 							progressBar.setValue(c);
 							progressBar.setIndeterminate(false);
 							progressLabel.setText((int)(((float)c / totalCount) * 100) + "%");
@@ -360,7 +366,7 @@ public class WadTableControlPanel extends JPanel
 						wadManager.addWAD(name, file.getPath());
 						int c = count.incrementAndGet();
 						SwingUtils.invoke(() -> {
-							progressMessage.setText("Adding " + file.getPath());
+							progressMessage.setText(language.getText("wads.scan.adding.adding", file.getPath()));
 							progressBar.setValue(c);
 							progressBar.setIndeterminate(false);
 							progressLabel.setText((int)(((float)c / totalCount) * 100) + "%");
@@ -382,13 +388,13 @@ public class WadTableControlPanel extends JPanel
 				return;
 		}
 		
-		SwingUtils.info(this, addedCount.get() + " file(s) added, " + updatedCount + " file(s) updated.");
+		SwingUtils.info(this, language.getText("wads.scan.adding.result", addedCount.get(), updatedCount.get()));
 	}
 	
 	// Called on WAD cleanup.
 	private void onCleanup()
 	{
-		WAD[] allWads = wadManager.getAllWADs("");
+		WAD[] allWads = wadManager.getAllWADs();
 		
 		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 		final List<WAD> missingWads = new LinkedList<>();
@@ -396,12 +402,12 @@ public class WadTableControlPanel extends JPanel
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 		
-		final Modal<Boolean> cancelProgressModal = modal(this, "Scanning WADs...", ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("wads.cleanup.scan.title"), ModalityType.APPLICATION_MODAL, 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.CENTER, progressBar),
 				node(BorderLayout.LINE_END, dimension(50, 1), progressLabel)
 			),
-			choice("Cancel", (Boolean)true)
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 		); 
 		
 		SwingUtils.invoke(() -> {
@@ -444,21 +450,21 @@ public class WadTableControlPanel extends JPanel
 		
 		if (missingWads.isEmpty())
 		{
-			SwingUtils.info(this, "All WADs accounted for. No WADs missing.");
+			SwingUtils.info(this, language.getText("wads.cleanup.scan.nomissing"));
 			return;
 		}
 		
 		List<String> missingWadNames = missingWads.stream().map((wad) -> wad.name).collect(Collectors.toList());
 		final JScrollPane wadListPanel = scroll(ComponentFactory.list(missingWadNames));
-		final JTextArea messageLabel = wrappedLabel("The following " + missingWads.size() + " WADs are missing. Are you sure you wish to remove them?");
+		final JTextArea messageLabel = wrappedLabel(language.getText("wads.cleanup.scan.remove.message", missingWads.size()));
 		
-		Boolean askModal = modal(this, "Remove Missing WADs", 
+		Boolean askModal = modal(this, language.getText("wads.cleanup.scan.remove.title"), 
 			containerOf(dimension(300, 175), borderLayout(0, 8),
 				node(BorderLayout.NORTH, messageLabel),
 				node(BorderLayout.CENTER, wadListPanel)
-			), 
-			choice("Yes", KeyEvent.VK_Y, (Boolean)true),
-			choice("No", KeyEvent.VK_N, (Boolean)false)
+			),
+			gui.createChoiceFromLanguageKey("wads.cleanup.scan.remove.choice.yes", (Boolean)true),
+			gui.createChoiceFromLanguageKey("wads.cleanup.scan.remove.choice.no", (Boolean)false)
 		).openThenDispose();
 		
 		if (askModal != Boolean.TRUE)
@@ -469,7 +475,7 @@ public class WadTableControlPanel extends JPanel
 		
 		wadTable.refreshWADs();
 		
-		SwingUtils.info(this, missingWadNames.size() + " WAD(s) removed.");
+		SwingUtils.info(this, language.getText("wads.cleanup.scan.removed", missingWadNames.size()));
 	}
 	
 	private void onSelection(DefaultListSelectionModel model, ListSelectionEvent event)
