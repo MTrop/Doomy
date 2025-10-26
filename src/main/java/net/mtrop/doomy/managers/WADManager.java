@@ -96,7 +96,7 @@ public final class WADManager
 	
 	/**
 	 * Fetches the amount of WADs.
-	 * @return a WAD,or null if not found.
+	 * @return the count.
 	 */
 	public long getWADCount()
 	{

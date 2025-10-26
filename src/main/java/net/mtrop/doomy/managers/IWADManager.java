@@ -10,6 +10,7 @@ import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.SingletonProvider;
+import net.mtrop.doomy.struct.swing.TableFactory.Column;
 
 /**
  * IWAD singleton.
@@ -19,6 +20,8 @@ public final class IWADManager
 {
 	// ============================== QUERIES ================================
 	
+	private static final String QUERY_GET_COUNT
+		= "SELECT COUNT(*) FROM IWADs"; 
 	private static final String QUERY_GET_BY_ID
 		= "SELECT * FROM IWADs WHERE id = ?"; 
 	private static final String QUERY_GET_BY_NAME 
@@ -65,6 +68,15 @@ public final class IWADManager
 	}
 
 	/**
+	 * Fetches the amount of IWADs.
+	 * @return the count.
+	 */
+	public long getIWADCount()
+	{
+		return connection.getRow(QUERY_GET_COUNT).getLong(0);
+	}
+	
+	/**
 	 * Checks for an IWAD entry.
 	 * @param name the name of the IWAD.
 	 * @return an IWAD, or null if not found.
@@ -92,6 +104,15 @@ public final class IWADManager
 	public IWAD getIWAD(String name)
 	{
 		return connection.getRow(IWAD.class, QUERY_GET_BY_NAME, name);
+	}
+	
+	/**
+	 * Gets a set of all IWAD templates.
+	 * @return the found templates.
+	 */
+	public IWAD[] getAllIWADs()
+	{
+		return getAllIWADs("");
 	}
 	
 	/**
@@ -171,8 +192,10 @@ public final class IWADManager
 		/** Entry id. */
 		public long id;
 		/** IWAD name. */
+		@Column(name = "Name", order = 0, sortable = true, editable = false)
 		public String name;
 		/** IWAD path. */
+		@Column(name = "Path", order = 1, sortable = false, editable = false)
 		public String path;
 	}
 
