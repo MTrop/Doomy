@@ -157,13 +157,13 @@ public class IwadTableControlPanel extends JPanel
 		}
 		
 		iwadManager.addIWAD(name, path.getAbsolutePath());
-		iwadTable.refreshWADs();
+		iwadTable.refreshIWADs();
 	}
 
 	// Called on WAD removal.
 	private void onRemove()
 	{
-		final List<IWAD> selected = iwadTable.getSelectedWADs(); 
+		final List<IWAD> selected = iwadTable.getSelectedIWADs(); 
 		if (SwingUtils.noTo(this, language.getText("iwads.remove.message", selected.size())))
 			return;
 		
@@ -210,7 +210,7 @@ public class IwadTableControlPanel extends JPanel
 		
 		signal.offer(true); // alert thread.
 		cancelProgressModal.openThenDispose();
-		iwadTable.refreshWADs();
+		iwadTable.refreshIWADs();
 	}
 
 	// Called for scanning for new WADs.
@@ -389,7 +389,7 @@ public class IwadTableControlPanel extends JPanel
 			if (out == Boolean.TRUE)
 				cancelSwitch.set(true);
 	
-			iwadTable.refreshWADs();
+			iwadTable.refreshIWADs();
 			
 			if (cancelSwitch.get())
 				return;
@@ -480,14 +480,14 @@ public class IwadTableControlPanel extends JPanel
 		for (String name : missingWadNames)
 			iwadManager.removeIWAD(name);
 		
-		iwadTable.refreshWADs();
+		iwadTable.refreshIWADs();
 		
 		SwingUtils.info(this, language.getText("iwads.cleanup.scan.removed", missingWadNames.size()));
 	}
 
 	private void onSelection()
 	{
-		removeAction.setEnabled(!iwadTable.getSelectedWADs().isEmpty());
+		removeAction.setEnabled(!iwadTable.getSelectedIWADs().isEmpty());
 		cleanupAction.setEnabled(iwadManager.getIWADCount() > 0);
 	}
 	

@@ -68,7 +68,7 @@ public class IwadTablePanel extends JPanel
 	/**
 	 * @return the current selected IWADs.
 	 */
-	public List<IWAD> getSelectedWADs()
+	public List<IWAD> getSelectedIWADs()
 	{
 		return iwadTable.getSelectedObjects();
 	}
@@ -76,7 +76,7 @@ public class IwadTablePanel extends JPanel
 	/**
 	 * Reloads and re-populates the table with IWADs.
 	 */
-	public void refreshWADs()
+	public void refreshIWADs()
 	{
 		iwadTable.getTableModel().setRows(Arrays.asList(iwadManager.getAllIWADs()));
 	}
