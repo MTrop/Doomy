@@ -53,7 +53,7 @@ public class IwadTablePanel extends JPanel
 		
 		containerOf(this, dimension(450, 250), borderLayout(0, 8),
 			node(BorderLayout.NORTH, containerOf(borderLayout(8, 0),
-				node(BorderLayout.LINE_START, label(language.getText("wads.filter"))),
+				node(BorderLayout.LINE_START, label(language.getText("iwads.filter"))),
 				node(BorderLayout.CENTER, filterField)
 			)),
 			node(BorderLayout.CENTER, scroll(iwadTable))
