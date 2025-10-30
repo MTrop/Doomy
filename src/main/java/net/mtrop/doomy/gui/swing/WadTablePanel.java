@@ -25,8 +25,8 @@ public class WadTablePanel extends JPanel
 {
 	private static final long serialVersionUID = 5567427378826188364L;
 	
-	private WADManager wadManager;
-	private LanguageManager language;
+	private final WADManager wadManager;
+	private final LanguageManager language;
 	
 	/** The WAD filter field. */
 	private JFormField<String> filterField;

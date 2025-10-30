@@ -13,6 +13,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
+import net.mtrop.doomy.struct.ProcessCallable;
+import net.mtrop.doomy.struct.util.OSUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
 /**
@@ -102,6 +104,29 @@ public final class DoomyCommon
 			throw new IllegalArgumentException("Object should not have been empty.");
 	}
 
+	/**
+	 * Opens the system explorer/finder to highlight a file.
+	 * @param target the target file to open.
+	 * @return true if the command succeeded, false if not.
+	 */
+	public static boolean openInSystemBrowser(File target)
+	{
+		ProcessCallable pc = 
+			OSUtils.isWindows() ? ProcessCallable.create("explorer.exe", "/select,"+target.getAbsolutePath()) :
+			OSUtils.isOSX() ? ProcessCallable.create("open", target.getAbsoluteFile().getParent()) :
+			null;
+		
+		if (pc == null)
+			return false;
+
+		try {
+			pc.exec();
+		} catch (IOException e) {
+			return false;
+		}
+		return true;
+	}
+	
 	/**
 	 * Prints the splash.
 	 * @param handler the handler to use. 

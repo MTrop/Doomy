@@ -10,6 +10,7 @@ import com.blackrook.sql.util.SQLRuntimeException;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.SingletonProvider;
+import net.mtrop.doomy.struct.swing.TableFactory.Column;
 
 /**
  * Engine manager singleton.
@@ -109,9 +110,18 @@ public final class EngineManager
 	}
 	
 	/**
-	 * Gets a set of engine templates by name.
+	 * Gets all engines.
+	 * @return the found engines.
+	 */
+	public Engine[] getAllEngines()
+	{
+		return getAllEngines("");
+	}
+	
+	/**
+	 * Gets a set of engines by name.
 	 * @param containingPhrase the phrase to search for.
-	 * @return the found templates.
+	 * @return the found engines.
 	 */
 	public Engine[] getAllEngines(String containingPhrase)
 	{
@@ -221,6 +231,7 @@ public final class EngineManager
 		/** Entry id. */
 		public long id;
 		/** Engine name. */
+		@Column(name = "Name", order = 0, sortable = true, editable = false)
 		public String name;
 		/** Engine's template source name. */
 		public String templateSource;

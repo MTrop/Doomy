@@ -44,6 +44,7 @@ public final class DoomyGUIMain
 			dbModal.dispose();
 		}
 
+		(new DoomyGUIMainWindow()).setVisible(true);
 	}
 
 }

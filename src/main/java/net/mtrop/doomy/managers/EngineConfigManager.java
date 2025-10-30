@@ -221,9 +221,47 @@ public final class EngineConfigManager
 		if (id == null)
 			return false;
 		if (containsSetting(engineName, name))
-			return connection.getUpdateResult(QUERY_SETTING_SET, value, id, name).getRowCount() > 0;
-		else
+		{
+			if (ObjectUtils.isEmpty(value))
+				return removeSetting(engineName, name);
+			else
+				return connection.getUpdateResult(QUERY_SETTING_SET, value, id, name).getRowCount() > 0;
+		}
+		else if (!ObjectUtils.isEmpty(value))
+		{
 			return connection.getUpdateResult(QUERY_SETTING_ADD, id, name, value).getRowCount() > 0;
+		}
+		else
+		{
+			return true;
+		}
+	}
+	
+	/**
+	 * Sets a full engine's settings.
+	 * @param name the name of the engine.
+	 * @param settings the engine's settings.
+	 * @return true if successful, false if not.
+	 */
+	public boolean setEngineSettings(String name, EngineSettings settings)
+	{
+		return setSetting(name, SETTING_EXEPATH, settings.exePath)
+			&& setSetting(name, SETTING_DOSBOXPATH, settings.dosboxPath)
+			&& setSetting(name, SETTING_DOSBOXCOMMANDLINE, settings.dosboxCommandLine)
+			&& setSetting(name, SETTING_SETUPFILENAME, settings.setupFileName)
+			&& setSetting(name, SETTING_SERVERFILENAME, settings.serverFileName)
+			&& setSetting(name, SETTING_WORKDIRPATH, settings.workingDirectoryPath)
+			&& setSetting(name, SETTING_IWADSWITCH, settings.iwadSwitch)
+			&& setSetting(name, SETTING_FILESWITCH, settings.fileSwitch)
+			&& setSetting(name, SETTING_DEHSWITCH, settings.dehackedSwitch)
+			&& setSetting(name, SETTING_DEHLUMPSWITCH, settings.dehlumpSwitch)
+			&& setSetting(name, SETTING_SAVEDIRSWITCH, settings.saveDirectorySwitch)
+			&& setSetting(name, SETTING_SHOTDIRSWITCH, settings.screenshotDirectorySwitch)
+			&& setSetting(name, SETTING_SAVEPATTERN, settings.saveGameRegex != null ? settings.saveGameRegex.pattern() : "")
+			&& setSetting(name, SETTING_SHOTPATTERN, settings.screenshotRegex != null ? settings.screenshotRegex.pattern() : "")
+			&& setSetting(name, SETTING_DEMOPATTERN, settings.demoRegex != null ? settings.demoRegex.pattern() : "")
+			&& setSetting(name, SETTING_COMMANDLINE, settings.commandLine)
+		;
 	}
 	
 	/**
@@ -323,6 +361,33 @@ public final class EngineConfigManager
 		public Pattern demoRegex;
 		/** Extra command line options (passed in before literal options). */
 		public String commandLine;
+
+		public EngineSettings()
+		{
+			// defaults
+		}
+		
+		public EngineSettings(EngineSettings original)
+		{
+			this.commandLine = original.commandLine;
+			this.dehackedSwitch = original.dehackedSwitch;
+			this.dehlumpSwitch = original.dehlumpSwitch;
+			this.demoRegex = original.demoRegex;
+			this.dosboxCommandLine = original.dosboxCommandLine;
+			this.dosboxPath = original.dosboxPath;
+			this.engineId = original.engineId;
+			this.exePath = original.exePath;
+			this.fileSwitch = original.fileSwitch;
+			this.iwadSwitch = original.iwadSwitch;
+			this.saveDirectorySwitch = original.saveDirectorySwitch;
+			this.saveGameRegex = original.saveGameRegex;
+			this.screenshotDirectorySwitch = original.screenshotDirectorySwitch;
+			this.screenshotRegex = original.screenshotRegex;
+			this.serverFileName = original.serverFileName;
+			this.setupFileName = original.setupFileName;
+			this.workingDirectoryPath = original.workingDirectoryPath;
+		}
+		
 	}
 
 }

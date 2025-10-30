@@ -1,29 +1,11 @@
 package net.mtrop.doomy.gui.swing;
 
-import static net.mtrop.doomy.struct.swing.ComponentFactory.actionItem;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.button;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.checkBox;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.label;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.progressBar;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.wrappedLabel;
-import static net.mtrop.doomy.struct.swing.ContainerFactory.containerOf;
-import static net.mtrop.doomy.struct.swing.ContainerFactory.dimension;
-import static net.mtrop.doomy.struct.swing.ContainerFactory.node;
-import static net.mtrop.doomy.struct.swing.ContainerFactory.scroll;
-import static net.mtrop.doomy.struct.swing.FileChooserFactory.chooseDirectory;
-import static net.mtrop.doomy.struct.swing.FileChooserFactory.chooseFile;
-import static net.mtrop.doomy.struct.swing.FormFactory.checkBoxField;
-import static net.mtrop.doomy.struct.swing.FormFactory.fileField;
-import static net.mtrop.doomy.struct.swing.FormFactory.form;
-import static net.mtrop.doomy.struct.swing.FormFactory.stringField;
-import static net.mtrop.doomy.struct.swing.LayoutFactory.borderLayout;
-import static net.mtrop.doomy.struct.swing.LayoutFactory.gridLayout;
-import static net.mtrop.doomy.struct.swing.ModalFactory.modal;
-
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -56,20 +38,28 @@ import net.mtrop.doomy.struct.swing.SwingUtils;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
+import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
+import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
+import static net.mtrop.doomy.struct.swing.ModalFactory.*;
+import static net.mtrop.doomy.struct.swing.FormFactory.*;
+import static net.mtrop.doomy.struct.swing.FileChooserFactory.*;
+import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
+
 public class IwadTableControlPanel extends JPanel 
 {
 	private static final long serialVersionUID = -6460082133191850158L;
 	
-	private GUIManager gui;
-	private IWADManager iwadManager;
-	private TaskManager taskManager;
-	private LanguageManager language;
+	private final GUIManager gui;
+	private final IWADManager iwadManager;
+	private final TaskManager taskManager;
+	private final LanguageManager language;
 	
 	private IwadTablePanel iwadTable;
 	private Action addAction;
 	private Action removeAction;
 	private Action scanAction;
 	private Action cleanupAction;
+	private Action openAction;
 
 	public IwadTableControlPanel()
 	{
@@ -84,13 +74,15 @@ public class IwadTableControlPanel extends JPanel
 		this.removeAction = actionItem(language.getText("iwads.remove"), (e) -> onRemove());
 		this.scanAction = actionItem(language.getText("iwads.scan"), (e) -> onScan());
 		this.cleanupAction = actionItem(language.getText("iwads.cleanup"), (e) -> onCleanup());
+		this.openAction = actionItem(language.getText("iwads.open"), (e) -> onOpen());
 
 		onSelection();
 
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, iwadTable),
 			node(BorderLayout.EAST, containerOf(dimension(100, 1), borderLayout(),
-				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1),
+				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
+					node(button(openAction)),
 					node(button(addAction)),
 					node(button(removeAction)),
 					node(button(scanAction)),
@@ -485,10 +477,22 @@ public class IwadTableControlPanel extends JPanel
 		SwingUtils.info(this, language.getText("iwads.cleanup.scan.removed", missingWadNames.size()));
 	}
 
+	private void onOpen()
+	{
+		IWAD selected = iwadTable.getSelectedIWADs().get(0);
+		try {
+			Desktop.getDesktop().open(new File(selected.path));
+		} catch (IOException e) {
+			SwingUtils.error(this, language.getText("iwads.open.error"));
+		}
+	}
+	
 	private void onSelection()
 	{
-		removeAction.setEnabled(!iwadTable.getSelectedIWADs().isEmpty());
+		List<IWAD> selectedIWADs = iwadTable.getSelectedIWADs();
+		removeAction.setEnabled(!selectedIWADs.isEmpty());
 		cleanupAction.setEnabled(iwadManager.getIWADCount() > 0);
+		openAction.setEnabled(selectedIWADs.size() == 1);
 	}
 	
 }

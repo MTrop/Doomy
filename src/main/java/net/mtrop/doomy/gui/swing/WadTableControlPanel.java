@@ -22,6 +22,7 @@ import net.mtrop.doomy.struct.util.IOUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.Dialog.ModalityType;
 import java.awt.Font;
 import java.io.BufferedReader;
@@ -61,10 +62,10 @@ public class WadTableControlPanel extends JPanel
 {
 	private static final long serialVersionUID = -8553950836856607413L;
 	
-	private GUIManager gui;
-	private WADManager wadManager;
-	private TaskManager taskManager;
-	private LanguageManager language;
+	private final GUIManager gui;
+	private final WADManager wadManager;
+	private final TaskManager taskManager;
+	private final LanguageManager language;
 	
 	private WadTablePanel wadTable;
 	private Action addAction;
@@ -72,6 +73,7 @@ public class WadTableControlPanel extends JPanel
 	private Action scanAction;
 	private Action cleanupAction;
 	private Action textAction;
+	private Action openAction;
 	
 	/**
 	 * Creates the WAD table control panel.
@@ -90,14 +92,16 @@ public class WadTableControlPanel extends JPanel
 		this.scanAction = actionItem(language.getText("wads.scan"), (e) -> onScan());
 		this.cleanupAction = actionItem(language.getText("wads.cleanup"), (e) -> onCleanup());
 		this.textAction = actionItem(language.getText("wads.text"), (e) -> onTextFile());
+		this.openAction = actionItem(language.getText("wads.open"), (e) -> onOpen());
 		
 		onSelection();
 
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, wadTable),
 			node(BorderLayout.EAST, containerOf(dimension(100, 1), borderLayout(),
-				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1),
+				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
 					node(button(textAction)),
+					node(button(openAction)),
 					node(button(addAction)),
 					node(button(removeAction)),
 					node(button(scanAction)),
@@ -580,11 +584,23 @@ public class WadTableControlPanel extends JPanel
 		).openThenDispose();
 	}
 	
+	private void onOpen()
+	{
+		WAD selected = wadTable.getSelectedWADs().get(0);
+		try {
+			Desktop.getDesktop().open(new File(selected.path));
+		} catch (IOException e) {
+			SwingUtils.error(this, language.getText("wads.open.error"));
+		}
+	}
+	
 	private void onSelection()
 	{
-		removeAction.setEnabled(!wadTable.getSelectedWADs().isEmpty());
+		List<WAD> selectedWADs = wadTable.getSelectedWADs();
+		removeAction.setEnabled(!selectedWADs.isEmpty());
 		cleanupAction.setEnabled(wadManager.getWADCount() > 0);
-		textAction.setEnabled(wadTable.getSelectedWADs().size() == 1);
+		textAction.setEnabled(selectedWADs.size() == 1);
+		openAction.setEnabled(selectedWADs.size() == 1);
 	}
 	
 }

@@ -2,8 +2,8 @@ package net.mtrop.doomy.gui.swing;
 
 import javax.swing.JPanel;
 
-import net.mtrop.doomy.managers.IWADManager;
-import net.mtrop.doomy.managers.IWADManager.IWAD;
+import net.mtrop.doomy.managers.EngineManager;
+import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.TableFactory.JObjectTable;
@@ -21,64 +21,63 @@ import java.util.List;
 /**
  * The WAD table panel.
  */
-public class IwadTablePanel extends JPanel
+public class EngineTablePanel extends JPanel
 {
-	private static final long serialVersionUID = 5567427378826188364L;
-	
-	private final IWADManager iwadManager;
+	private static final long serialVersionUID = 4263494603409552234L;
+
+	private final EngineManager engineManager;
 	private final LanguageManager language;
 	
-	/** The WAD filter field. */
+	/** The filter field. */
 	private JFormField<String> filterField;
-	/** The WAD table. */
-	private JObjectTable<IWAD> iwadTable;
+	/** The engine table. */
+	private JObjectTable<Engine> engineTable;
 	
 	/**
-	 * Creates a new WAD Table panel.
+	 * Creates a new Engine Table panel.
 	 * @param selectionListener the listener to call when a selection changes.
 	 */
-	public IwadTablePanel(final JObjectTableSelectionListener<IWAD> selectionListener)
+	public EngineTablePanel(final JObjectTableSelectionListener<Engine> selectionListener)
 	{
-		this.iwadManager = IWADManager.get();
+		this.engineManager = EngineManager.get();
 		this.language = LanguageManager.get();
 		
 		this.filterField = stringField(this::onFilterChange);
-		this.iwadTable = objectTable(SelectionPolicy.SINGLE_INTERVAL, 
-			objectTableModel(IWAD.class, Arrays.asList(iwadManager.getAllIWADs())), 
+		this.engineTable = objectTable(SelectionPolicy.SINGLE_INTERVAL, 
+			objectTableModel(Engine.class, Arrays.asList(engineManager.getAllEngines())), 
 			selectionListener
 		);
 		
-		this.iwadTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-		this.iwadTable.getColumnModel().getColumn(1).setPreferredWidth(300);
+		this.engineTable.getColumnModel().getColumn(0).setPreferredWidth(300);
 		
-		containerOf(this, dimension(450, 250), borderLayout(0, 8),
+		containerOf(this, dimension(300, 250), borderLayout(0, 8),
 			node(BorderLayout.NORTH, containerOf(borderLayout(8, 0),
 				node(BorderLayout.LINE_START, label(language.getText("iwads.filter"))),
 				node(BorderLayout.CENTER, filterField)
 			)),
-			node(BorderLayout.CENTER, scroll(iwadTable))
+			node(BorderLayout.CENTER, scroll(engineTable))
 		);
 	}
 	
 	private void onFilterChange(String filter)
 	{
-		iwadTable.setRowFilter((iwad) -> iwad.name.contains(filter));
+		engineTable.setRowFilter((engine) -> engine.name.contains(filter));
 	}
 	
 	/**
 	 * @return the current selected IWADs.
 	 */
-	public List<IWAD> getSelectedIWADs()
+	public List<Engine> getSelectedEngines()
 	{
-		return iwadTable.getSelectedObjects();
+		return engineTable.getSelectedObjects();
 	}
 	
 	/**
 	 * Reloads and re-populates the table with IWADs.
 	 */
-	public void refreshIWADs()
+	public void refreshEngines()
 	{
-		iwadTable.getTableModel().setRows(Arrays.asList(iwadManager.getAllIWADs()));
+		engineTable.getTableModel().setRows(Arrays.asList(engineManager.getAllEngines()));
 	}
 	
 }
