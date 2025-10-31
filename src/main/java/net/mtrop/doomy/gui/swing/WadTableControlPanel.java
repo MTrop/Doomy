@@ -17,6 +17,7 @@ import net.mtrop.doomy.struct.swing.ComponentFactory;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doomy.struct.swing.SwingUtils;
+import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.IOUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
@@ -85,7 +86,7 @@ public class WadTableControlPanel extends JPanel
 		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
-		this.wadTable = new WadTablePanel((model, event) -> onSelection());
+		this.wadTable = new WadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection());
 
 		this.addAction = actionItem(language.getText("wads.add"), (e) -> onAdd());
 		this.removeAction = actionItem(language.getText("wads.remove"), (e) -> onRemove());

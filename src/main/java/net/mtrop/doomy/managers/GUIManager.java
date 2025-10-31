@@ -44,7 +44,7 @@ import javax.swing.filechooser.FileFilter;
 import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.gui.swing.TextOutputPanel;
-import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.swing.ClipboardUtils;
 import net.mtrop.doomy.struct.swing.FileChooserFactory;
@@ -536,7 +536,7 @@ public class GUIManager
 		final Container parent, 
 		final String title, 
 		final File inFile, 
-		final TriFunction<PrintStream, PrintStream, InputStream, Instance<Integer>> modalOutFunction
+		final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction
 	){
 		return createProcessModal(parent, title, inFile, new TextOutputPanel(), false, modalOutFunction);
 	}
@@ -555,7 +555,7 @@ public class GUIManager
 		final String title, 
 		final File inFile, 
 		final boolean dontOpen,
-		final TriFunction<PrintStream, PrintStream, InputStream, Instance<Integer>> modalOutFunction
+		final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction
 	){
 		return createProcessModal(parent, title, inFile, new TextOutputPanel(), dontOpen, modalOutFunction);
 	}
@@ -576,7 +576,7 @@ public class GUIManager
 		final File inFile, 
 		final TextOutputPanel outputPanel,
 		final boolean dontOpen,
-		final TriFunction<PrintStream, PrintStream, InputStream, Instance<Integer>> modalOutFunction
+		final TriFunction<PrintStream, PrintStream, InputStream, InstancedFuture<Integer>> modalOutFunction
 	){
 		final JLabel statusLabel = label("");
 		
@@ -627,7 +627,7 @@ public class GUIManager
 					
 					try (InputStream stdin = inFile != null ? new FileInputStream(inFile) : IOUtils.getNullInputStream()) 
 					{
-						Instance<Integer> runInstance = modalOutFunction.apply(outStream, errorStream, stdin);
+						InstancedFuture<Integer> runInstance = modalOutFunction.apply(outStream, errorStream, stdin);
 						Integer result = runInstance.result();
 						if (result == 0)
 							statusLabel.setText(language.getText("process.success"));

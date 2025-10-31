@@ -11,7 +11,7 @@ import com.blackrook.json.JSONReader;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.managers.DownloadManager.FileDownloadListener;
 import net.mtrop.doomy.struct.SingletonProvider;
-import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.struct.util.HTTPUtils;
 import net.mtrop.doomy.struct.util.HTTPUtils.HTTPParameters;
 import net.mtrop.doomy.struct.util.HTTPUtils.HTTPReader;
@@ -274,7 +274,7 @@ public final class IdGamesManager
 	 * @param listener a listener for file progress.
 	 * @return the response object.
 	 */
-	public Instance<File> download(String idGamesPath, String targetPath, FileDownloadListener listener)
+	public InstancedFuture<File> download(String idGamesPath, String targetPath, FileDownloadListener listener)
 	{
 		return downloadManager.download(getMirrorURL() + idGamesPath, getTimeout(), targetPath, listener);
 	}

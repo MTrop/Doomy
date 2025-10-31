@@ -18,7 +18,7 @@ import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileContent;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSearchResponse;
-import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
@@ -228,7 +228,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 
 		final long refdate = System.currentTimeMillis();
 
-		Instance<File> instance = idgm.download(uri, downloadTempTarget, DownloadManager.intervalListener(125L, (cur, len, pct) -> 
+		InstancedFuture<File> instance = idgm.download(uri, downloadTempTarget, DownloadManager.intervalListener(125L, (cur, len, pct) -> 
 		{
 			long timeMillis = System.currentTimeMillis() - refdate;
 			long speed = timeMillis > 0L ? cur / timeMillis * 1000L / 1024 : 0;

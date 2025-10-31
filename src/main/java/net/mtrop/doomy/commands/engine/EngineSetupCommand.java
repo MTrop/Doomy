@@ -8,7 +8,7 @@ import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineConfigManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.struct.ProcessCallable;
-import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
 
 /**
@@ -83,7 +83,7 @@ public class EngineSetupCommand implements DoomyCommand
 			return ERROR_NOT_FOUND;
 		}
 
-		Instance<Integer> process;
+		InstancedFuture<Integer> process;
 		
 		ProcessCallable callable = ProcessCallable.create(exe.getPath())
 			.setWorkingDirectory(workingDirFile);

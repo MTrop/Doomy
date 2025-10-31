@@ -7,6 +7,7 @@ import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.TableFactory.JObjectTable;
+import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
 
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
@@ -35,9 +36,10 @@ public class EngineTablePanel extends JPanel
 	
 	/**
 	 * Creates a new Engine Table panel.
+	 * @param selectionPolicy this table's selection policy.
 	 * @param selectionListener the listener to call when a selection changes.
 	 */
-	public EngineTablePanel(final JObjectTableSelectionListener<Engine> selectionListener)
+	public EngineTablePanel(SelectionPolicy selectionPolicy, final JObjectTableSelectionListener<Engine> selectionListener)
 	{
 		this.engineManager = EngineManager.get();
 		this.language = LanguageManager.get();

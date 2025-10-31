@@ -268,6 +268,12 @@ public final class WADManager
 		public String path;
 		/** Source URL. */
 		public String sourceUrl;
+		
+		@Override
+		public String toString() 
+		{
+			return name;
+		}
 	}
 
 }

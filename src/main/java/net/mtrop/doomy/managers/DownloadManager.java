@@ -9,8 +9,8 @@ import java.net.URL;
 import java.net.URLConnection;
 
 import net.mtrop.doomy.DoomySetupException;
-import net.mtrop.doomy.struct.AsyncFactory.Cancellable;
-import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.InstancedFuture;
+import net.mtrop.doomy.struct.InstancedFuture.Cancellable;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.HTTPUtils;
 import net.mtrop.doomy.struct.util.HTTPUtils.HTTPHeaders;
@@ -70,7 +70,7 @@ public final class DownloadManager
 	 * @param listener a listener interface to monitor download progress.
 	 * @return a handle to the download task that returns the file written.
 	 */
-	public Instance<File> download(final String url, int timeoutMillis, final String targetFile, final FileDownloadListener listener)
+	public InstancedFuture<File> download(final String url, int timeoutMillis, final String targetFile, final FileDownloadListener listener)
 	{
 		if (url.startsWith("http://") || url.startsWith("https://"))
 			return taskManager.spawn(new HTTPFileDownloadTask(url, timeoutMillis, targetFile, listener));

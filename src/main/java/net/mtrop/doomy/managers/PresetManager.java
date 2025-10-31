@@ -12,6 +12,7 @@ import com.blackrook.sql.SQLResult;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.SingletonProvider;
+import net.mtrop.doomy.struct.swing.TableFactory.Column;
 
 /**
  * Preset manager singleton.
@@ -266,6 +267,15 @@ public final class PresetManager
 	}
 
 	/**
+	 * Fetches all available presets.
+	 * @return the found presets.
+	 */
+	public PresetInfo[] getAllPresets()
+	{
+		return getAllPresetsByNameOrHash("");
+	}
+	
+	/**
 	 * Searches for all presets.
 	 * @param containingPhrase the name phrase or hash phrase.
 	 * @return the found presets.
@@ -399,13 +409,29 @@ public final class PresetManager
 		/** Preset hash. */
 		public String hash;
 		/** Preset name. */
+		@Column(name = "Name", order = 0, sortable = true, editable = false)
 		public String name;
 		/** Preset engine. */
+		@Column(name = "Engine", order = 1, sortable = true, editable = false)
 		public String engineName;
 		/** Preset IWAD. */
+		@Column(name = "IWAD", order = 2, sortable = true, editable = false)
 		public String iwadName;
 		/** Preset WADs. */
 		public String[] wads;
+		
+		@Column(name = "WADs", order = 3, sortable = true, editable = false)
+		public String getWADListString()
+		{
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < wads.length; i++)
+			{
+				if (i > 0)
+					sb.append(", ");
+				sb.append(wads[i]);
+			}
+			return sb.toString();
+		}
 	}
 	
 	/**

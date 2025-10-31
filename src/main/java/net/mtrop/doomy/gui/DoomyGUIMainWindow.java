@@ -8,6 +8,7 @@ import javax.swing.JPanel;
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.gui.swing.EngineTableControlPanel;
 import net.mtrop.doomy.gui.swing.IwadTableControlPanel;
+import net.mtrop.doomy.gui.swing.PresetTableControlPanel;
 import net.mtrop.doomy.gui.swing.WadTableControlPanel;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
@@ -59,6 +60,9 @@ public class DoomyGUIMainWindow extends JFrame
 		
 		setContentPane(containerOf(dimension(640, 480), borderLayout(8, 8),
 			node(BorderLayout.CENTER, tabs(TabPlacement.TOP, TabLayoutPolicy.WRAP, 
+				tab(language.getText("tab.presets"), containerOf(
+					node(new PresetTableControlPanel(), (panel) -> panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0)))
+				)),
 				tab(language.getText("tab.engines"), containerOf(
 					node(new EngineTableControlPanel(), (panel) -> panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0)))
 				)),
@@ -96,7 +100,7 @@ public class DoomyGUIMainWindow extends JFrame
 			ObjectUtils.apply(new JPanel(), (panel) -> containerOf(panel, dimension(350, 250), boxLayout(panel, BoxAxis.Y_AXIS),
 				node(label(labelHTML))
 			)), 
-			choice(language.getText("choice.ok"), (Boolean)true))
+			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true))
 		.openThenDispose();
 	}
 	

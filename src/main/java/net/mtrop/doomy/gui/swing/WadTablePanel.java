@@ -35,15 +35,16 @@ public class WadTablePanel extends JPanel
 	
 	/**
 	 * Creates a new WAD Table panel.
+	 * @param selectionPolicy this table's selection policy.
 	 * @param selectionListener the listener to call when a selection changes.
 	 */
-	public WadTablePanel(final JObjectTableSelectionListener<WAD> selectionListener)
+	public WadTablePanel(SelectionPolicy selectionPolicy, final JObjectTableSelectionListener<WAD> selectionListener)
 	{
 		this.wadManager = WADManager.get();
 		this.language = LanguageManager.get();
 		
 		this.filterField = stringField(this::onFilterChange);
-		this.wadTable = objectTable(SelectionPolicy.SINGLE_INTERVAL, 
+		this.wadTable = objectTable(selectionPolicy, 
 			objectTableModel(WAD.class, Arrays.asList(wadManager.getAllWADs())), 
 			selectionListener
 		);

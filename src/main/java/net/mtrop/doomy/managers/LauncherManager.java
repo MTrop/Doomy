@@ -22,7 +22,7 @@ import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.UnzipSet;
-import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.IOUtils;
 
@@ -476,7 +476,7 @@ public final class LauncherManager
 			
 			// Launch.
 			handler.outln("Launching...");
-			Instance<Integer> process; 
+			InstancedFuture<Integer> process; 
 			if (context.dosboxExecutable != null)
 			{
 				File cmdlineFile = createCommandLineFile(context, settings, tempDirectory, extraArgs);

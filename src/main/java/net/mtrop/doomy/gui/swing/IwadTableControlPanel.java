@@ -35,6 +35,7 @@ import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doomy.struct.swing.ModalFactory.Modal;
 import net.mtrop.doomy.struct.swing.SwingUtils;
+import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
@@ -68,7 +69,7 @@ public class IwadTableControlPanel extends JPanel
 		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
-		this.iwadTable = new IwadTablePanel((model, event) -> onSelection());
+		this.iwadTable = new IwadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection());
 
 		this.addAction = actionItem(language.getText("iwads.add"), (e) -> onAdd());
 		this.removeAction = actionItem(language.getText("iwads.remove"), (e) -> onRemove());

@@ -10,7 +10,7 @@ import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.DownloadManager;
 import net.mtrop.doomy.managers.WADManager;
-import net.mtrop.doomy.struct.AsyncFactory.Instance;
+import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.struct.util.FileUtils;
 
 /**
@@ -83,7 +83,7 @@ public class WADDownloadCommand implements DoomyCommand
 
 		final long refdate = System.currentTimeMillis();
 
-		Instance<File> instance = DownloadManager.get().download(url, 5000, downloadTempTarget, DownloadManager.intervalListener(125L, (cur, len, pct) -> 
+		InstancedFuture<File> instance = DownloadManager.get().download(url, 5000, downloadTempTarget, DownloadManager.intervalListener(125L, (cur, len, pct) -> 
 		{
 			long timeMillis = System.currentTimeMillis() - refdate;
 			long speed = timeMillis > 0L ? cur / timeMillis * 1000L / 1024 : 0;

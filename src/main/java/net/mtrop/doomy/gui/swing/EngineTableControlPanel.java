@@ -26,6 +26,7 @@ import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doomy.struct.swing.ModalFactory.Modal;
+import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
 import net.mtrop.doomy.struct.swing.SwingUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
@@ -60,7 +61,7 @@ public class EngineTableControlPanel extends JPanel
 		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
-		this.engineTable = new EngineTablePanel((model, event) -> onSelection());
+		this.engineTable = new EngineTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection());
 
 		this.addAction = actionItem(language.getText("engine.add"), (e) -> onAdd());
 		this.copyAction = actionItem(language.getText("engine.copy"), (e) -> onCopy());

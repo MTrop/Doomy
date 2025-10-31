@@ -7,6 +7,7 @@ import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.TableFactory.JObjectTable;
+import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
 
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
@@ -35,15 +36,16 @@ public class IwadTablePanel extends JPanel
 	
 	/**
 	 * Creates a new WAD Table panel.
+	 * @param selectionPolicy this table's selection policy.
 	 * @param selectionListener the listener to call when a selection changes.
 	 */
-	public IwadTablePanel(final JObjectTableSelectionListener<IWAD> selectionListener)
+	public IwadTablePanel(SelectionPolicy selectionPolicy, final JObjectTableSelectionListener<IWAD> selectionListener)
 	{
 		this.iwadManager = IWADManager.get();
 		this.language = LanguageManager.get();
 		
 		this.filterField = stringField(this::onFilterChange);
-		this.iwadTable = objectTable(SelectionPolicy.SINGLE_INTERVAL, 
+		this.iwadTable = objectTable(selectionPolicy, 
 			objectTableModel(IWAD.class, Arrays.asList(iwadManager.getAllIWADs())), 
 			selectionListener
 		);
