@@ -171,6 +171,7 @@
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
 			<zipfileset file="${jar.dir}/${jar.filename}" prefix="jar" />
 			<zipfileset dir="${build.dir}/shell/cmd" />
+			<zipfileset dir="shell/exe" />
 			<zipfileset refid="fileset.documents" prefix="docs" />
 			<zipfileset dir="docs" prefix="docs" />
 		</zip>

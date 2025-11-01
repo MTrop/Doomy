@@ -1,11 +1,13 @@
 package net.mtrop.doomy;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.LinkedList;
 
 import net.mtrop.doomy.DoomyCommand.BadArgumentException;
 import net.mtrop.doomy.DoomyCommand.BadCommandException;
+import net.mtrop.doomy.gui.DoomyGUIMain;
 import net.mtrop.doomy.managers.DatabaseManager;
 import net.mtrop.doomy.struct.TokenScanner;
 
@@ -20,6 +22,8 @@ public final class DoomyMain
 	
 	/** Start REPL in script mode. */
 	public static final String SWITCH_SCRIPT = "--script";
+	/** Start in GUI mode. */
+	public static final String SWITCH_GUI = "--gui";
 
 	/** Exit command. */
 	public static final String COMMAND_EXIT = "exit";
@@ -205,6 +209,18 @@ public final class DoomyMain
 			// Pre-warm DB connection.
 			DatabaseManager.get();
 			returnValue = doScriptLoop(handler);
+		}
+		else if (DoomyCommand.matchArgument(arguments, SWITCH_GUI))
+		{
+			// Pre-warm DB connection.
+			DatabaseManager.get();
+			try {
+				DoomyCommon.spawnJava(DoomyGUIMain.class).exec();
+				returnValue = DoomyCommand.ERROR_NONE;
+			} catch (IOException e) {
+				handler.outln("ERROR: Could not start GUI process: " + e.getLocalizedMessage());
+				returnValue = DoomyCommand.ERROR_IO_ERROR;
+			}
 		}
 		else
 		{

@@ -88,6 +88,8 @@ public class EngineSettingsEditorPanel extends JPanel
 					workingDirectoryPathField.setValue(selected.getParentFile());
 				if (selected != null)
 					settings.exePath = selected.getAbsolutePath();
+				else
+					settings.exePath = null;
 			}
 		);
 		this.setupFileNameField = stringField(settings.setupFileName, true, true, (v) -> settings.setupFileName = v);
@@ -100,6 +102,8 @@ public class EngineSettingsEditorPanel extends JPanel
 			(selected) -> {
 				if (selected != null)
 					settings.workingDirectoryPath = selected.getAbsolutePath();
+				else
+					settings.workingDirectoryPath = null;
 			}
 		);
 		
@@ -144,6 +148,12 @@ public class EngineSettingsEditorPanel extends JPanel
 			(current) -> {
 				File chosen = chooseFile(this, language.getText("file.browse.file.title"), current, language.getText("file.browse.select"), gui.createExecutableFilter());
 				return chosen != null ? chosen : current;
+			},
+			(selected) -> {
+				if (selected != null) 
+					settings.dosboxPath = selected.getAbsolutePath();
+				else
+					settings.dosboxPath = null;
 			}
 		);
 		this.dosboxCommandLineField = stringField(settings.dosboxCommandLine, true, true, (v) -> settings.dosboxCommandLine = v);

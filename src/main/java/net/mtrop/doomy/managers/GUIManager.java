@@ -13,6 +13,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Image;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -28,6 +29,8 @@ import java.io.PrintStream;
 import java.io.Reader;
 import java.io.Writer;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.function.BiFunction;
@@ -35,6 +38,8 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import javax.swing.Action;
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.border.Border;
@@ -98,14 +103,30 @@ public class GUIManager
 
 	// =======================================================================
 
-	private LanguageManager language;
+	private final LanguageManager language;
+	private final ImageManager images;
 
 	private Properties properties;
+	private List<Image> windowIcons;
+	private Icon windowIcon;
 	
 	private GUIManager()
 	{
 		this.language = LanguageManager.get();
+		this.images = ImageManager.get();
 		this.properties = new Properties();
+		
+		final Image icon16  = images.getImage("doomy16.png"); 
+		final Image icon32  = images.getImage("doomy32.png"); 
+		final Image icon48  = images.getImage("doomy48.png"); 
+		final Image icon64  = images.getImage("doomy64.png"); 
+		final Image icon96  = images.getImage("doomy96.png"); 
+		final Image icon128 = images.getImage("doomy128.png"); 
+		final Image icon256 = images.getImage("doomy256.png"); 
+
+		this.windowIcons = Arrays.asList(icon256, icon128, icon96, icon64, icon48, icon32, icon16);
+		this.windowIcon = new ImageIcon(icon16);
+		
 		File propsFile = new File(DoomyEnvironment.getPropertiesPath());
 		if (propsFile.exists())
 		{
@@ -198,6 +219,22 @@ public class GUIManager
 		return prop != null ? new File(prop) : null;
 	}
 
+	/**
+	 * @return the common window icons to use.
+	 */
+	public List<Image> getWindowIcons() 
+	{
+		return windowIcons;
+	}
+	
+	/**
+	 * @return the single window icon to use.
+	 */
+	public Icon getWindowIcon() 
+	{
+		return windowIcon;
+	}
+	
 	/**
 	 * Creates a consistent title panel.
 	 * @param title the title.

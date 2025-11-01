@@ -105,6 +105,16 @@ public final class DoomyCommon
 	}
 
 	/**
+	 * Creates a Java process callable using some common Java options.
+	 * @param mainClass the class.
+	 * @return the new process callable.
+	 */
+	public static ProcessCallable spawnJava(Class<?> mainClass)
+	{
+		return ProcessCallable.java(mainClass, "-Xms32M", "-Xmx4G");
+	}
+	
+	/**
 	 * Opens the system explorer/finder to highlight a file.
 	 * @param target the target file to open.
 	 * @return true if the command succeeded, false if not.

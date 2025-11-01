@@ -3,17 +3,16 @@ package net.mtrop.doomy.gui;
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
-import javax.swing.JPanel;
 
 import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.gui.swing.AboutJavaPanel;
+import net.mtrop.doomy.gui.swing.AboutPanel;
 import net.mtrop.doomy.gui.swing.EngineTableControlPanel;
 import net.mtrop.doomy.gui.swing.IwadTableControlPanel;
 import net.mtrop.doomy.gui.swing.PresetTableControlPanel;
 import net.mtrop.doomy.gui.swing.WadTableControlPanel;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
-import net.mtrop.doomy.struct.swing.LayoutFactory.BoxAxis;
-import net.mtrop.doomy.struct.util.ObjectUtils;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;
@@ -48,7 +47,8 @@ public class DoomyGUIMainWindow extends JFrame
 		setResizable(true);
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setLocationByPlatform(true);
-
+		setIconImages(gui.getWindowIcons());
+		
 		addWindowListener(new WindowAdapter() 
 		{
 			@Override
@@ -85,21 +85,28 @@ public class DoomyGUIMainWindow extends JFrame
 				gui.createItemFromLanguageKey("menu.file.exit", (i) -> attemptClose())
 			),
 			gui.createMenuFromLanguageKey("menu.help",
-				gui.createItemFromLanguageKey("menu.help.about", (i) -> onAbout())
+				gui.createItemFromLanguageKey("menu.help.about", (i) -> onAbout()),
+				gui.createItemFromLanguageKey("menu.help.about.java", (i) -> onAboutJava())
 			)
 		);
 	}
 	
 	private void onAbout()
 	{
-		String labelHTML = (new StringBuilder()).append("<html>")
-			.append("Doomy v" + VERSION).append("<br>")
-		.append("</html>").toString();
-		
 		modal(this, language.getText("about.title"), 
-			ObjectUtils.apply(new JPanel(), (panel) -> containerOf(panel, dimension(350, 250), boxLayout(panel, BoxAxis.Y_AXIS),
-				node(label(labelHTML))
-			)), 
+			containerOf(borderLayout(),
+				node(BorderLayout.CENTER, new AboutPanel())
+			), 
+			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true))
+		.openThenDispose();
+	}
+	
+	private void onAboutJava()
+	{
+		modal(this, language.getText("about.java.title"), 
+			containerOf(borderLayout(),
+				node(BorderLayout.CENTER, new AboutJavaPanel())
+			), 
 			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true))
 		.openThenDispose();
 	}
@@ -115,7 +122,6 @@ public class DoomyGUIMainWindow extends JFrame
 
 	private boolean onCloseAttempt()
 	{
-		// TODO: Finish.
 		return true;
 	}
 	
