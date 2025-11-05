@@ -86,7 +86,7 @@ public class WadTableControlPanel extends JPanel
 		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
-		this.wadTable = new WadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection());
+		this.wadTable = new WadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
 
 		this.addAction = actionItem(language.getText("wads.add"), (e) -> onAdd());
 		this.removeAction = actionItem(language.getText("wads.remove"), (e) -> onRemove());
@@ -99,11 +99,11 @@ public class WadTableControlPanel extends JPanel
 
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, wadTable),
-			node(BorderLayout.EAST, containerOf(dimension(100, 1), borderLayout(),
+			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("wads.actions.width"), 1), borderLayout(),
 				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
-					node(button(textAction)),
 					node(button(openAction)),
 					node(button(addAction)),
+					node(button(textAction)),
 					node(button(removeAction)),
 					node(button(scanAction)),
 					node(button(cleanupAction))
@@ -222,6 +222,7 @@ public class WadTableControlPanel extends JPanel
 		
 		signal.offer(true); // alert thread.
 		cancelProgressModal.openThenDispose();
+		cancelSwitch.set(true);
 		wadTable.refreshWADs();
 	}
 	
@@ -577,6 +578,7 @@ public class WadTableControlPanel extends JPanel
 		textArea.setFont(new Font("Courier New", Font.PLAIN, 14));
 		textArea.setEditable(false);
 		textArea.setText(sw.toString());
+		textArea.setCaretPosition(0);
 		
 		modal(this, textFileName,
 			containerOf(borderLayout(),
@@ -587,7 +589,11 @@ public class WadTableControlPanel extends JPanel
 	
 	private void onOpen()
 	{
-		WAD selected = wadTable.getSelectedWADs().get(0);
+		List<WAD> selectedWADs = wadTable.getSelectedWADs();
+		if (selectedWADs.isEmpty())
+			return;
+		
+		WAD selected = selectedWADs.get(0);
 		try {
 			Desktop.getDesktop().open(new File(selected.path));
 		} catch (IOException e) {

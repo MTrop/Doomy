@@ -55,6 +55,7 @@ public class AboutPanel extends JPanel
 		sb.append("Using <b>FlatLaf v").append(VERSION_FLATLAF).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("<b>FlatLaf</b> Look And Feel (C) 2003-2022 FormDev Software GmbH").append("<br/>");
+		sb.append("<b>FamFamFam Silk</b> Icons by Mark James").append("<br/>");
 		sb.append("<br/>");
 		sb.append("All third-party licenses are available in the \"licenses\" folder in the documentation folder.").append("<br/>");
 		sb.append("<br/>");

@@ -669,6 +669,16 @@ public final class TableFactory
 		}
 		
 		/**
+		 * Removes all rows from this table.
+		 */
+		public void clear()
+		{
+			if (getRowCount() > 0)
+				fireDeleteEvent(0, getRowCount() - 1);
+			objects.clear();
+		}
+		
+		/**
 		 * Removes a row from this table.
 		 * @param row the row to add.
 		 */
@@ -684,8 +694,8 @@ public final class TableFactory
 		 */
 		public void removeRowAt(int index)
 		{
-			objects.remove(index);
 			fireDeleteEvent(index, index);
+			objects.remove(index);
 		}
 		
 		/**

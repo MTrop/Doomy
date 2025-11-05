@@ -1,6 +1,7 @@
 package net.mtrop.doomy.gui.swing;
 
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
 
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
@@ -16,8 +17,10 @@ import static net.mtrop.doomy.struct.swing.TableFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The WAD table panel.
@@ -38,9 +41,13 @@ public class IwadTablePanel extends JPanel
 	 * Creates a new WAD Table panel.
 	 * @param selectionPolicy this table's selection policy.
 	 * @param selectionListener the listener to call when a selection changes.
+	 * @param doubleClickListener what to call on a double-click.
 	 */
-	public IwadTablePanel(SelectionPolicy selectionPolicy, final JObjectTableSelectionListener<IWAD> selectionListener)
-	{
+	public IwadTablePanel(
+		SelectionPolicy selectionPolicy, 
+		final JObjectTableSelectionListener<IWAD> selectionListener,
+		final Consumer<MouseEvent> doubleClickListener
+	){
 		this.iwadManager = IWADManager.get();
 		this.language = LanguageManager.get();
 		
@@ -49,7 +56,16 @@ public class IwadTablePanel extends JPanel
 			objectTableModel(IWAD.class, Arrays.asList(iwadManager.getAllIWADs())), 
 			selectionListener
 		);
-		
+		this.iwadTable.addMouseListener(new MouseInputAdapter() 
+		{
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				if (e.getClickCount() == 2)
+					doubleClickListener.accept(e);
+			}
+		});
+				
 		this.iwadTable.getColumnModel().getColumn(0).setPreferredWidth(150);
 		this.iwadTable.getColumnModel().getColumn(1).setPreferredWidth(300);
 		

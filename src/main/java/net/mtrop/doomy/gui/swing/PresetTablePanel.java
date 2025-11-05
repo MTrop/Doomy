@@ -11,10 +11,13 @@ import static net.mtrop.doomy.struct.swing.TableFactory.objectTable;
 import static net.mtrop.doomy.struct.swing.TableFactory.objectTableModel;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
 
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.PresetManager;
@@ -44,9 +47,13 @@ public class PresetTablePanel extends JPanel
 	 * Creates the new preset panel.
 	 * @param selectionPolicy this table's selection policy.
 	 * @param selectionListener the listener to call when a selection changes.
+	 * @param doubleClickListener what to call on a double-click.
 	 */
-	public PresetTablePanel(SelectionPolicy selectionPolicy, final JObjectTableSelectionListener<PresetInfo> selectionListener)
-	{
+	public PresetTablePanel(
+		SelectionPolicy selectionPolicy, 
+		final JObjectTableSelectionListener<PresetInfo> selectionListener,
+		final Consumer<MouseEvent> doubleClickListener
+	){
 		this.presetManager = PresetManager.get();
 		this.language = LanguageManager.get();
 
@@ -55,6 +62,15 @@ public class PresetTablePanel extends JPanel
 			objectTableModel(PresetInfo.class, Arrays.asList(presetManager.getAllPresets())), 
 			selectionListener
 		);
+		this.presetTable.addMouseListener(new MouseInputAdapter() 
+		{
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				if (e.getClickCount() == 2)
+					doubleClickListener.accept(e);
+			}
+		});
 			
 		this.presetTable.getColumnModel().getColumn(0).setPreferredWidth(150);
 		this.presetTable.getColumnModel().getColumn(1).setPreferredWidth(100);

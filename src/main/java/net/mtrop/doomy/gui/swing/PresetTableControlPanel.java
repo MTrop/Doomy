@@ -1,26 +1,20 @@
 package net.mtrop.doomy.gui.swing;
 
-import static net.mtrop.doomy.struct.swing.ComponentFactory.actionItem;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.button;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.label;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.progressBar;
-import static net.mtrop.doomy.struct.swing.ContainerFactory.containerOf;
-import static net.mtrop.doomy.struct.swing.ContainerFactory.dimension;
-import static net.mtrop.doomy.struct.swing.ContainerFactory.node;
-import static net.mtrop.doomy.struct.swing.LayoutFactory.borderLayout;
-import static net.mtrop.doomy.struct.swing.LayoutFactory.gridLayout;
-import static net.mtrop.doomy.struct.swing.ModalFactory.modal;
-
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.Action;
 import javax.swing.JLabel;
@@ -50,6 +44,7 @@ import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
 import net.mtrop.doomy.struct.util.IOUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
+import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.FormFactory.*;
 import static net.mtrop.doomy.struct.swing.ModalFactory.*;
@@ -73,6 +68,7 @@ public class PresetTableControlPanel extends JPanel
 	private Action createAction;
 	private Action removeAction;
 	private Action openFolderAction;
+	private Action cleanupFoldersAction;
 	private Action launchAction;
 
 	public PresetTableControlPanel()
@@ -83,22 +79,24 @@ public class PresetTableControlPanel extends JPanel
 		this.presetManager = PresetManager.get();
 		this.launcherManager = LauncherManager.get();
 		
-		this.presetTable = new PresetTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection());
+		this.presetTable = new PresetTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onLaunch());
 
 		this.createAction = actionItem(language.getText("preset.create"), (e) -> onCreate());
 		this.removeAction = actionItem(language.getText("preset.remove"), (e) -> onRemove());
 		this.openFolderAction = actionItem(language.getText("preset.open"), (e) -> onOpen());
+		this.cleanupFoldersAction = actionItem(language.getText("preset.cleanup"), (e) -> onCleanup());
 		this.launchAction = actionItem(language.getHTML("preset.launch"), (e) -> onLaunch());
 
 		onSelection();
 
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, presetTable),
-			node(BorderLayout.EAST, containerOf(dimension(100, 1), borderLayout(),
+			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("preset.actions.width"), 1), borderLayout(),
 				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
 					node(button(createAction)),
 					node(button(removeAction)),
 					node(button(openFolderAction)),
+					node(button(cleanupFoldersAction)),
 					node(button(launchAction))
 				)),
 				node(BorderLayout.CENTER, containerOf())
@@ -108,7 +106,7 @@ public class PresetTableControlPanel extends JPanel
 	
 	private Engine browseEngine(Engine selected)
 	{
-		final EngineTablePanel engineTablePanel = new EngineTablePanel(SelectionPolicy.SINGLE, (model, event) -> {});
+		final EngineTablePanel engineTablePanel = new EngineTablePanel(SelectionPolicy.SINGLE, (model, event) -> {}, (event) -> {});
 		
 		Boolean ok = modal(this, language.getText("engine.select"), 
 			containerOf(dimension(350, 200), borderLayout(),
@@ -126,7 +124,7 @@ public class PresetTableControlPanel extends JPanel
 	
 	private IWAD browseIWAD(IWAD selected)
 	{
-		final IwadTablePanel iwadTablePanel = new IwadTablePanel(SelectionPolicy.SINGLE, (model, event) -> {});
+		final IwadTablePanel iwadTablePanel = new IwadTablePanel(SelectionPolicy.SINGLE, (model, event) -> {}, (event) -> {});
 		
 		Boolean ok = modal(this, language.getText("iwads.select"), 
 			containerOf(dimension(350, 200), borderLayout(),
@@ -285,6 +283,7 @@ public class PresetTableControlPanel extends JPanel
 		
 		signal.offer(true); // alert thread.
 		cancelProgressModal.openThenDispose();
+		cancelSwitch.set(true);
 		presetTable.refreshPresets();
 	}
 
@@ -295,8 +294,99 @@ public class PresetTableControlPanel extends JPanel
 		DoomyCommon.openInSystemBrowser(presetDir);
 	}
 
+	private void onCleanup()
+	{
+		if (SwingUtils.noTo(this, language.getText("preset.cleanup.message")))
+			return;
+		
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
+		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
+		final JLabel progressLabel = label("0%");
+	
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("preset.cleanup.title"), ModalityType.APPLICATION_MODAL, 
+			containerOf(dimension(350, 24), borderLayout(8, 0),
+				node(BorderLayout.CENTER, progressBar),
+				node(BorderLayout.LINE_END, progressLabel)
+			),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
+		);
+			
+		SwingUtils.invoke(() -> {
+			progressBar.setIndeterminate(true);
+		});
+	
+		AtomicInteger progressIndex = new AtomicInteger(0);
+
+		taskManager.spawn(() -> 
+		{
+			signal.poll();
+			
+			PresetInfo[] allPresets = presetManager.getAllPresets();
+			String presetParentPath = DoomyEnvironment.getPresetDirectoryPath();
+			Set<String> hashSet = new HashSet<>();
+			SortedSet<File> dirSet = new TreeSet<>();
+			
+			for (PresetInfo info : allPresets)
+				hashSet.add(info.hash);
+			
+			for (File dir : (new File(presetParentPath)).listFiles((f) -> f.isDirectory()))
+			{
+				if (cancelSwitch.get())
+					return;
+
+				if (!hashSet.contains(dir.getName()))
+					dirSet.add(dir);
+			}
+
+			if (cancelSwitch.get())
+				return;
+			
+			if (!dirSet.isEmpty())
+			{
+				for (File presetDir : dirSet)
+				{
+					SwingUtils.invoke(() -> {
+						progressBar.setIndeterminate(false);
+						progressBar.setMinimum(0);
+						progressBar.setMaximum(dirSet.size());
+						progressLabel.setText((int)((float)progressIndex.get() / dirSet.size() * 100) + "%");
+					});
+					
+					for (File f : presetDir.listFiles())
+						f.delete();
+					
+					if (presetDir.delete())
+						progressIndex.incrementAndGet();
+				}
+				
+				SwingUtils.invoke(() -> {
+					progressBar.setMinimum(1);
+					progressBar.setMaximum(1);
+					progressLabel.setText("100%");
+				});
+				
+			}
+
+			cancelProgressModal.dispose();
+		});
+		
+		signal.offer(true); // alert thread.
+		cancelProgressModal.openThenDispose();
+		cancelSwitch.set(true);
+
+		if (progressIndex.get() == 0)
+			SwingUtils.info(this, language.getText("preset.cleanup.nofolders"));
+		else
+			SwingUtils.info(this, language.getText("preset.cleanup.folders", progressIndex.get()));
+	}
+	
 	private void onLaunch() 
 	{
+		List<PresetInfo> selectedPresets = presetTable.getSelectedPresets();
+		if (selectedPresets.isEmpty())
+			return;
+
 		final TextOutputPanel textOutputPanel = new TextOutputPanel();
 		final PrintStream outStream = textOutputPanel.getPrintStream();
 		final PrintStream errStream = textOutputPanel.getErrorPrintStream();
@@ -348,7 +438,7 @@ public class PresetTableControlPanel extends JPanel
 		taskManager.spawn(() -> 
 		{
 			signal.poll();
-			Preset preset = presetManager.getPreset(presetTable.getSelectedPresets().get(0).id); 
+			Preset preset = presetManager.getPreset(selectedPresets.get(0).id); 
 			try {
 				launcherManager.run(ioHandler, preset, new String[]{}, false);
 			} catch (LaunchException e) {

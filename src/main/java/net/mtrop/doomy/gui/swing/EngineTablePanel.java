@@ -1,6 +1,7 @@
 package net.mtrop.doomy.gui.swing;
 
 import javax.swing.JPanel;
+import javax.swing.event.MouseInputAdapter;
 
 import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
@@ -16,8 +17,10 @@ import static net.mtrop.doomy.struct.swing.TableFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 
 import java.awt.BorderLayout;
+import java.awt.event.MouseEvent;
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * The WAD table panel.
@@ -38,9 +41,13 @@ public class EngineTablePanel extends JPanel
 	 * Creates a new Engine Table panel.
 	 * @param selectionPolicy this table's selection policy.
 	 * @param selectionListener the listener to call when a selection changes.
+	 * @param doubleClickListener what to call on a double-click.
 	 */
-	public EngineTablePanel(SelectionPolicy selectionPolicy, final JObjectTableSelectionListener<Engine> selectionListener)
-	{
+	public EngineTablePanel(
+		SelectionPolicy selectionPolicy, 
+		final JObjectTableSelectionListener<Engine> selectionListener,
+		final Consumer<MouseEvent> doubleClickListener
+	){
 		this.engineManager = EngineManager.get();
 		this.language = LanguageManager.get();
 		
@@ -49,6 +56,15 @@ public class EngineTablePanel extends JPanel
 			objectTableModel(Engine.class, Arrays.asList(engineManager.getAllEngines())), 
 			selectionListener
 		);
+		this.engineTable.addMouseListener(new MouseInputAdapter() 
+		{
+			@Override
+			public void mouseClicked(MouseEvent e) 
+			{
+				if (e.getClickCount() == 2)
+					doubleClickListener.accept(e);
+			}
+		});
 		
 		this.engineTable.getColumnModel().getColumn(0).setPreferredWidth(300);
 		

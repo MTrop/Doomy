@@ -37,7 +37,7 @@ public class PresetWadsSelectionPanel extends OrderableListPanel<WAD>
 	@Override
 	public void onAdd()
 	{
-		final WadTablePanel wadTablePanel = new WadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> {});
+		final WadTablePanel wadTablePanel = new WadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> {}, (event) -> {});
 		final GUIManager gui = GUIManager.get();
 		final LanguageManager language = LanguageManager.get();
 

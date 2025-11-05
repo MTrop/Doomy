@@ -50,6 +50,15 @@ public final class DoomyEnvironment
     }
 
     /**
+     * Gets the path to all presets.
+     * @return the canonical directory path to the preset.
+     */
+    public static String getPresetDirectoryPath()
+    {
+    	return getConfigBasePath() + PRESETS_DIR;
+    }
+
+    /**
      * Gets the path to a specific preset.
      * @param presetHash the preset hash.
      * @return the canonical directory path to the preset.

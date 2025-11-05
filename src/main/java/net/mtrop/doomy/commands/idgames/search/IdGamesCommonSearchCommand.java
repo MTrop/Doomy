@@ -7,6 +7,9 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Deque;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.function.BiFunction;
 
 import net.mtrop.doomy.DoomyCommand;
@@ -145,13 +148,14 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 
 	/**
 	 * Calls a search and grabs the resulting file content.
+	 * @param handler the I/O handler.
 	 * @param query the query to send to the idGames service.
 	 * @param limit the result limit.
 	 * @return a list of file results, or null on service error.
 	 * @throws SocketTimeoutException if the request times out.
 	 * @throws IOException if a read error occurs.
 	 */
-	public abstract IdGamesSearchResponse search(String query, int limit) throws SocketTimeoutException, IOException;
+	public abstract IdGamesSearchResponse search(IOHandler handler, String query, int limit) throws SocketTimeoutException, IOException;
 	
 	/**
 	 * Downloads a file.
@@ -163,15 +167,29 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 	{
 		IdGamesManager idgm = IdGamesManager.get();
 		
-		IdGamesFileResponse response;
+		Future<IdGamesFileResponse> future;
 		try {
-			response = idgm.getById(idGamesFileId);
+			future = idgm.getById(idGamesFileId);
 		} catch (SocketTimeoutException e) {
 			handler.errln("ERROR: Call to idGames timed out.");
 			return ERROR_SOCKET_TIMEOUT;
 		} catch (IOException e) {
 			handler.errln("ERROR: I/O error on call to idGames.");
 			return ERROR_IO_ERROR;
+		}
+		
+		IdGamesFileResponse response;
+		try {
+			response = future.get();
+		} catch (CancellationException e) {
+			handler.errln("ERROR: Service call was cancelled.");
+			return ERROR_SERVICE_ERROR;
+		} catch (InterruptedException e) {
+			handler.errln("ERROR: Service was interrupted.");
+			return ERROR_SERVICE_ERROR;
+		} catch (ExecutionException e) {
+			handler.errln("ERROR: Service error: " + e.getCause().getLocalizedMessage());
+			return ERROR_SERVICE_ERROR;
 		}
 		
 		if (response.error != null)
@@ -286,7 +304,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 	{
 		return execute(handler, query, name, limit, resultNumber, download, (q, l) -> {
 			try {
-				return search(q, l);
+				return search(handler, q, l);
 			} catch (IOException e) {
 				return null;
 			} catch (SecurityException e) {

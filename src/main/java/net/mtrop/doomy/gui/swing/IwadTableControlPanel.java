@@ -69,7 +69,7 @@ public class IwadTableControlPanel extends JPanel
 		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
-		this.iwadTable = new IwadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection());
+		this.iwadTable = new IwadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
 
 		this.addAction = actionItem(language.getText("iwads.add"), (e) -> onAdd());
 		this.removeAction = actionItem(language.getText("iwads.remove"), (e) -> onRemove());
@@ -81,7 +81,7 @@ public class IwadTableControlPanel extends JPanel
 
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, iwadTable),
-			node(BorderLayout.EAST, containerOf(dimension(100, 1), borderLayout(),
+			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("iwads.actions.width"), 1), borderLayout(),
 				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
 					node(button(openAction)),
 					node(button(addAction)),
@@ -203,6 +203,7 @@ public class IwadTableControlPanel extends JPanel
 		
 		signal.offer(true); // alert thread.
 		cancelProgressModal.openThenDispose();
+		cancelSwitch.set(true);
 		iwadTable.refreshIWADs();
 	}
 
@@ -480,7 +481,11 @@ public class IwadTableControlPanel extends JPanel
 
 	private void onOpen()
 	{
-		IWAD selected = iwadTable.getSelectedIWADs().get(0);
+		List<IWAD> selectedIWADs = iwadTable.getSelectedIWADs();
+		if (selectedIWADs.isEmpty())
+			return;
+		
+		IWAD selected = selectedIWADs.get(0);
 		try {
 			Desktop.getDesktop().open(new File(selected.path));
 		} catch (IOException e) {

@@ -8,8 +8,10 @@ import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.gui.swing.AboutJavaPanel;
 import net.mtrop.doomy.gui.swing.AboutPanel;
 import net.mtrop.doomy.gui.swing.EngineTableControlPanel;
+import net.mtrop.doomy.gui.swing.IdGamesSearchControlPanel;
 import net.mtrop.doomy.gui.swing.IwadTableControlPanel;
 import net.mtrop.doomy.gui.swing.PresetTableControlPanel;
+import net.mtrop.doomy.gui.swing.SettingsPanel;
 import net.mtrop.doomy.gui.swing.WadTableControlPanel;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
@@ -71,6 +73,9 @@ public class DoomyGUIMainWindow extends JFrame
 				)),
 				tab(language.getText("tab.wads"), containerOf(
 					node(new WadTableControlPanel(), (panel) -> panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0)))
+				)),
+				tab(language.getText("tab.idgames"), containerOf(
+					node(new IdGamesSearchControlPanel(), (panel) -> panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0)))
 				))
 			), (tabs) -> tabs.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8)))
 		));
@@ -82,6 +87,7 @@ public class DoomyGUIMainWindow extends JFrame
 	{
 		return menuBar(
 			gui.createMenuFromLanguageKey("menu.file",
+				gui.createItemFromLanguageKey("menu.file.prefs", (i) -> openSettings()),
 				gui.createItemFromLanguageKey("menu.file.exit", (i) -> attemptClose())
 			),
 			gui.createMenuFromLanguageKey("menu.help",
@@ -97,8 +103,8 @@ public class DoomyGUIMainWindow extends JFrame
 			containerOf(borderLayout(),
 				node(BorderLayout.CENTER, new AboutPanel())
 			), 
-			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true))
-		.openThenDispose();
+			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true)
+		).openThenDispose();
 	}
 	
 	private void onAboutJava()
@@ -107,8 +113,17 @@ public class DoomyGUIMainWindow extends JFrame
 			containerOf(borderLayout(),
 				node(BorderLayout.CENTER, new AboutJavaPanel())
 			), 
-			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true))
-		.openThenDispose();
+			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true)
+		).openThenDispose();
+	}
+	
+	private void openSettings()
+	{
+		modal(this, language.getText("settings.title"), 
+			containerOf(borderLayout(),
+				node(BorderLayout.CENTER, new SettingsPanel())
+			)
+		).openThenDispose();
 	}
 	
 	private void attemptClose()

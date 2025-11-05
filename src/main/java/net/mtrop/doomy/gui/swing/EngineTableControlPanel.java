@@ -61,7 +61,7 @@ public class EngineTableControlPanel extends JPanel
 		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
-		this.engineTable = new EngineTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection());
+		this.engineTable = new EngineTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
 
 		this.addAction = actionItem(language.getText("engine.add"), (e) -> onAdd());
 		this.copyAction = actionItem(language.getText("engine.copy"), (e) -> onCopy());
@@ -73,13 +73,13 @@ public class EngineTableControlPanel extends JPanel
 
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, engineTable),
-			node(BorderLayout.EAST, containerOf(dimension(100, 1), borderLayout(),
+			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("engine.actions.width"), 1), borderLayout(),
 				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
+					node(button(openFolderAction)),
 					node(button(addAction)),
 					node(button(copyAction)),
 					node(button(editAction)),
-					node(button(removeAction)),
-					node(button(openFolderAction))
+					node(button(removeAction))
 				)),
 				node(BorderLayout.CENTER, containerOf())
 			))
@@ -276,7 +276,11 @@ public class EngineTableControlPanel extends JPanel
 	// Called when opening an engine's folder.
 	private void onOpen()
 	{
-		Engine source = engineTable.getSelectedEngines().get(0);
+		List<Engine> selectedEngines = engineTable.getSelectedEngines();
+		if (selectedEngines.isEmpty())
+			return;
+		
+		Engine source = selectedEngines.get(0);
 		EngineSettings settings = engineConfigManager.getEngineSettings(source.name);
 		DoomyCommon.openInSystemBrowser(new File(settings.exePath));
 	}
