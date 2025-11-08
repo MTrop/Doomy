@@ -1,35 +1,60 @@
 package net.mtrop.doomy.gui.swing;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.MouseEvent;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.Action;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JTextField;
 import javax.swing.event.MouseInputAdapter;
 
+import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.managers.DownloadManager;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.IconManager;
 import net.mtrop.doomy.managers.IdGamesManager;
 import net.mtrop.doomy.managers.IdGamesManager.FieldType;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileContent;
+import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSearchResponse;
+import net.mtrop.doomy.managers.IdGamesManager.IdGamesSingleFileContent;
 import net.mtrop.doomy.managers.LanguageManager;
-import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
-import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
+import net.mtrop.doomy.managers.TaskManager;
+import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.struct.swing.SwingUtils;
-import net.mtrop.doomy.struct.swing.TableFactory.JObjectTable;
-import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
+import net.mtrop.doomy.struct.InstancedFuture;
+import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
+import net.mtrop.doomy.struct.util.FileUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
+
+import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
+import net.mtrop.doomy.struct.swing.ModalFactory.Modal;
+import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
+
 
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
+import static net.mtrop.doomy.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.FormFactory.*;
+import static net.mtrop.doomy.struct.swing.ModalFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 import static net.mtrop.doomy.struct.swing.TableFactory.*;
 
@@ -45,6 +70,8 @@ public class IdGamesSearchControlPanel extends JPanel
 	private final LanguageManager language;
 	private final IconManager icons;
 	private final IdGamesManager idGames;
+	private final TaskManager taskManager;
+	private final WADManager wadManager;
 	
 	private JFormField<String> searchField;
 	private JFormField<FieldType> fieldTypeField;
@@ -63,6 +90,8 @@ public class IdGamesSearchControlPanel extends JPanel
 		this.language = LanguageManager.get();
 		this.icons = IconManager.get();
 		this.idGames = IdGamesManager.get();
+		this.taskManager = TaskManager.get();
+		this.wadManager = WADManager.get();
 		
 		this.searchField = stringField(false, true);
 		this.fieldTypeField = comboField(comboBox(Arrays.asList(FieldType.values())));
@@ -83,7 +112,7 @@ public class IdGamesSearchControlPanel extends JPanel
 			}
 		});
 		
-		this.resultsTable.getColumnModel().getColumn(0).setPreferredWidth(100);
+		this.resultsTable.getColumnModel().getColumn(0).setPreferredWidth(120);
 		this.resultsTable.getColumnModel().getColumn(1).setPreferredWidth(200);
 		this.resultsTable.getColumnModel().getColumn(2).setPreferredWidth(80);
 		this.resultsTable.getColumnModel().getColumn(3).setPreferredWidth(150);
@@ -141,14 +170,311 @@ public class IdGamesSearchControlPanel extends JPanel
 		});
 	}
 	
+	private JFormField<String> createReadOnlyField(String content)
+	{
+		return ObjectUtils.apply(stringField(content, false, false), (field) -> ((JTextField)field.getFormInputComponent()).setEditable(false));
+	}
+	
 	private void onFileInfo()
 	{
-		// TODO Auto-generated method stub
+		List<IdGamesFileContent> selected = resultsTable.getSelectedObjects();
+		if (selected.isEmpty())
+			return;
+		
+		IdGamesFileResponse response;
+
+		try {
+			response = idGames.getById(selected.get(0).id).get();
+
+			if (response.error != null)
+				printErrorStatus(language.getText("idgames.messages.error", response.error.message));
+			else if (response.warning != null)
+				printSuccessStatus(response.warning.message);
+			else
+				printSuccessStatus(language.getText("idgames.messages.done"));
+			
+		} catch (CancellationException e) {
+			printErrorStatus(language.getText("idgames.messages.error.cancel"));
+			return;
+		} catch (InterruptedException e) {
+			printErrorStatus(language.getText("idgames.messages.error.interrupt"));
+			return;
+		} catch (ExecutionException e) {
+			printErrorStatus(language.getText("idgames.messages.error", e.getCause().getLocalizedMessage()));
+			return;
+		} catch (SocketTimeoutException e) {
+			printErrorStatus(language.getText("idgames.messages.error.timeout"));
+			return;
+		} catch (IOException e) {
+			printErrorStatus(language.getText("idgames.messages.error.io"));
+			return;
+		}
+		
+		int labelWidth = language.getInteger("idgames.fileinfo.labelwidth");
+		IdGamesSingleFileContent content = response.content;
+		
+		modal(this, language.getText("idgames.fileinfo.modal.title", content.title), 
+			ObjectUtils.apply(new JPanel(), (panel) -> containerOf(panel, dimension(640, 640), borderLayout(),
+				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, labelWidth),
+					gui.formField("idgames.fileinfo.filename", createReadOnlyField(content.filename)),
+					gui.formField("idgames.fileinfo.url", createReadOnlyField(content.idgamesurl)),
+					gui.formField("idgames.fileinfo.title", createReadOnlyField(content.title)),
+					gui.formField("idgames.fileinfo.size", createReadOnlyField(String.valueOf(content.size / 1024) + " KB")),
+					gui.formField("idgames.fileinfo.date", createReadOnlyField(content.date)),
+					gui.formField("idgames.fileinfo.rating", createReadOnlyField(String.valueOf(content.rating)))
+				)),
+				node(BorderLayout.CENTER, scroll(ObjectUtils.apply(textArea(content.textfile, 25, 80), (area) -> {
+					area.setEditable(false);
+					area.setFont(new Font("Courier New", Font.PLAIN, 12));
+				})))
+			)), 
+			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true)
+		).openThenDispose();
+		
 	}
 
 	private void onDownload()
 	{
-		// TODO Auto-generated method stub
+		List<IdGamesFileContent> selected = resultsTable.getSelectedObjects();
+		if (selected.isEmpty())
+			return;
+
+		// ask for download destination and WAD name.
+		
+		JFormField<File> destinationDirField = fileField(null, "...", 
+			(current) -> {
+				File chosen = chooseDirectory(this, language.getText("idgames.download.browse.file.title"), current, language.getText("idgames.download.file.browse.select"));
+				return chosen != null ? chosen : current;
+			}
+		);
+		JFormField<String> wadNameField = stringField(FileUtils.getFileNameWithoutExtension(selected.get(0).filename), true, true);
+		
+		Boolean ok = modal(this, language.getText("idgames.download.title"),
+			containerOf(dimension(320, 80), borderLayout(),
+				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("idgames.download.labelwidth")), 
+					gui.formField("idgames.download.dest", destinationDirField),
+					gui.formField("idgames.download.wadname", wadNameField)
+				))
+			),
+			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (ok != Boolean.TRUE)
+			return;
+		
+		// check WAD name
+		
+		final String wadName = wadNameField.getValue();
+		if (wadName != null)
+		{
+			if (wadManager.getWAD(wadName) != null)
+			{
+				SwingUtils.error(this, language.getText("idgames.download.wadname.error"));
+				return;
+			}
+		}
+
+		// check destination.
+
+		final File destinationDir = destinationDirField.getValue();
+		if (destinationDir == null)
+		{
+			SwingUtils.error(this, language.getText("idgames.download.dir.error"));
+			return;
+		}
+		if (!destinationDir.exists())
+		{
+			SwingUtils.error(this, language.getText("idgames.download.dir.notexist"));
+			return;
+		}
+		if (!destinationDir.isDirectory())
+		{
+			SwingUtils.error(this, language.getText("idgames.download.dir.notdir"));
+			return;
+		}
+		
+		// pull data from idGames
+		
+		IdGamesFileResponse response;
+
+		try {
+			response = idGames.getById(selected.get(0).id).get();
+
+			if (response.error != null)
+				printErrorStatus(language.getText("idgames.messages.error", response.error.message));
+			else if (response.warning != null)
+				printSuccessStatus(response.warning.message);
+			else
+				printSuccessStatus(language.getText("idgames.messages.done"));
+			
+		} catch (CancellationException e) {
+			printErrorStatus(language.getText("idgames.messages.error.cancel"));
+			return;
+		} catch (InterruptedException e) {
+			printErrorStatus(language.getText("idgames.messages.error.interrupt"));
+			return;
+		} catch (ExecutionException e) {
+			printErrorStatus(language.getText("idgames.messages.error", e.getCause().getLocalizedMessage()));
+			return;
+		} catch (SocketTimeoutException e) {
+			printErrorStatus(language.getText("idgames.messages.error.timeout"));
+			return;
+		} catch (IOException e) {
+			printErrorStatus(language.getText("idgames.messages.error.io"));
+			return;
+		}
+		
+		// start download
+		
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
+		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
+		final JLabel progressLabel = label("                 ");
+	
+		Modal<Boolean> cancelProgressModal = modal(this, language.getText("idgames.download.file.title"), 
+			containerOf(dimension(350, 24), borderLayout(8, 0),
+				node(BorderLayout.CENTER, progressBar),
+				node(BorderLayout.LINE_END, progressLabel)
+			),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
+		);
+		
+		SwingUtils.invoke(() -> {
+			progressBar.setIndeterminate(true);
+		});
+	
+		final AtomicReference<InstancedFuture<File>> downloadFuture = new AtomicReference<>();
+		String uri = response.content.dir + response.content.filename;
+		String downloadTarget = DoomyEnvironment.getDownloadDirectoryPath() + File.separator + uri.replace('/', File.separatorChar);
+		String downloadTempTarget = downloadTarget + ".temp";
+		
+		taskManager.spawn(() -> 
+		{
+			signal.poll();
+			if (cancelSwitch.get())
+				return;
+	
+			downloadFuture.set(idGames.download(uri, downloadTempTarget, DownloadManager.intervalListener(125, (current, total, percent) -> 
+			{
+				if (cancelSwitch.get())
+					return true;
+				
+				SwingUtils.invoke(() -> {
+					progressBar.setIndeterminate(false);
+					progressBar.setMinimum(0);
+					progressBar.setMaximum((int)total);
+					progressBar.setValue((int)current);
+					progressLabel.setText( (current / 1024) + " KB / " + (total / 1024) + " KB");
+				});
+				
+				return false;
+			})));
+			
+			downloadFuture.get().join();
+			cancelProgressModal.dispose();
+		});
+		
+		signal.offer(true); // alert thread.
+		Boolean out = cancelProgressModal.openThenDispose();
+		if (out == Boolean.TRUE)
+			cancelSwitch.set(true);
+		
+		// handle downloaded file
+
+		InstancedFuture<File> downloadFile = downloadFuture.get();
+		
+		if (downloadFile == null)
+			return;
+		
+		if (downloadFile.getException() != null)
+		{
+			SwingUtils.error(this, language.getText("idgames.download.error", downloadFile.getException().getLocalizedMessage()));
+			return;
+		}
+		
+		final File downloadedFile = downloadFile.result();
+		if (downloadedFile == null)
+			return;
+		
+		// copy file to destination.
+		
+		final Modal<Boolean> cancelCopyModal = modal(this, language.getText("idgames.download.copy.title"), 
+			containerOf(dimension(350, 24), borderLayout(8, 0),
+				node(BorderLayout.CENTER, progressBar),
+				node(BorderLayout.LINE_END, progressLabel)
+			),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
+		);
+
+		SwingUtils.invoke(() -> {
+			progressBar.setIndeterminate(true);
+			progressLabel.setText("0%");
+		});
+
+		final File outFile = new File(destinationDir.getAbsolutePath() + File.separator + response.content.filename);
+		
+		taskManager.spawn(() -> 
+		{
+			signal.poll();
+			if (cancelSwitch.get())
+				return;
+
+			int buf = 0;
+			int max = (int)downloadedFile.length();
+			byte[] buffer = new byte[16384];
+			final AtomicInteger current = new AtomicInteger(0);
+			
+			try (FileInputStream fis = new FileInputStream(downloadedFile); FileOutputStream fos = new FileOutputStream(outFile))
+			{
+				while (!cancelSwitch.get() && (buf = fis.read(buffer)) > 0)
+				{
+					current.set(current.get() + buf);
+					fos.write(buffer, 0, buf);
+					SwingUtils.invoke(() -> {
+						progressBar.setIndeterminate(false);
+						progressBar.setMinimum(0);
+						progressBar.setMaximum(max);
+						progressBar.setValue(current.get());
+					});
+				}
+			} 
+			catch (FileNotFoundException e) 
+			{
+				SwingUtils.error(this, "idgames.download.copy.notfound");
+				cancelSwitch.set(true);
+			} 
+			catch (IOException e) 
+			{
+				SwingUtils.error(this, "idgames.download.copy.ioerror");
+				cancelSwitch.set(true);
+			}
+	
+			cancelCopyModal.dispose();
+		});
+		
+		signal.offer(true); // alert thread.
+		out = cancelCopyModal.openThenDispose();
+		if (out == Boolean.TRUE)
+			cancelSwitch.set(true);
+		
+		if (cancelSwitch.get())
+		{
+			outFile.delete();
+			return;
+		}
+		
+		// add to WAD directory
+		
+		if (wadName != null)
+		{
+			if (wadManager.addWAD(wadName, outFile.getAbsolutePath()) != null)
+				SwingUtils.info(language.getText("idgames.download.success.wad"));
+		}
+		else
+		{
+			SwingUtils.info(language.getText("idgames.download.success"));
+		}
 	}
 
 	private void onSearch() 
@@ -192,6 +518,7 @@ public class IdGamesSearchControlPanel extends JPanel
 		} catch (IOException e) {
 			printErrorStatus(language.getText("idgames.messages.error.io"));
 		}
+			
 	}
 	
 	private void onSelection()

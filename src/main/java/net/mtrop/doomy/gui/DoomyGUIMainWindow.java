@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 
 import net.mtrop.doomy.DoomyCommon;
+import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.gui.swing.AboutJavaPanel;
 import net.mtrop.doomy.gui.swing.AboutPanel;
 import net.mtrop.doomy.gui.swing.EngineTableControlPanel;
@@ -15,10 +16,14 @@ import net.mtrop.doomy.gui.swing.SettingsPanel;
 import net.mtrop.doomy.gui.swing.WadTableControlPanel;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.struct.swing.SwingUtils;
 
 import java.awt.BorderLayout;
+import java.awt.Desktop;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.File;
+import java.io.IOException;
 
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
@@ -92,7 +97,9 @@ public class DoomyGUIMainWindow extends JFrame
 			),
 			gui.createMenuFromLanguageKey("menu.help",
 				gui.createItemFromLanguageKey("menu.help.about", (i) -> onAbout()),
-				gui.createItemFromLanguageKey("menu.help.about.java", (i) -> onAboutJava())
+				gui.createItemFromLanguageKey("menu.help.about.java", (i) -> onAboutJava()),
+				separator(),
+				gui.createItemFromLanguageKey("menu.help.open.config", (i) -> onOpenConfigFolder())
 			)
 		);
 	}
@@ -124,6 +131,15 @@ public class DoomyGUIMainWindow extends JFrame
 				node(BorderLayout.CENTER, new SettingsPanel())
 			)
 		).openThenDispose();
+	}
+	
+	private void onOpenConfigFolder()
+	{
+		try {
+			Desktop.getDesktop().open(new File(DoomyEnvironment.getConfigBasePath()));
+		} catch (IOException e) {
+			SwingUtils.error(this, language.getText("config.open.error"));
+		}
 	}
 	
 	private void attemptClose()

@@ -359,7 +359,7 @@ public final class IdGamesManager
 		public String url;
 		public String idgamesurl;
 		
-		@Column(name = "Size", editable = false, sortable = true, order = 4)
+		@Column(name = "Size", editable = false, sortable = false, order = 4)
 		public String getSizeString()
 		{
 			return size < 1024 ? size + " bytes" : (size / 1024) + " KB";

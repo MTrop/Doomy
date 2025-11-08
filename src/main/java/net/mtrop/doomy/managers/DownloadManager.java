@@ -91,8 +91,9 @@ public final class DownloadManager
 		 * @param current the current amount of bytes.
 		 * @param total the total amount of bytes to download.
 		 * @param percent the percent complete.
+		 * @return true to cancel, false to continue.
 		 */
-		void onProgress(long current, long total, long percent);
+		boolean onProgress(long current, long total, long percent);
 	}
 	
 	private static class URLFileDownloadTask extends Cancellable<File>
@@ -138,7 +139,8 @@ public final class DownloadManager
 						{
 							fos.write(buffer, 0, buf);
 							cur += buf;
-							listener.onProgress(cur, len, len > 0 ? cur * 100 / len : -1);
+							if (listener.onProgress(cur, len, len > 0 ? cur * 100 / len : -1))
+								cancel();
 						}
 					}
 				}
@@ -185,7 +187,8 @@ public final class DownloadManager
 					
 					long len = response.getLength();
 					
-					listener.onProgress(0, len, len > 0 ? 0 / len : -1);
+					if (listener.onProgress(0, len, len > 0 ? 0 / len : -1))
+						cancel();
 					
 					byte[] buffer = new byte[8192];
 					InputStream in = response.getContentStream();
@@ -198,7 +201,8 @@ public final class DownloadManager
 						{
 							fos.write(buffer, 0, buf);
 							cur += buf;
-							listener.onProgress(cur, len, len > 0 ? cur * 100 / len : -1);
+							if (listener.onProgress(cur, len, len > 0 ? cur * 100 / len : -1))
+								cancel();
 						}
 					}
 					finally
@@ -233,23 +237,25 @@ public final class DownloadManager
 		}
 		
 		@Override
-		public void onProgress(long current, long total, long percent) 
+		public boolean onProgress(long current, long total, long percent) 
 		{
 			long now = System.currentTimeMillis();
 			if (current == total)
 			{
-				listener.onProgress(current, total, percent);
+				return listener.onProgress(current, total, percent);
 			}
 			else if (nextTime < 0L)
 			{
 				nextTime = now + intervalMillis;
-				listener.onProgress(current, total, percent);
+				return listener.onProgress(current, total, percent);
 			}
 			else if (now > nextTime)
 			{
 				nextTime = now + intervalMillis;
-				listener.onProgress(current, total, percent);
+				return listener.onProgress(current, total, percent);
 			}
+			
+			return false;
 		}
 	}
 	

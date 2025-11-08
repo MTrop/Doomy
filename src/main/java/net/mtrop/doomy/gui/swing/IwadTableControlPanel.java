@@ -2,7 +2,6 @@ package net.mtrop.doomy.gui.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
-import java.awt.Dialog.ModalityType;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -165,7 +164,7 @@ public class IwadTableControlPanel extends JPanel
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 	
-		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("iwads.remove.title"), ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("iwads.remove.title"), 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.CENTER, progressBar),
 				node(BorderLayout.LINE_END, progressLabel)
@@ -202,8 +201,9 @@ public class IwadTableControlPanel extends JPanel
 		});
 		
 		signal.offer(true); // alert thread.
-		cancelProgressModal.openThenDispose();
-		cancelSwitch.set(true);
+		Boolean out = cancelProgressModal.openThenDispose();
+		if (out == Boolean.TRUE)
+			cancelSwitch.set(true);
 		iwadTable.refreshIWADs();
 	}
 
@@ -275,7 +275,7 @@ public class IwadTableControlPanel extends JPanel
 		
 		final JLabel progressLabel = label("");
 	
-		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("iwads.scan.title"), ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("iwads.scan.title"), 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.NORTH, progressLabel)
 			),
@@ -329,7 +329,7 @@ public class IwadTableControlPanel extends JPanel
 		
 		if (totalCount > 0)
 		{
-			final Modal<Boolean> cancelProgressModal2 = modal(this, language.getText("iwads.scan.adding.title"), ModalityType.APPLICATION_MODAL, 
+			final Modal<Boolean> cancelProgressModal2 = modal(this, language.getText("iwads.scan.adding.title"), 
 				containerOf(dimension(350, 48), borderLayout(8, 0),
 					node(BorderLayout.NORTH, progressMessage),
 					node(BorderLayout.CENTER, progressBar),
@@ -403,7 +403,7 @@ public class IwadTableControlPanel extends JPanel
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 		
-		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("iwads.cleanup.scan.title"), ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("iwads.cleanup.scan.title"), 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.CENTER, progressBar),
 				node(BorderLayout.LINE_END, dimension(50, 1), progressLabel)

@@ -1,7 +1,6 @@
 package net.mtrop.doomy.gui.swing;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog.ModalityType;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -245,7 +244,7 @@ public class PresetTableControlPanel extends JPanel
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 	
-		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("engine.remove.title"), ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("engine.remove.title"), 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.CENTER, progressBar),
 				node(BorderLayout.LINE_END, progressLabel)
@@ -282,8 +281,10 @@ public class PresetTableControlPanel extends JPanel
 		});
 		
 		signal.offer(true); // alert thread.
-		cancelProgressModal.openThenDispose();
-		cancelSwitch.set(true);
+		Boolean out = cancelProgressModal.openThenDispose();
+		if (out == Boolean.TRUE)
+			cancelSwitch.set(true);
+
 		presetTable.refreshPresets();
 	}
 
@@ -304,7 +305,7 @@ public class PresetTableControlPanel extends JPanel
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 	
-		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("preset.cleanup.title"), ModalityType.APPLICATION_MODAL, 
+		final Modal<Boolean> cancelProgressModal = modal(this, language.getText("preset.cleanup.title"), 
 			containerOf(dimension(350, 24), borderLayout(8, 0),
 				node(BorderLayout.CENTER, progressBar),
 				node(BorderLayout.LINE_END, progressLabel)
@@ -372,8 +373,9 @@ public class PresetTableControlPanel extends JPanel
 		});
 		
 		signal.offer(true); // alert thread.
-		cancelProgressModal.openThenDispose();
-		cancelSwitch.set(true);
+		Boolean out = cancelProgressModal.openThenDispose();
+		if (out == Boolean.TRUE)
+			cancelSwitch.set(true);
 
 		if (progressIndex.get() == 0)
 			SwingUtils.info(this, language.getText("preset.cleanup.nofolders"));

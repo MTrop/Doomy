@@ -254,6 +254,7 @@ public abstract class IdGamesCommonSearchCommand implements DoomyCommand
 				handler.outf("\rDownloading: %d (%d KB/s)...", cur, speed);
 			else
 				handler.outf("\rDownloading: %-" + (int)(Math.log10(len) + 1.0) + "d of " + len + " (%3d%%, %d KB/s)...", cur, pct, speed);
+			return false;
 		}));
 
 		if (instance.getException() != null)
