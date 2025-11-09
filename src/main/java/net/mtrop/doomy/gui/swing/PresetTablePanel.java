@@ -1,3 +1,8 @@
+/*******************************************************************************
+ * Copyright (c) 2019-2025 Matt Tropiano
+ * This program and the accompanying materials are made available under 
+ * the terms of the MIT License, which accompanies this distribution.
+ ******************************************************************************/
 package net.mtrop.doomy.gui.swing;
 
 import static net.mtrop.doomy.struct.swing.ComponentFactory.label;
