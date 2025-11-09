@@ -65,7 +65,7 @@ public class DoomyGUIMainWindow extends JFrame
 			}
 		});
 		
-		setContentPane(containerOf(dimension(640, 480), borderLayout(8, 8),
+		setContentPane(containerOf(dimension(720, 480), borderLayout(8, 8),
 			node(BorderLayout.CENTER, tabs(TabPlacement.TOP, TabLayoutPolicy.WRAP, 
 				tab(language.getText("tab.presets"), containerOf(
 					node(new PresetTableControlPanel(), (panel) -> panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0)))
