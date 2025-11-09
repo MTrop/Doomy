@@ -84,7 +84,8 @@ public class WadTablePanel extends JPanel
 	
 	private void onFilterChange(String filter)
 	{
-		wadTable.setRowFilter((wad) -> wad.name.contains(filter));
+		final String filterLower = filter.toLowerCase();
+		wadTable.setRowFilter((wad) -> wad.name.toLowerCase().contains(filterLower));
 	}
 	
 	/**

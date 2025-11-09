@@ -85,7 +85,8 @@ public class IwadTablePanel extends JPanel
 	
 	private void onFilterChange(String filter)
 	{
-		iwadTable.setRowFilter((iwad) -> iwad.name.contains(filter));
+		final String filterLower = filter.toLowerCase();
+		iwadTable.setRowFilter((iwad) -> iwad.name.toLowerCase().contains(filterLower));
 	}
 	
 	/**

@@ -24,6 +24,7 @@ import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
@@ -44,6 +45,7 @@ public class EngineTableControlPanel extends JPanel
 {
 	private static final long serialVersionUID = -4932594840213904302L;
 
+	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final EngineManager engineManager;
 	private final EngineConfigManager engineConfigManager;
@@ -59,6 +61,7 @@ public class EngineTableControlPanel extends JPanel
 
 	public EngineTableControlPanel()
 	{
+		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.engineManager = EngineManager.get();
 		this.engineConfigManager = EngineConfigManager.get();
@@ -75,6 +78,8 @@ public class EngineTableControlPanel extends JPanel
 
 		onSelection();
 
+		this.messenger.subscribe(MessengerManager.CHANNEL_ENGINES_CHANGED, (message) -> engineTable.refreshEngines());
+		
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, engineTable),
 			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("engine.actions.width"), 1), borderLayout(),
@@ -275,6 +280,7 @@ public class EngineTableControlPanel extends JPanel
 		signal.offer(true); // alert thread.
 		cancelProgressModal.openThenDispose();
 		engineTable.refreshEngines();
+		messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
 	}
 	
 	// Called when opening an engine's folder.

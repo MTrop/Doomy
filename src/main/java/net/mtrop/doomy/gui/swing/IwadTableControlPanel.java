@@ -31,6 +31,7 @@ import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.struct.swing.ComponentFactory;
 import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
@@ -54,6 +55,7 @@ public class IwadTableControlPanel extends JPanel
 {
 	private static final long serialVersionUID = -6460082133191850158L;
 	
+	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final IWADManager iwadManager;
 	private final TaskManager taskManager;
@@ -68,6 +70,7 @@ public class IwadTableControlPanel extends JPanel
 
 	public IwadTableControlPanel()
 	{
+		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.iwadManager = IWADManager.get();
 		this.taskManager = TaskManager.get();
@@ -83,6 +86,8 @@ public class IwadTableControlPanel extends JPanel
 
 		onSelection();
 
+		this.messenger.subscribe(MessengerManager.CHANNEL_IWADS_CHANGED, (message) -> iwadTable.refreshIWADs());
+		
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, iwadTable),
 			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("iwads.actions.width"), 1), borderLayout(),
@@ -210,6 +215,7 @@ public class IwadTableControlPanel extends JPanel
 		if (out == Boolean.TRUE)
 			cancelSwitch.set(true);
 		iwadTable.refreshIWADs();
+		messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
 	}
 
 	// Called for scanning for new WADs.

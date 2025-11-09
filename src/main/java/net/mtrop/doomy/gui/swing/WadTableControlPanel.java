@@ -15,6 +15,7 @@ import javax.swing.JTextArea;
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
@@ -67,6 +68,7 @@ public class WadTableControlPanel extends JPanel
 {
 	private static final long serialVersionUID = -8553950836856607413L;
 	
+	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final WADManager wadManager;
 	private final TaskManager taskManager;
@@ -85,6 +87,7 @@ public class WadTableControlPanel extends JPanel
 	 */
 	public WadTableControlPanel()
 	{
+		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.wadManager = WADManager.get();
 		this.taskManager = TaskManager.get();
@@ -100,6 +103,8 @@ public class WadTableControlPanel extends JPanel
 		this.openAction = actionItem(language.getText("wads.open"), (e) -> onOpen());
 		
 		onSelection();
+
+		this.messenger.subscribe(MessengerManager.CHANNEL_WADS_CHANGED, (message) -> wadTable.refreshWADs());
 
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, wadTable),
@@ -230,6 +235,7 @@ public class WadTableControlPanel extends JPanel
 			cancelSwitch.set(true);
 
 		wadTable.refreshWADs();
+		messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
 	}
 	
 	// Called for scanning for new WADs.

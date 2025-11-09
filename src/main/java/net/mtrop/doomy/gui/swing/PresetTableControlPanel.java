@@ -33,6 +33,7 @@ import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.LauncherManager;
+import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.managers.LauncherManager.LaunchException;
 import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.Preset;
@@ -62,6 +63,7 @@ public class PresetTableControlPanel extends JPanel
 {
 	private static final long serialVersionUID = -5512536206650970521L;
 	
+	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final TaskManager taskManager;
 	private final LanguageManager language;
@@ -77,6 +79,7 @@ public class PresetTableControlPanel extends JPanel
 
 	public PresetTableControlPanel()
 	{
+		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
@@ -93,6 +96,8 @@ public class PresetTableControlPanel extends JPanel
 
 		onSelection();
 
+		this.messenger.subscribe(MessengerManager.CHANNEL_PRESETS_CHANGED, (message) -> presetTable.refreshPresets());
+		
 		containerOf(this, borderLayout(8, 0),
 			node(BorderLayout.CENTER, presetTable),
 			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("preset.actions.width"), 1), borderLayout(),

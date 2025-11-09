@@ -93,7 +93,8 @@ public class PresetTablePanel extends JPanel
 	
 	private void onFilterChange(String filter)
 	{
-		presetTable.setRowFilter((preset) -> preset.name.contains(filter));
+		final String filterLower = filter.toLowerCase();
+		presetTable.setRowFilter((preset) -> preset.name.toLowerCase().contains(filterLower));
 	}
 	
 	/**

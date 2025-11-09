@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2025 Matt Tropiano
+ * Copyright (c) 2019-2022 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -54,7 +54,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	private Throwable exception;
 	private T finishedResult;
 
-	private volatile Thread executor;
+	private volatile Thread executingThread;
 	private volatile boolean running;
 	private volatile boolean done;
 	
@@ -73,7 +73,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 		this.exception = null;
 		this.finishedResult = null;
 
-		this.executor = null;
+		this.executingThread = null;
 		this.running = false;
 		this.done = false;
 	}
@@ -239,7 +239,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	{
 		done = false;
 		running = true;
-		executor = Thread.currentThread();
+		executingThread = Thread.currentThread();
 
 		exception = null;
 		finishedResult = null;
@@ -267,7 +267,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 		} 
 		finally 
 		{
-			executor = null;
+			executingThread = null;
 			running = false;
 			done = true;
 			
@@ -298,9 +298,9 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	 * If this is done or waiting for execution, this returns null.
 	 * @return the executor thread, or null.
 	 */
-	public final Thread getExecutor()
+	public final Thread getExecutingThread()
 	{
-		return executor;
+		return executingThread;
 	}
 	
 	/**
@@ -530,7 +530,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 	// Checks for livelocks.
 	private void liveLockCheck()
 	{
-		if (executor == Thread.currentThread())
+		if (executingThread == Thread.currentThread())
 			throw new IllegalStateException("Attempt to make executing thread wait for this result.");
 	}
 	
@@ -806,7 +806,7 @@ public abstract class InstancedFuture<T> implements RunnableFuture<T>
 			{
 				((Cancellable<T>)callable).cancel();
 				
-				Thread executor = getExecutor();
+				Thread executor = getExecutingThread();
 				if (mayInterruptIfRunning && executor != null)
 					executor.interrupt();
 				join();

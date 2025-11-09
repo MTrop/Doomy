@@ -42,6 +42,7 @@ import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSearchResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSingleFileContent;
 import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.struct.swing.SwingUtils;
@@ -71,6 +72,7 @@ public class IdGamesSearchControlPanel extends JPanel
 {
 	private static final long serialVersionUID = 5500042924527901695L;
 
+	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final LanguageManager language;
 	private final IconManager icons;
@@ -91,6 +93,7 @@ public class IdGamesSearchControlPanel extends JPanel
 	
 	public IdGamesSearchControlPanel()
 	{
+		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.language = LanguageManager.get();
 		this.icons = IconManager.get();
@@ -222,7 +225,7 @@ public class IdGamesSearchControlPanel extends JPanel
 			ObjectUtils.apply(new JPanel(), (panel) -> containerOf(panel, dimension(640, 640), borderLayout(),
 				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, labelWidth),
 					gui.formField("idgames.fileinfo.filename", createReadOnlyField(content.filename)),
-					gui.formField("idgames.fileinfo.url", createReadOnlyField(content.idgamesurl)),
+					gui.formField("idgames.fileinfo.path", createReadOnlyField(content.dir + content.filename)),
 					gui.formField("idgames.fileinfo.title", createReadOnlyField(content.title)),
 					gui.formField("idgames.fileinfo.size", createReadOnlyField(String.valueOf(content.size / 1024) + " KB")),
 					gui.formField("idgames.fileinfo.date", createReadOnlyField(content.date)),
@@ -463,6 +466,8 @@ public class IdGamesSearchControlPanel extends JPanel
 		if (out == Boolean.TRUE)
 			cancelSwitch.set(true);
 		
+		downloadedFile.delete();
+		
 		if (cancelSwitch.get())
 		{
 			outFile.delete();
@@ -474,7 +479,10 @@ public class IdGamesSearchControlPanel extends JPanel
 		if (wadName != null)
 		{
 			if (wadManager.addWAD(wadName, outFile.getAbsolutePath()) != null)
+			{
 				SwingUtils.info(language.getText("idgames.download.success.wad"));
+				messenger.publish(MessengerManager.CHANNEL_WADS_CHANGED, true);
+			}
 		}
 		else
 		{

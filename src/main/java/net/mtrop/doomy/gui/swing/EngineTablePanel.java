@@ -84,7 +84,8 @@ public class EngineTablePanel extends JPanel
 	
 	private void onFilterChange(String filter)
 	{
-		engineTable.setRowFilter((engine) -> engine.name.contains(filter));
+		final String filterLower = filter.toLowerCase();
+		engineTable.setRowFilter((engine) -> engine.name.toLowerCase().contains(filterLower));
 	}
 	
 	/**

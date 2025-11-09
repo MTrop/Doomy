@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2025 Matt Tropiano
+ * Copyright (c) 2025 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -597,7 +597,7 @@ public final class TableFactory
 				setFieldValue(instance, col.publicField, aValue);
 			else if (col.setterMethod != null)
 				invokeBlind(col.setterMethod, instance, aValue);
-			fireUpdateEvent(rowIndex, columnIndex);
+			fireUpdateEvent(rowIndex, rowIndex, columnIndex);
 		}
 		
 		@Override
@@ -624,8 +624,26 @@ public final class TableFactory
 		 */
 		public void setRows(Collection<T> collection)
 		{
+			int amount = objects.size();
 			objects.clear();
-			addAllRowsAt(collection, 0);
+			objects.addAll(collection);
+
+			if (collection.size() < amount)
+			{
+				if (!collection.isEmpty())
+					fireUpdateEvent(0, collection.size() - 1);
+				fireDeleteEvent(collection.size(), amount - 1);
+			}
+			else if (collection.size() > amount)
+			{
+				if (amount > 0)
+					fireUpdateEvent(0, amount - 1);
+				fireInsertEvent(amount, collection.size() - 1);
+			}
+			else
+			{
+				fireUpdateEvent(0, amount);
+			}
 		}
 		
 		/**
@@ -673,8 +691,8 @@ public final class TableFactory
 		 */
 		public void clear()
 		{
-			if (getRowCount() > 0)
-				fireDeleteEvent(0, getRowCount() - 1);
+			if (objects.size() > 0)
+				fireDeleteEvent(0, objects.size() - 1);
 			objects.clear();
 		}
 		
@@ -708,9 +726,9 @@ public final class TableFactory
 			return objects.get(index);
 		}
 		
-		protected void fireInsertEvent(int minRow, int maxRow)
+		protected void fireInsertEvent(int firstRow, int lastRow)
 		{
-			TableModelEvent e = new TableModelEvent(this, minRow, maxRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT);
+			TableModelEvent e = new TableModelEvent(this, firstRow, lastRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.INSERT);
 			
 			synchronized (listeners)
 			{
@@ -719,9 +737,9 @@ public final class TableFactory
 			}
 		}
 		
-		protected void fireDeleteEvent(int minRow, int maxRow)
+		protected void fireDeleteEvent(int firstRow, int lastRow)
 		{
-			TableModelEvent e = new TableModelEvent(this, minRow, maxRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE);
+			TableModelEvent e = new TableModelEvent(this, firstRow, lastRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE);
 			
 			synchronized (listeners)
 			{
@@ -730,9 +748,14 @@ public final class TableFactory
 			}
 		}
 		
-		protected void fireUpdateEvent(int row, int column)
+		protected void fireUpdateEvent(int firstRow, int lastRow)
 		{
-			TableModelEvent e = new TableModelEvent(this, row, row, column, TableModelEvent.UPDATE);
+			fireUpdateEvent(firstRow, lastRow, TableModelEvent.ALL_COLUMNS);
+		}
+
+		protected void fireUpdateEvent(int firstRow, int lastRow, int column)
+		{
+			TableModelEvent e = new TableModelEvent(this, firstRow, lastRow, column, TableModelEvent.UPDATE);
 			
 			synchronized (listeners)
 			{
