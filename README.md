@@ -1,6 +1,6 @@
 # Doomy
 
-Copyright (c) 2019 Matt Tropiano  
+Copyright (c) 2019-2025 Matt Tropiano  
 
 ### Required Libraries
 
