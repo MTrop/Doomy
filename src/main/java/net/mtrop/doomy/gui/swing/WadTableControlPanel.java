@@ -506,6 +506,7 @@ public class WadTableControlPanel extends JPanel
 			wadManager.removeWAD(name);
 		
 		wadTable.refreshWADs();
+		messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
 		
 		SwingUtils.info(this, language.getText("wads.cleanup.scan.removed", missingWadNames.size()));
 	}
