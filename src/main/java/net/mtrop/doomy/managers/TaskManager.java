@@ -42,7 +42,7 @@ public final class TaskManager
 	
 	private TaskManager()
 	{
-		this.executor = Executors.newFixedThreadPool(8, new DefaultThreadFactory("DoomToolsThread"));
+		this.executor = Executors.newFixedThreadPool(4, new DefaultThreadFactory("DoomToolsThread"));
 	}
 
 	/**

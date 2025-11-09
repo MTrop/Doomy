@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -104,7 +105,7 @@ public class IdGamesSearchControlPanel extends JPanel
 		this.searchField = stringField(false, true);
 		this.fieldTypeField = comboField(comboBox(Arrays.asList(FieldType.values())));
 		this.fieldTypeField.setValue(FieldType.FILENAME);
-		this.searchButtonField = buttonField(button(language.getText("idgames.search.button"), (b) -> onSearch()));
+		this.searchButtonField = buttonField(button(language.getText("idgames.search.button"), (b) -> taskManager.spawn(() -> onSearch())));
 		
 		this.resultsTable = objectTable(SelectionPolicy.SINGLE, 
 			objectTableModel(IdGamesFileContent.class, Arrays.asList()), 
@@ -501,24 +502,28 @@ public class IdGamesSearchControlPanel extends JPanel
 			return;
 		}
 
-		resultsTable.getTableModel().clear();
+		resultsTable.setSelectedRows();
+		resultsTable.getTableModel().clearAllRows();
+		
+		Future<IdGamesSearchResponse> responseFuture = idGames.searchBy(criteria, fieldType);
 		printActivityStatus(language.getText("idgames.messages.fetch.search"));
 		
-		IdGamesSearchResponse response;
+		IdGamesSearchResponse searchResult;
+		
 		try {
-			response = idGames.searchBy(criteria, fieldType).get();
+			searchResult = responseFuture.get();
 			
-			if (response.error != null)
-				printErrorStatus(language.getText("idgames.messages.error", response.error.message));
-			else if (response.warning != null)
-				printSuccessStatus(response.warning.message);
+			if (searchResult.error != null)
+				printErrorStatus(language.getText("idgames.messages.error", searchResult.error.message));
+			else if (searchResult.warning != null)
+				printSuccessStatus(searchResult.warning.message);
 			else
 				printSuccessStatus(language.getText("idgames.messages.done"));
 			
-			if (response.content != null)
-				resultsTable.getTableModel().setRows(Arrays.asList(response.content.files));
+			if (searchResult.content != null)
+				resultsTable.getTableModel().setRows(Arrays.asList(searchResult.content.files));
 			else
-				resultsTable.getTableModel().clear();
+				resultsTable.getTableModel().clearAllRows();
 			
 		} catch (CancellationException e) {
 			printErrorStatus(language.getText("idgames.messages.error.cancel"));
@@ -526,10 +531,6 @@ public class IdGamesSearchControlPanel extends JPanel
 			printErrorStatus(language.getText("idgames.messages.error.interrupt"));
 		} catch (ExecutionException e) {
 			printErrorStatus(language.getText("idgames.messages.error", e.getCause().getLocalizedMessage()));
-		} catch (SocketTimeoutException e) {
-			printErrorStatus(language.getText("idgames.messages.error.timeout"));
-		} catch (IOException e) {
-			printErrorStatus(language.getText("idgames.messages.error.io"));
 		}
 			
 	}

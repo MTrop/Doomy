@@ -211,7 +211,7 @@ public final class IdGamesManager
 			.sendAsync(IDGAMESFILE_READER);
 	}
 
-	private HTTPRequestFuture<IdGamesSearchResponse> search(HTTPParameters parameters) throws SocketTimeoutException, IOException
+	private HTTPRequestFuture<IdGamesSearchResponse> search(HTTPParameters parameters)
 	{
 		return HTTPRequest.get(getAPIURL())
 			.setHeaders(COMMON_HEADERS.copy())
@@ -227,10 +227,8 @@ public final class IdGamesManager
 	 * @param sortType the result sort type.
 	 * @param direction the sort direction.
 	 * @return the response object.
-	 * @throws SocketTimeoutException if the call times out.
-	 * @throws IOException if an I/O error occurs.
 	 */
-	public HTTPRequestFuture<IdGamesSearchResponse> searchBy(String criteria, FieldType fieldType, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
+	public HTTPRequestFuture<IdGamesSearchResponse> searchBy(String criteria, FieldType fieldType, SortType sortType, SortDirection direction)
 	{
 		return search(SEARCH_PARAMS.copy()
 			.addParameter("query", criteria)
@@ -245,10 +243,8 @@ public final class IdGamesManager
 	 * @param criteria the search criteria.
 	 * @param fieldType the field type.
 	 * @return the response object.
-	 * @throws SocketTimeoutException if the call times out.
-	 * @throws IOException if an I/O error occurs.
 	 */
-	public HTTPRequestFuture<IdGamesSearchResponse> searchBy(String criteria, FieldType fieldType) throws SocketTimeoutException, IOException
+	public HTTPRequestFuture<IdGamesSearchResponse> searchBy(String criteria, FieldType fieldType)
 	{
 		return searchBy(criteria, fieldType, SortType.FILENAME, SortDirection.ASC);
 	}
@@ -259,10 +255,8 @@ public final class IdGamesManager
 	 * @param sortType the result sort type.
 	 * @param direction the sort direction.
 	 * @return the response object.
-	 * @throws SocketTimeoutException if the call times out.
-	 * @throws IOException if an I/O error occurs.
 	 */
-	public HTTPRequestFuture<IdGamesSearchResponse> searchByFileName(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
+	public HTTPRequestFuture<IdGamesSearchResponse> searchByFileName(String criteria, SortType sortType, SortDirection direction)
 	{
 		return searchBy(criteria, FieldType.FILENAME, sortType, direction);
 	}
@@ -273,10 +267,8 @@ public final class IdGamesManager
 	 * @param sortType the result sort type.
 	 * @param direction the sort direction.
 	 * @return the response object.
-	 * @throws SocketTimeoutException if the call times out.
-	 * @throws IOException if an I/O error occurs.
 	 */
-	public HTTPRequestFuture<IdGamesSearchResponse> searchByTitle(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
+	public HTTPRequestFuture<IdGamesSearchResponse> searchByTitle(String criteria, SortType sortType, SortDirection direction)
 	{
 		return searchBy(criteria, FieldType.TITLE, sortType, direction);
 	}
@@ -287,10 +279,8 @@ public final class IdGamesManager
 	 * @param sortType the result sort type.
 	 * @param direction the sort direction.
 	 * @return the response object.
-	 * @throws SocketTimeoutException if the call times out.
-	 * @throws IOException if an I/O error occurs.
 	 */
-	public HTTPRequestFuture<IdGamesSearchResponse> searchByAuthor(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
+	public HTTPRequestFuture<IdGamesSearchResponse> searchByAuthor(String criteria, SortType sortType, SortDirection direction)
 	{
 		return searchBy(criteria, FieldType.AUTHOR, sortType, direction);
 	}
@@ -301,10 +291,8 @@ public final class IdGamesManager
 	 * @param sortType the result sort type.
 	 * @param direction the sort direction.
 	 * @return the response object.
-	 * @throws SocketTimeoutException if the call times out.
-	 * @throws IOException if an I/O error occurs.
 	 */
-	public HTTPRequestFuture<IdGamesSearchResponse> searchByTextFile(String criteria, SortType sortType, SortDirection direction) throws SocketTimeoutException, IOException
+	public HTTPRequestFuture<IdGamesSearchResponse> searchByTextFile(String criteria, SortType sortType, SortDirection direction)
 	{
 		return searchBy(criteria, FieldType.TEXTFILE, sortType, direction);
 	}

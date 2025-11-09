@@ -689,11 +689,12 @@ public final class TableFactory
 		/**
 		 * Removes all rows from this table.
 		 */
-		public void clear()
+		public void clearAllRows()
 		{
-			if (objects.size() > 0)
-				fireDeleteEvent(0, objects.size() - 1);
+			int amount = objects.size();
 			objects.clear();
+			if (amount > 0)
+				fireDeleteEvent(0, amount - 1);
 		}
 		
 		/**
@@ -712,8 +713,8 @@ public final class TableFactory
 		 */
 		public void removeRowAt(int index)
 		{
-			fireDeleteEvent(index, index);
 			objects.remove(index);
+			fireDeleteEvent(index, index);
 		}
 		
 		/**
@@ -740,7 +741,7 @@ public final class TableFactory
 		protected void fireDeleteEvent(int firstRow, int lastRow)
 		{
 			TableModelEvent e = new TableModelEvent(this, firstRow, lastRow, TableModelEvent.ALL_COLUMNS, TableModelEvent.DELETE);
-			
+
 			synchronized (listeners)
 			{
 				for (int i = 0; i < listeners.size(); i++)
