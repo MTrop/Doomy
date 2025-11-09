@@ -234,7 +234,7 @@ public class IdGamesSearchControlPanel extends JPanel
 				)),
 				node(BorderLayout.CENTER, scroll(ObjectUtils.apply(textArea(content.textfile, 25, 80), (area) -> {
 					area.setEditable(false);
-					area.setFont(new Font("Courier New", Font.PLAIN, 12));
+					area.setFont(new Font("Monospaced", Font.PLAIN, 12));
 				})))
 			)), 
 			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true)

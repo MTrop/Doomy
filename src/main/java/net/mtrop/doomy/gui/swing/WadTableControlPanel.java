@@ -587,7 +587,7 @@ public class WadTableControlPanel extends JPanel
 		}
 		
 		JTextArea textArea = textArea(25, 80);
-		textArea.setFont(new Font("Courier New", Font.PLAIN, 14));
+		textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
 		textArea.setEditable(false);
 		textArea.setText(sw.toString());
 		textArea.setCaretPosition(0);

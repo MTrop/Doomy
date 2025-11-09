@@ -7,15 +7,24 @@ package net.mtrop.doomy.gui;
 
 import net.mtrop.doomy.managers.DatabaseManager;
 import net.mtrop.doomy.managers.GUIManager;
+import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.managers.LoggerManager;
+import net.mtrop.doomy.struct.LoggingFactory.Logger;
 import net.mtrop.doomy.struct.swing.ModalFactory.Modal;
 import net.mtrop.doomy.struct.swing.SwingUtils;
 import net.mtrop.doomy.struct.util.OSUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
+import net.mtrop.doomy.struct.util.StringUtils;
 
 import java.awt.Dialog.ModalityType;
-import java.awt.BorderLayout;
 
-import static net.mtrop.doomy.struct.swing.ModalFactory.modal;
-import static net.mtrop.doomy.struct.swing.ComponentFactory.label;
+import javax.swing.JScrollPane;
+
+import java.awt.BorderLayout;
+import java.awt.Toolkit;
+
+import static net.mtrop.doomy.struct.swing.ModalFactory.*;
+import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 
@@ -25,6 +34,8 @@ import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
  */
 public final class DoomyGUIMain
 {
+	private static final Logger LOG = LoggerManager.getLogger(DoomyGUIMain.class);
+	
 	/**
 	 * Sets the preferred Look And Feel.
 	 */
@@ -38,6 +49,7 @@ public final class DoomyGUIMain
 	public static void main(String[] args)
 	{
 		setLAF();
+		setExceptionHandler();
 		
 		if (!DatabaseManager.databaseExists())
 		{
@@ -50,6 +62,38 @@ public final class DoomyGUIMain
 		}
 
 		(new DoomyGUIMainWindow()).setVisible(true);
+	}
+
+	// Sets the exception handler.
+	private static void setExceptionHandler()
+	{
+		Thread.setDefaultUncaughtExceptionHandler((thread, exception) -> {
+			String threadName = thread.getName();
+			LOG.errorf(exception, "Thread [%s] threw an uncaught exception!", threadName);
+			
+			LanguageManager language = LanguageManager.get();
+			
+			JScrollPane exceptionPane = scroll(ObjectUtils.apply(textArea(StringUtils.getJREExceptionString(exception), 20, 80), (area) -> {
+				area.setEditable(false);
+			}));
+			
+			Toolkit.getDefaultToolkit().beep();
+			Boolean choice = modal(language.getText("doomy.exception.title", threadName),
+				containerOf(borderLayout(),
+					node(BorderLayout.NORTH, label(language.getText("doomy.exception.content"))),
+					node(BorderLayout.CENTER, exceptionPane)
+				),
+				choice(language.getText("doomy.exception.continue"), Boolean.FALSE),
+				choice(language.getText("doomy.exception.shutdown"), Boolean.TRUE)
+			).openThenDispose();
+			
+			if (choice == Boolean.TRUE)
+			{
+				LOG.info("Forcing JVM shutdown...");
+				System.exit(2);
+			}
+			
+		});
 	}
 
 }
