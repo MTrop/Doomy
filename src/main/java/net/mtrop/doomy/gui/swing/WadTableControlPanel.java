@@ -324,12 +324,13 @@ public class WadTableControlPanel extends JPanel
 				});
 				
 				String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
-				if (wadManager.containsWAD(name) && force)
+				boolean containsWAD = wadManager.containsWAD(name);
+				if (containsWAD && force)
 				{
 					updatedCount.incrementAndGet();
 					filesToAdd.add(file);
 				}
-				else if (!wadManager.containsWAD(name))
+				else if (!containsWAD)
 				{
 					addedCount.incrementAndGet();
 					filesToAdd.add(file);

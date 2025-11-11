@@ -239,6 +239,12 @@ public class PresetTableControlPanel extends JPanel
 		for (WAD wad : selectedWads)
 			wadIds[i++] = wad.id;
 		
+		if (presetManager.containsPreset(presetName))
+		{
+			SwingUtils.error(this, language.getText("preset.create.error.exists", presetName));
+			return;
+		}
+		
 		presetManager.addPreset(presetName, selectedEngine.id, selectedIWAD != null ? selectedIWAD.id : null, wadIds);
 		presetTable.refreshPresets();
 	}

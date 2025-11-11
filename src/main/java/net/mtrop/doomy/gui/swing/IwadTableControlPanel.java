@@ -269,7 +269,7 @@ public class IwadTableControlPanel extends JPanel
 		boolean recurse = recurseField.getValue();
 		boolean force = updateExistingField.getValue();
 		
-		final String[] FILETYPES = {"PK3", "PK7", "PKE", "WAD", "ZIP"};
+		final String[] FILETYPES = {"IPK3", "IPK7", "IPKE", "IWAD", "PK3", "PK7", "PKE", "WAD", "ZIP"};
 		
 		final FileFilter WADFILTER = (file) ->
 		{
@@ -304,12 +304,13 @@ public class IwadTableControlPanel extends JPanel
 				});
 				
 				String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
-				if (iwadManager.containsIWAD(name) && force)
+				boolean containsIWAD = iwadManager.containsIWAD(name);
+				if (containsIWAD && force)
 				{
 					updatedCount.incrementAndGet();
 					filesToAdd.add(file);
 				}
-				else if (!iwadManager.containsIWAD(name))
+				else if (!containsIWAD)
 				{
 					addedCount.incrementAndGet();
 					filesToAdd.add(file);

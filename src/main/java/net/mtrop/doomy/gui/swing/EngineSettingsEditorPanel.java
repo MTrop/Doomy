@@ -13,18 +13,25 @@ import java.util.regex.PatternSyntaxException;
 
 import javax.swing.JPanel;
 
+import net.mtrop.doomy.managers.EngineConfigManager;
 import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
+import net.mtrop.doomy.managers.EngineTemplateConfigManager;
+import net.mtrop.doomy.managers.EngineTemplateConfigManager.EngineTemplateSettingEntry;
+import net.mtrop.doomy.managers.EngineTemplateManager.EngineTemplate;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doomy.struct.swing.SwingUtils;
+import net.mtrop.doomy.struct.swing.TableFactory.SelectionPolicy;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
+import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doomy.struct.swing.FormFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
+import static net.mtrop.doomy.struct.swing.ModalFactory.*;
 
 /**
  * An editor panel for Engine settings.
@@ -36,6 +43,7 @@ public class EngineSettingsEditorPanel extends JPanel
 
 	private final GUIManager gui;
 	private final LanguageManager language;
+	private final EngineTemplateConfigManager engineTemplateConfigManager;
 	
 	private EngineSettings settings;
 	
@@ -81,6 +89,7 @@ public class EngineSettingsEditorPanel extends JPanel
 	{
 		this.gui = GUIManager.get();
 		this.language = LanguageManager.get();
+		this.engineTemplateConfigManager = EngineTemplateConfigManager.get();
 		
 		this.settings = new EngineSettings(startingSettings);
 		this.exePathField = fileField(settings.exePath != null ? new File(settings.exePath) : null, "...", 
@@ -89,12 +98,15 @@ public class EngineSettingsEditorPanel extends JPanel
 				return chosen != null ? chosen : current;
 			},
 			(selected) -> {
-				if (ObjectUtils.isEmpty(workingDirectoryPathField.getValue()) && selected != null)
-					workingDirectoryPathField.setValue(selected.getParentFile());
 				if (selected != null)
+				{
 					settings.exePath = selected.getAbsolutePath();
+					workingDirectoryPathField.setValue(selected.getParentFile());
+				}
 				else
+				{
 					settings.exePath = null;
+				}
 			}
 		);
 		this.setupFileNameField = stringField(settings.setupFileName, true, true, (v) -> settings.setupFileName = v);
@@ -212,10 +224,116 @@ public class EngineSettingsEditorPanel extends JPanel
 							gui.formField("engine.settings.dosboxcommandline", dosboxCommandLineField)
 						))
 					)
+				)),
+				node(gui.createTitlePanel(language.getText("engine.settings.templates.title"),
+					containerOf(
+						node(button(language.getText("engine.settings.usetemplate"), (b) -> applyTemplate()))
+					)
 				))
-			))),
-			node(BorderLayout.CENTER, containerOf())
+			)))
 		);
+	}
+	
+	private void clearFields()
+	{
+		exePathField.setValue(null);
+		setupFileNameField.setValue(null);
+		serverFileNameField.setValue(null);
+		workingDirectoryPathField.setValue(null);
+		iwadSwitchField.setValue(null);
+		fileSwitchField.setValue(null);
+		dehackedSwitchField.setValue(null);
+		dehlumpSwitchField.setValue(null);
+		saveDirectorySwitchField.setValue(null);
+		screenshotDirectorySwitchField.setValue(null);
+		saveGameRegexField.setValue(null);
+		screenshotRegexField.setValue(null);
+		demoRegexField.setValue(null);
+		commandLineField.setValue(null);
+		dosboxPathField.setValue(null);
+		dosboxCommandLineField.setValue(null);
+	}
+	
+	private void applyTemplate()
+	{
+		EngineTemplate template = browseEngineTemplate();
+		if (template != null)
+		{
+			clearFields();
+			EngineTemplateSettingEntry[] entries = engineTemplateConfigManager.getAllSettings(template.name, "");
+			for (EngineTemplateSettingEntry entry : entries)
+			{
+				switch (entry.name)
+				{
+					case EngineConfigManager.SETTING_EXEPATH:
+						exePathField.setValue(new File(entry.value));
+						break;
+					case EngineConfigManager.SETTING_DOSBOXPATH:
+						dosboxPathField.setValue(new File(entry.value));
+						break;
+					case EngineConfigManager.SETTING_DOSBOXCOMMANDLINE:
+						dosboxCommandLineField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_SETUPFILENAME:
+						setupFileNameField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_SERVERFILENAME:
+						serverFileNameField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_WORKDIRPATH:
+						workingDirectoryPathField.setValue(new File(entry.value));
+						break;
+					case EngineConfigManager.SETTING_FILESWITCH:
+						fileSwitchField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_IWADSWITCH:
+						iwadSwitchField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_DEHSWITCH:
+						dehackedSwitchField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_DEHLUMPSWITCH:
+						dehlumpSwitchField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_SAVEDIRSWITCH:
+						saveDirectorySwitchField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_SHOTDIRSWITCH:
+						screenshotDirectorySwitchField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_SAVEPATTERN:
+						saveGameRegexField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_SHOTPATTERN:
+						screenshotRegexField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_DEMOPATTERN:
+						demoRegexField.setValue(entry.value);
+						break;
+					case EngineConfigManager.SETTING_COMMANDLINE:
+						commandLineField.setValue(entry.value);
+						break;
+				}
+			}
+		}
+	}
+	
+	private EngineTemplate browseEngineTemplate()
+	{
+		final EngineTemplateTablePanel engineTemplateTablePanel = new EngineTemplateTablePanel(SelectionPolicy.SINGLE, (model, event) -> {}, (event) -> {});
+		
+		Boolean ok = modal(this, language.getText("template.select"), 
+			containerOf(dimension(350, 200), borderLayout(),
+				node(BorderLayout.CENTER, engineTemplateTablePanel)
+			),
+			gui.createChoiceFromLanguageKey("choice.ok", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (ok != Boolean.TRUE)
+			return null;
+		
+		return engineTemplateTablePanel.getSelectedTemplates().get(0);
 	}
 	
 	/**

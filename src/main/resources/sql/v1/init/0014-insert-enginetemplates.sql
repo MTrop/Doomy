@@ -1,0 +1,18 @@
+INSERT INTO EngineTemplates (name) VALUES
+	('dos-doom'),
+	('dos-doom2'),
+	('dos-heretic'),
+	('dos-hexen'),
+	('dos-strife'),
+	('chocolate-doom'),
+	('chocolate-heretic'),
+	('chocolate-hexen'),
+	('chocolate-strife'),
+	('crispy'),
+	('doom-retro'),
+	('dsda-doom'),
+	('woof'),
+	('nugget'),
+	('zdoom'),
+	('gzdoom'),
+	('eternity')

@@ -640,9 +640,9 @@ public final class TableFactory
 					fireUpdateEvent(0, amount - 1);
 				fireInsertEvent(amount, collection.size() - 1);
 			}
-			else
+			else if (amount > 0)
 			{
-				fireUpdateEvent(0, amount);
+				fireUpdateEvent(0, amount - 1);
 			}
 		}
 		

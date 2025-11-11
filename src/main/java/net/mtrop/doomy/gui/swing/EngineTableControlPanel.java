@@ -7,6 +7,7 @@ package net.mtrop.doomy.gui.swing;
 
 import java.awt.BorderLayout;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -26,6 +27,7 @@ import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.managers.TaskManager;
+import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
@@ -58,6 +60,7 @@ public class EngineTableControlPanel extends JPanel
 	private Action editAction;
 	private Action removeAction;
 	private Action openFolderAction;
+	private Action setupAction;
 
 	public EngineTableControlPanel()
 	{
@@ -75,7 +78,8 @@ public class EngineTableControlPanel extends JPanel
 		this.editAction = actionItem(language.getText("engine.edit"), (e) -> onEdit());
 		this.removeAction = actionItem(language.getText("engine.remove"), (e) -> onRemove());
 		this.openFolderAction = actionItem(language.getText("engine.open"), (e) -> onOpen());
-
+		this.setupAction = actionItem(language.getText("engine.setup"), (e) -> onSetup());
+		
 		onSelection();
 
 		this.messenger.subscribe(MessengerManager.CHANNEL_ENGINES_CHANGED, (message) -> engineTable.refreshEngines());
@@ -85,6 +89,7 @@ public class EngineTableControlPanel extends JPanel
 			node(BorderLayout.EAST, containerOf(dimension(language.getInteger("engine.actions.width"), 1), borderLayout(),
 				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
 					node(button(openFolderAction)),
+					node(button(setupAction)),
 					node(button(addAction)),
 					node(button(copyAction)),
 					node(button(editAction)),
@@ -129,6 +134,26 @@ public class EngineTableControlPanel extends JPanel
 			return;
 		}
 		
+		if (ObjectUtils.isEmpty(settings.workingDirectoryPath))
+		{
+			SwingUtils.error(this, language.getText("engine.add.error.workdir.blank"));
+			return;
+		}
+	
+		File workingDir = new File(settings.workingDirectoryPath);
+		
+		if (!workingDir.exists())
+		{
+			SwingUtils.error(this, language.getText("engine.add.error.workdir.noexist"));
+			return;
+		}
+		
+		if (!workingDir.isDirectory())
+		{
+			SwingUtils.error(this, language.getText("engine.add.error.workdir.notdir"));
+			return;
+		}
+		
 		if (ObjectUtils.isEmpty(settings.fileSwitch))
 		{
 			SwingUtils.error(this, language.getText("engine.add.error.switch.file"));
@@ -149,11 +174,11 @@ public class EngineTableControlPanel extends JPanel
 		final JFormField<String> engineNameField = stringField(false, true);
 		EngineSettingsEditorPanel editorPanel = new EngineSettingsEditorPanel(new EngineSettings());
 		
-		Boolean doAdd = modal(this, language.getText("engine.add.title"), containerOf(dimension(400, 675), borderLayout(),
+		Boolean doAdd = modal(this, language.getText("engine.add.title"), containerOf(dimension(450, 640), borderLayout(),
 				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("engine.settings.labelwidth")), 
 					gui.formField("engine.add.form.name", engineNameField)
 				)),
-				node(BorderLayout.CENTER, editorPanel)
+				node(BorderLayout.CENTER, scroll(editorPanel))
 			),
 			gui.createChoiceFromLanguageKey("engine.add.choice.add", (Boolean)true),
 			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
@@ -179,11 +204,11 @@ public class EngineTableControlPanel extends JPanel
 		final JFormField<String> engineNameField = stringField(false, true);
 		EngineSettingsEditorPanel editorPanel = new EngineSettingsEditorPanel(new EngineSettings(settings));
 		
-		Boolean doCopy = modal(this, language.getText("engine.copy.title"), containerOf(dimension(400, 660), borderLayout(),
+		Boolean doCopy = modal(this, language.getText("engine.copy.title"), containerOf(dimension(450, 640), borderLayout(),
 				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("engine.settings.labelwidth")), 
 					gui.formField("engine.copy.form.name", engineNameField)
 				)),
-				node(BorderLayout.CENTER, editorPanel)
+				node(BorderLayout.CENTER, scroll(editorPanel))
 			),
 			gui.createChoiceFromLanguageKey("engine.copy.choice.add", (Boolean)true),
 			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
@@ -208,8 +233,8 @@ public class EngineTableControlPanel extends JPanel
 		
 		EngineSettingsEditorPanel editorPanel = new EngineSettingsEditorPanel(new EngineSettings(settings));
 		
-		Boolean doSave = modal(this, language.getText("engine.edit.title"), containerOf(dimension(400, 660), borderLayout(),
-				node(BorderLayout.NORTH, editorPanel)
+		Boolean doSave = modal(this, language.getText("engine.edit.title"), containerOf(dimension(450, 640), borderLayout(),
+				node(BorderLayout.CENTER, scroll(editorPanel))
 			),
 			gui.createChoiceFromLanguageKey("engine.edit.choice.save", (Boolean)true),
 			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
@@ -293,6 +318,31 @@ public class EngineTableControlPanel extends JPanel
 		Engine source = selectedEngines.get(0);
 		EngineSettings settings = engineConfigManager.getEngineSettings(source.name);
 		DoomyCommon.openInSystemBrowser(new File(settings.exePath));
+	}
+	
+	// Called when opening an engine's folder.
+	private void onSetup()
+	{
+		List<Engine> selectedEngines = engineTable.getSelectedEngines();
+		if (selectedEngines.isEmpty())
+			return;
+		
+		Engine source = selectedEngines.get(0);
+		EngineSettings settings = engineConfigManager.getEngineSettings(source.name);
+		
+		if (ObjectUtils.isEmpty(settings.setupFileName))
+		{
+			SwingUtils.error(this, language.getText("engine.setup.nosetup"));
+			return;
+		}
+		
+		File path = new File(settings.workingDirectoryPath + File.separator + settings.setupFileName);
+		ProcessCallable proc = ProcessCallable.create(path).setWorkingDirectory(new File(settings.workingDirectoryPath));
+		try {
+			proc.exec();
+		} catch (IOException e) {
+			SwingUtils.error(this, language.getText("engine.setup.ioerror", path.getAbsolutePath()));
+		}
 	}
 	
 	private void onSelection()

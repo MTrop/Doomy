@@ -29,8 +29,15 @@ public final class DatabaseManager
 	// Singleton instance.
 	private static final SingletonProvider<DatabaseManager> INSTANCE = new SingletonProvider<>(() -> initializeDatabase());
 	
+	private static final String QUERY_META_EXISTS
+		= "SELECT 1 WHERE EXISTS (SELECT name FROM sqlite_master WHERE type='table' AND name='Meta')"; 
+	private static final String QUERY_SET_TABLEVERSION
+		= "UPDATE Meta SET value = ? WHERE name = 'table.version'"; 
+	private static final String QUERY_GET_TABLEVERSION
+		= "SELECT value FROM Meta WHERE name = 'table.version'"; 
+
 	// Query resources.
-	private static String[] INIT_QUERIES = {
+	private static final String[] INIT_QUERIES = {
 		"sql/v1/init/0001-create-meta.sql",
 		"sql/v1/init/0002-create-config.sql",
 		"sql/v1/init/0003-create-engines.sql",
@@ -38,12 +45,14 @@ public final class DatabaseManager
 		"sql/v1/init/0005-create-iwads.sql",
 		"sql/v1/init/0006-create-wads.sql",
 		"sql/v1/init/0007-create-waddata.sql",
-		"sql/v1/init/0010-create-preset.sql",
-		"sql/v1/init/0011-create-presetitem.sql",
-		"sql/v1/init/0012-insert-meta-defaults.sql",
-		"sql/v1/init/0013-insert-config-defaults.sql",
-		"sql/v1/init/0014-create-enginetemplates.sql",
-		"sql/v1/init/0015-create-enginetemplatessettings.sql"
+		"sql/v1/init/0008-create-preset.sql",
+		"sql/v1/init/0009-create-presetitem.sql",
+		"sql/v1/init/0010-insert-meta-defaults.sql",
+		"sql/v1/init/0011-insert-config-defaults.sql",
+		"sql/v1/init/0012-create-enginetemplates.sql",
+		"sql/v1/init/0013-create-enginetemplatessettings.sql",
+		"sql/v1/init/0014-insert-enginetemplates.sql",
+		"sql/v1/init/0015-insert-enginetemplatessettings.sql"
 	};
 
 	// Initializes/creates the connector.
@@ -60,10 +69,17 @@ public final class DatabaseManager
 		
 		try 
 		{
-			createConnector(databaseFile).getConnectionAnd((conn)->
+			createConnector(databaseFile).getConnectionAnd((conn) ->
 			{
-				for (String resource : INIT_QUERIES)
+				int tableVersion;
+				if (conn.getRow(QUERY_META_EXISTS) != null)
+					tableVersion = conn.getRow(QUERY_GET_TABLEVERSION).getInt(0);
+				else 
+					tableVersion = 0;
+				
+				for (; tableVersion < INIT_QUERIES.length; tableVersion++)
 				{
+					String resource = INIT_QUERIES[tableVersion];
 					try (InputStream in = IOUtils.openResource(resource))
 					{
 						conn.getUpdateResult(IOUtils.getTextualContents(in, "UTF-8"));
@@ -73,6 +89,7 @@ public final class DatabaseManager
 						throw new DoomySetupException("Internal error: Could not open resource: " + resource, e);
 					}
 				}
+				conn.getUpdateResult(QUERY_SET_TABLEVERSION, String.valueOf(INIT_QUERIES.length));
 			});
 		} 
 		catch (SQLException e) 
@@ -115,8 +132,7 @@ public final class DatabaseManager
 		File dbFile = null;
 		try {
 			dbFile = new File(DoomyEnvironment.getDatabasePath());
-			if (!dbFile.exists())
-				initDatabaseFile(dbFile);
+			initDatabaseFile(dbFile);
 			return new DatabaseManager(dbFile);
 		} catch (SQLException e) {
 			if (dbFile.exists())
