@@ -7,6 +7,8 @@ package net.mtrop.doomy.commands.engine;
 
 import java.io.File;
 import java.util.Deque;
+import java.util.LinkedList;
+import java.util.List;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.IOHandler;
@@ -88,10 +90,40 @@ public class EngineSetupCommand implements DoomyCommand
 			return ERROR_NOT_FOUND;
 		}
 
+		ProcessCallable callable;
 		InstancedFuture<Integer> process;
+
+		if (settings.dosboxPath != null)
+		{
+			File dosboxFilePath = new File(settings.dosboxPath);
+			if (!dosboxFilePath.exists())
+			{
+				handler.errln("ERROR: DOSBox executable '" + dosboxFilePath.getPath() + "' not found.");
+				return ERROR_NOT_FOUND;
+			}
+			
+			List<String> commandList = new LinkedList<>();
+			commandList.add("-c");
+				commandList.add("mount C: " + "'" + workingDirFile.getAbsolutePath() + "'");
+			commandList.add("-c");
+				commandList.add("C:");
+			commandList.add("-c");
+				commandList.add(settings.setupFileName);
+			commandList.add("-c");
+				commandList.add("exit");
+			if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
+				commandList.add(s);
+			
+			callable = ProcessCallable.create(dosboxFilePath.getPath())
+				.setWorkingDirectory(dosboxFilePath.getParentFile())
+				.args(commandList.toArray(new String[commandList.size()]));
+		}
+		else
+		{
+			callable = ProcessCallable.create(exe.getPath())
+				.setWorkingDirectory(workingDirFile);
+		}
 		
-		ProcessCallable callable = ProcessCallable.create(exe.getPath())
-			.setWorkingDirectory(workingDirFile);
 		process = TaskManager.get().spawn(callable);
 		process.join();
 		

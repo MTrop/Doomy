@@ -8,6 +8,7 @@ package net.mtrop.doomy.gui.swing;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -336,8 +337,48 @@ public class EngineTableControlPanel extends JPanel
 			return;
 		}
 		
-		File path = new File(settings.workingDirectoryPath + File.separator + settings.setupFileName);
-		ProcessCallable proc = ProcessCallable.create(path).setWorkingDirectory(new File(settings.workingDirectoryPath));
+		if (ObjectUtils.isEmpty(settings.workingDirectoryPath))
+		{
+			SwingUtils.error(this, language.getText("engine.setup.noworkdir"));
+			return;
+		}
+		
+		if (!new File(settings.workingDirectoryPath).exists())
+		{
+			SwingUtils.error(this, language.getText("engine.setup.workdir.noexist"));
+			return;
+		}
+		
+		
+		ProcessCallable proc;
+		File path;
+		
+		if (settings.dosboxPath != null)
+		{
+			path = new File(settings.dosboxPath);
+			
+			List<String> commandList = new LinkedList<>();
+			commandList.add("-c");
+				commandList.add("mount C: " + "'" + settings.workingDirectoryPath + "'");
+			commandList.add("-c");
+				commandList.add("C:");
+			commandList.add("-c");
+				commandList.add(settings.setupFileName);
+			commandList.add("-c");
+				commandList.add("exit");
+			if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
+				commandList.add(s);
+			
+			proc = ProcessCallable.create(path.getPath())
+				.setWorkingDirectory(path.getParentFile())
+				.args(commandList.toArray(new String[commandList.size()]));
+		}
+		else
+		{
+			path = new File(settings.workingDirectoryPath + File.separator + settings.setupFileName);
+			proc = ProcessCallable.create(path).setWorkingDirectory(new File(settings.workingDirectoryPath));
+		}
+		
 		try {
 			proc.exec();
 		} catch (IOException e) {
