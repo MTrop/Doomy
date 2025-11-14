@@ -28,7 +28,6 @@ import net.mtrop.doomy.struct.util.ObjectUtils;
 
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
-import static net.mtrop.doomy.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doomy.struct.swing.FormFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 import static net.mtrop.doomy.struct.swing.ModalFactory.*;
@@ -94,7 +93,13 @@ public class EngineSettingsEditorPanel extends JPanel
 		this.settings = new EngineSettings(startingSettings);
 		this.exePathField = fileField(settings.exePath != null ? new File(settings.exePath) : null, "...", 
 			(current) -> {
-				File chosen = chooseFile(this, language.getText("file.browse.file.title"), current, language.getText("file.browse.select"), gui.createExecutableFilter());
+				File chosen = gui.chooseFile(this, 
+					language.getText("file.browse.file.title"), 
+					language.getText("file.browse.select"),
+					() -> current != null ? current : gui.getDefaultFile(),
+					gui::setDefaultFile,
+					gui.createExecutableFilter()
+				);
 				return chosen != null ? chosen : current;
 			},
 			(selected) -> {
@@ -113,7 +118,12 @@ public class EngineSettingsEditorPanel extends JPanel
 		this.serverFileNameField = stringField(settings.serverFileName, true, true, (v) -> settings.serverFileName = v);
 		this.workingDirectoryPathField = fileField(settings.workingDirectoryPath != null ? new File(settings.workingDirectoryPath) : null, "...", 
 			(current) -> {
-				File chosen = chooseDirectory(this, language.getText("file.browse.file.title"), current, language.getText("file.browse.select"), gui.createDirectoryFilter());
+				File chosen = gui.chooseDirectory(this, 
+					language.getText("file.browse.file.title"), 
+					language.getText("file.browse.select"),
+					() -> current != null ? current : gui.getDefaultFile(),
+					gui::setDefaultFile
+				);
 				return chosen != null ? chosen : current;
 			},
 			(selected) -> {
@@ -163,7 +173,13 @@ public class EngineSettingsEditorPanel extends JPanel
 		
 		this.dosboxPathField = fileField(settings.dosboxPath != null ? new File(settings.dosboxPath) : null, "...", 
 			(current) -> {
-				File chosen = chooseFile(this, language.getText("file.browse.file.title"), current, language.getText("file.browse.select"), gui.createExecutableFilter());
+				File chosen = gui.chooseFile(this, 
+					language.getText("file.browse.file.title"), 
+					language.getText("file.browse.select"), 
+					() -> current != null ? current : gui.getDefaultFile(),
+					gui::setDefaultFile,
+					gui.createExecutableFilter()
+				);
 				return chosen != null ? chosen : current;
 			},
 			(selected) -> {

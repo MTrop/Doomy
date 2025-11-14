@@ -9,6 +9,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
 import java.awt.BorderLayout;
+import java.io.File;
 import java.util.Arrays;
 
 import net.mtrop.doomy.managers.ConfigManager;
@@ -32,11 +33,12 @@ public class SettingsPanel extends JPanel
 {
 	private static final long serialVersionUID = -8580767280945724831L;
 
-	private final ConfigManager configManager;
+	private final ConfigManager config;
 	private final GUIManager gui;
 	private final LanguageManager language;
 
 	private JFormField<GUIThemeType> guiThemeTypeField;
+	private JFormField<File> initialDirectoryField;
 	
 	private JFormField<String> idGamesAPIURLField;
 	private JFormField<String> idGamesDownloadURLField;
@@ -44,28 +46,48 @@ public class SettingsPanel extends JPanel
 	
 	public SettingsPanel()
 	{
-		this.configManager = ConfigManager.get();
+		this.config = ConfigManager.get();
 		this.gui = GUIManager.get();
 		this.language = LanguageManager.get();
 		
 		this.guiThemeTypeField = comboField(comboBox(Arrays.asList(GUIThemeType.values()), (v) -> gui.setThemeType(v)));
 		this.guiThemeTypeField.setValue(gui.getThemeType());
+
+		this.initialDirectoryField = fileField(
+			config.getConvertedValue(ConfigManager.SETTING_FILECHOOSER_DEFAULT_DIR, (value) -> value != null ? new File(value) : null),
+			"...",
+			(current) -> {
+				File chosen = gui.chooseDirectory(this, 
+					language.getText("settings.browse.dir.title"), 
+					language.getText("settings.browse.dir.select"), 
+					() -> current != null ? current : gui.getDefaultFile(),
+					gui::setDefaultFile				
+				);
+				return chosen != null ? chosen : current;
+			},
+			(selected) -> {
+				config.setValue(ConfigManager.SETTING_FILECHOOSER_DEFAULT_DIR, selected != null ? selected.getAbsolutePath() : null);
+			}
+		);
 		
-		this.idGamesAPIURLField = stringField(configManager.getValue(ConfigManager.SETTING_IDGAMES_API_URL), false, true, 
-			(v) -> configManager.setValue(ConfigManager.SETTING_IDGAMES_API_URL, v) 
+		this.idGamesAPIURLField = stringField(config.getValue(ConfigManager.SETTING_IDGAMES_API_URL), false, true, 
+			(v) -> config.setValue(ConfigManager.SETTING_IDGAMES_API_URL, v) 
 		);
-		this.idGamesDownloadURLField = stringField(configManager.getValue(ConfigManager.SETTING_IDGAMES_MIRROR_BASE_URL), false, true, 
-			(v) -> configManager.setValue(ConfigManager.SETTING_IDGAMES_MIRROR_BASE_URL, v) 
+		this.idGamesDownloadURLField = stringField(config.getValue(ConfigManager.SETTING_IDGAMES_MIRROR_BASE_URL), false, true, 
+			(v) -> config.setValue(ConfigManager.SETTING_IDGAMES_MIRROR_BASE_URL, v) 
 		);
-		this.idGamesTimeoutField = integerField(Integer.parseInt(configManager.getValue(ConfigManager.SETTING_IDGAMES_TIMEOUT_MILLIS, "0")),
-			(v) -> configManager.setValue(ConfigManager.SETTING_IDGAMES_TIMEOUT_MILLIS, String.valueOf(v)) 
+		this.idGamesTimeoutField = integerField(Integer.parseInt(config.getValue(ConfigManager.SETTING_IDGAMES_TIMEOUT_MILLIS, "0")),
+			(v) -> config.setValue(ConfigManager.SETTING_IDGAMES_TIMEOUT_MILLIS, String.valueOf(v)) 
 		);
 		
 		containerOf(this,
 			node(tabs(TabPlacement.LEFT, TabLayoutPolicy.SCROLL,
 				tab(language.getText("settings.tab.doomy"), containerOf(borderLayout(),
-					node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("settings.tab.doomy.labelwidth")),
-						gui.formField("settings.tab.doomy.guitheme", guiThemeTypeField)), 
+					node(BorderLayout.NORTH, gui.createForm(
+						form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("settings.tab.doomy.labelwidth")),
+							gui.formField("settings.tab.doomy.guitheme", guiThemeTypeField), 
+							gui.formField("settings.tab.doomy.defaultdir", initialDirectoryField)
+						), 
 						(n) -> n.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0))
 					),
 					node(BorderLayout.CENTER, containerOf()),
@@ -74,10 +96,12 @@ public class SettingsPanel extends JPanel
 					)
 				)),
 				tab(language.getText("settings.tab.idgames"), containerOf(borderLayout(),
-					node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("settings.tab.idgames.labelwidth")),
-						gui.formField("settings.tab.idgames.apiurl", idGamesAPIURLField),
-						gui.formField("settings.tab.idgames.mirrorurl", idGamesDownloadURLField),
-						gui.formField("settings.tab.idgames.timeout", idGamesTimeoutField)),
+					node(BorderLayout.NORTH, gui.createForm(
+						form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("settings.tab.idgames.labelwidth")),
+							gui.formField("settings.tab.idgames.apiurl", idGamesAPIURLField),
+							gui.formField("settings.tab.idgames.mirrorurl", idGamesDownloadURLField),
+							gui.formField("settings.tab.idgames.timeout", idGamesTimeoutField)
+						),
 						(n) -> n.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 0))
 					),
 					node(BorderLayout.CENTER, containerOf())

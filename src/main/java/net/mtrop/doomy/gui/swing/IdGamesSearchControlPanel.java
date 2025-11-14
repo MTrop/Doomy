@@ -33,6 +33,7 @@ import javax.swing.JTextField;
 import javax.swing.event.MouseInputAdapter;
 
 import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.managers.ConfigManager;
 import net.mtrop.doomy.managers.DownloadManager;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.IconManager;
@@ -58,7 +59,6 @@ import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
 
 
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
-import static net.mtrop.doomy.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.FormFactory.*;
 import static net.mtrop.doomy.struct.swing.ModalFactory.*;
@@ -73,6 +73,7 @@ public class IdGamesSearchControlPanel extends JPanel
 {
 	private static final long serialVersionUID = 5500042924527901695L;
 
+	private final ConfigManager config;
 	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final LanguageManager language;
@@ -94,6 +95,7 @@ public class IdGamesSearchControlPanel extends JPanel
 	
 	public IdGamesSearchControlPanel()
 	{
+		this.config = ConfigManager.get();
 		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.language = LanguageManager.get();
@@ -117,7 +119,7 @@ public class IdGamesSearchControlPanel extends JPanel
 			public void mouseClicked(MouseEvent e) 
 			{
 				if (e.getClickCount() == 2)
-					onDownload();
+					onFileInfo();
 			}
 		});
 		
@@ -250,9 +252,16 @@ public class IdGamesSearchControlPanel extends JPanel
 
 		// ask for download destination and WAD name.
 		
-		JFormField<File> destinationDirField = fileField(null, "...", 
+		File initDir = config.getConvertedValue(ConfigManager.SETTING_IDGAMES_DOWNLOAD_DIR, (value) -> value != null ? new File(value) : null);
+		
+		JFormField<File> destinationDirField = fileField(initDir, "...",
 			(current) -> {
-				File chosen = chooseDirectory(this, language.getText("idgames.download.browse.file.title"), current, language.getText("idgames.download.file.browse.select"));
+				File chosen = gui.chooseDirectory(this, 
+					language.getText("idgames.download.browse.file.title"), 
+					language.getText("idgames.download.file.browse.select"),
+					() -> current != null ? current : gui.getDefaultFile(),
+					(select) -> config.setValue(ConfigManager.SETTING_IDGAMES_DOWNLOAD_DIR, select != null ? select.getAbsolutePath() : null)
+				);
 				return chosen != null ? chosen : current;
 			}
 		);

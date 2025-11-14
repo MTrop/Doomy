@@ -5,6 +5,8 @@
  ******************************************************************************/
 package net.mtrop.doomy.managers;
 
+import java.util.function.Function;
+
 import com.blackrook.sql.SQLConnection;
 import com.blackrook.sql.SQLRow;
 
@@ -20,10 +22,9 @@ public final class ConfigManager
 	public static final String SETTING_IDGAMES_API_URL = "idgames.api.url";
 	public static final String SETTING_IDGAMES_MIRROR_BASE_URL = "idgames.mirror.base.url";
 	public static final String SETTING_IDGAMES_TIMEOUT_MILLIS = "idgames.timeout.millis";
-
-	public static final String SETTING_WADARCHIVE_API_URL = "wadarchive.api.url";
-	public static final String SETTING_WADARCHIVE_WADSEEKER_API_URL = "wadarchive.wadseeker.api.url";
-	public static final String SETTING_WADARCHIVE_TIMEOUT_MILLIS = "wadarchive.timeout.millis";
+	public static final String SETTING_IDGAMES_DOWNLOAD_DIR = "doomy.file.idgames.download.dir";
+	public static final String SETTING_FILECHOOSER_DEFAULT_DIR = "doomy.filechooser.default.dir";
+	public static final String SETTING_LASTFILE = "doomy.file.last";
 	
 	// ============================== QUERIES ================================
 	
@@ -110,6 +111,19 @@ public final class ConfigManager
 	{
 		String value = getValue(name); 
 		return value != null ? value : def;
+	}
+
+	/**
+	 * Gets a config value by name, converting it into a different type.
+	 * @param <V> the resultant type.
+	 * @param name the value name.
+	 * @param converter the converter function.
+	 * @return the resultant value, or the default if it doesn't exist.
+	 */
+	public <V> V getConvertedValue(String name, Function<String, V> converter)
+	{
+		String value = getValue(name); 
+		return converter.apply(value);
 	}
 
 	/**

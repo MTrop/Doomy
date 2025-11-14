@@ -58,7 +58,6 @@ import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.ModalFactory.*;
 import static net.mtrop.doomy.struct.swing.FormFactory.*;
-import static net.mtrop.doomy.struct.swing.FileChooserFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 
 /**
@@ -128,7 +127,13 @@ public class WadTableControlPanel extends JPanel
 		final JFormField<String> wadNameField = stringField(false, true);
 		final JFormField<File> wadPathField = fileField(null, language.getText("file.browse"), 
 			(current) -> {
-				File chosen = chooseFile(this, language.getText("file.browse.file.title"), language.getText("file.browse.select"), gui.createDoomArchivesFilter());
+				File chosen = gui.chooseFile(this, 
+					language.getText("file.browse.file.title"), 
+					language.getText("file.browse.select"), 
+					() -> current != null ? current : gui.getDefaultFile(),
+					gui::setDefaultFile,				
+					gui.createDoomArchivesFilter()
+				);
 				return chosen != null ? chosen : current;
 			}, 
 			(selected) -> {
@@ -246,7 +251,12 @@ public class WadTableControlPanel extends JPanel
 		final JFormField<Boolean> updateExistingField = checkBoxField(checkBox(false));
 		final JFormField<File> directoryField = fileField(null, language.getText("file.browse"), 
 			(current) -> {
-				File chosen = chooseDirectory(this, language.getText("file.browse.dir.title"), language.getText("file.browse.select"));
+				File chosen = gui.chooseDirectory(this, 
+					language.getText("file.browse.dir.title"), 
+					language.getText("file.browse.select"),
+					gui::getDefaultFile,
+					gui::setDefaultFile				
+				);
 				return chosen != null ? chosen : current;
 			}
 		);

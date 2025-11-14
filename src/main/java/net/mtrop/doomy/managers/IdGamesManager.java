@@ -126,7 +126,7 @@ public final class IdGamesManager
 	{
 		int out;
 		try {
-			out = Integer.parseInt(config.getValue(ConfigManager.SETTING_IDGAMES_TIMEOUT_MILLIS, "10000"));
+			out = config.getConvertedValue(ConfigManager.SETTING_IDGAMES_TIMEOUT_MILLIS, (value) -> value != null ? Integer.parseInt(value) : 10000);
 		} catch (NumberFormatException e) {
 			return 10000;
 		}
