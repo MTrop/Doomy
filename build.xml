@@ -34,6 +34,9 @@
 	<property name="sqlite.lib.version" value="3.50.3.0" />
 	<property name="sqlite.jar" value="sqlite-jdbc-${sqlite.lib.version}.jar" />
 
+	<property name="jsoup.lib.version" value="1.15.3" />
+	<property name="jsoup.jar" value="jsoup-${jsoup.lib.version}.jar" />
+
 	<property name="flatlaf.lib.version" value="2.0.2" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
 
@@ -84,6 +87,7 @@
 		<echo file="${build.versions.dir}/json.version" message="${json.lib.version}" />
 		<echo file="${build.versions.dir}/sql.version" message="${sql.lib.version}" />
 		<echo file="${build.versions.dir}/sqlite.version" message="${sqlite.lib.version}" />
+		<echo file="${build.versions.dir}/jsoup.version" message="${jsoup.lib.version}" />
 		<echo file="${build.versions.dir}/flatlaf.version" message="${flatlaf.lib.version}" />
 	</target>
 
@@ -154,8 +158,12 @@
 		<maven-jar-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
 		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
 	</target>
+	<target name="dependency.jsoup">
+		<maven-jar-dl group-path="org/jsoup" artifact="jsoup" version="${jsoup.lib.version}" />
+		<maven-jar-sources-dl group-path="org/jsoup" artifact="jsoup" version="${jsoup.lib.version}" />
+	</target>
 
-	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.sql, dependency.sqlite, dependency.flatlaf, dependency.properties" description="Downloads and compiles the dependencies.">
+	<target name="dependencies" depends="init.dependencies, dependency.json, dependency.sql, dependency.sqlite, dependency.jsoup, dependency.flatlaf, dependency.properties" description="Downloads and compiles the dependencies.">
 	</target>
 
 	<!-- Scripts -->

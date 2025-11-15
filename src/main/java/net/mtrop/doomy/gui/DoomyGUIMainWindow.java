@@ -13,6 +13,7 @@ import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.gui.swing.AboutJavaPanel;
 import net.mtrop.doomy.gui.swing.AboutPanel;
+import net.mtrop.doomy.gui.swing.DoomFetchControlPanel;
 import net.mtrop.doomy.gui.swing.EngineTableControlPanel;
 import net.mtrop.doomy.gui.swing.IdGamesSearchControlPanel;
 import net.mtrop.doomy.gui.swing.IwadTableControlPanel;
@@ -86,6 +87,9 @@ public class DoomyGUIMainWindow extends JFrame
 				)),
 				tab(language.getText("tab.idgames"), containerOf(
 					node(new IdGamesSearchControlPanel(), (panel) -> panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0)))
+				)),
+				tab(language.getText("tab.doomfetch"), containerOf(
+					node(new DoomFetchControlPanel(), (panel) -> panel.setBorder(BorderFactory.createEmptyBorder(8, 0, 0, 0)))
 				))
 			), (tabs) -> tabs.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8)))
 		));

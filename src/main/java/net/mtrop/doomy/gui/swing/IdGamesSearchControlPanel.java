@@ -57,7 +57,6 @@ import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doomy.struct.swing.ModalFactory.Modal;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
 
-
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.FormFactory.*;
