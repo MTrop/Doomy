@@ -85,7 +85,7 @@ INSERT INTO EngineTemplateSettings (engineTemplateId, name, value) VALUES
 	((SELECT id FROM EngineTemplates WHERE name = 'woof'), 'switch.file', '-file'),
 	((SELECT id FROM EngineTemplates WHERE name = 'woof'), 'switch.dehacked', '-deh'),
 	((SELECT id FROM EngineTemplates WHERE name = 'woof'), 'switch.iwad', '-iwad'),
-	((SELECT id FROM EngineTemplates WHERE name = 'woof'), 'switch.save.dir', '-savedir'),
+	((SELECT id FROM EngineTemplates WHERE name = 'woof'), 'switch.save.dir', '-save'),
 	((SELECT id FROM EngineTemplates WHERE name = 'woof'), 'switch.screenshots.dir', '-shotdir'),
 	((SELECT id FROM EngineTemplates WHERE name = 'woof'), 'regex.demos', '.+\.lmp'),
 

@@ -458,12 +458,12 @@ public class IdGamesSearchControlPanel extends JPanel
 			} 
 			catch (FileNotFoundException e) 
 			{
-				SwingUtils.error(this, "idgames.download.copy.notfound");
+				SwingUtils.error(this, language.getText("idgames.download.copy.notfound"));
 				cancelSwitch.set(true);
 			} 
 			catch (IOException e) 
 			{
-				SwingUtils.error(this, "idgames.download.copy.ioerror");
+				SwingUtils.error(this, language.getText("idgames.download.copy.ioerror", e.getLocalizedMessage()));
 				cancelSwitch.set(true);
 			}
 	
