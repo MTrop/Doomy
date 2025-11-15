@@ -44,7 +44,13 @@
 	
 	<property name="project.archive" value="doomy" />
 	<property name="project.javadoc.title" value="Doomy" />
-	<property name="project.classpath" value="${dev.base}/${json.jar}${S}${dev.base}/${sql.jar}${S}${dev.base}/${sqlite.jar}${S}${dev.base}/${flatlaf.jar}${S}${dev.base}/${jsoup.jar}" />
+	<property name="project.classpath" value="
+		${dev.base}/${json.jar}
+		${S}${dev.base}/${sql.jar}
+		${S}${dev.base}/${sqlite.jar}
+		${S}${dev.base}/${flatlaf.jar}
+		${S}${dev.base}/${jsoup.jar}
+		" />
 	<property name="project.compiler.bootclasspath" value="" />
 	<property name="project.testclass" value=""/>
 	<property name="project.testclass.main" value=""/>
@@ -133,6 +139,7 @@
 			<zipgroupfileset file="${dependencies.dir}/${sql.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${sqlite.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${jsoup.jat}"/>
 		</jar>
 		<copy todir="${bin.dir}/net/mtrop/doomy">
 			<fileset dir="${build.versions.dir}" includes="*.version" />
