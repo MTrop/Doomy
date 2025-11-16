@@ -20,13 +20,11 @@ public class BlankCommand implements DoomyCommand
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
 	{
-		// TODO: Finish this.
 	}
 
 	@Override
 	public int call(IOHandler handler)
 	{
-		// TODO: Finish this.
 		return ERROR_NONE;
 	}
 
