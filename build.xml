@@ -144,7 +144,11 @@
 		<copy todir="${bin.dir}/net/mtrop/doomy">
 			<fileset dir="${build.versions.dir}" includes="*.version" />
 		</copy>
-		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true" />
+		<jar basedir="${bin.dir}" destfile="${jar.dir}/${jar.filename}" update="true"> 
+			<manifest>
+				<attribute name="Main-Class" value="net.mtrop.doomy.gui.DoomyGUIMain" />
+			</manifest>
+		</jar>
 	</target>
 
 	<!-- Dependencies -->
