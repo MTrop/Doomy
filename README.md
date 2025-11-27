@@ -73,13 +73,11 @@ To clean up everything:
 
 ### Other
 
-This program/library and the accompanying materials
-are made available under the terms of the GNU Lesser Public License v2.1
-which accompanies this distribution, and is available at
-http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html
+This program and the accompanying materials are made available under the 
+terms of the MIT License, which accompanies this distribution.
 
-A copy of the LGPL should have been included in this release (LICENSE.txt).
-If it was not, please contact me for a copy, or to notify me of a distribution
+A copy of the MIT License should have been included in this release (LICENSE.txt).
+If it was not, please contact us for a copy, or to notify us of a distribution
 that has not included it. 
 
 This contains code copied from Black Rook Base, under the terms of the MIT License (docs/LICENSE-BlackRookBase.txt).
