@@ -4,7 +4,7 @@ HTML {
 }
 
 BODY {
-	background-color: rgb(8, 41, 57);
+	background-color: rgb(57, 77, 69);
 	color: #dddddd;
 	border-left: 4px solid rgb(32, 32, 32);
 	border-right: 4px solid rgb(32, 32, 32);
@@ -88,9 +88,9 @@ A:hover {
 }
 
 .download-link {
-	background-color: #2d4760;
+	background-color: rgb(95, 145, 120);
 	color: #dddddd;
-	box-shadow: rgb(8, 37, 46) 0px 5px;
+	box-shadow: rgb(25, 39, 32) 0px 5px;
 	white-space: pre-wrap;
 }
 
