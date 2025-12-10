@@ -103,6 +103,7 @@ public interface DoomyCommand
 	static final String PRESET = "preset";
 	static final String RUN = "run";
 	static final String IDGAMES = "idgames";
+	static final String DOOMFETCH = "doomfetch";
 	static final String LIST = "list";
 	static final String GET = "get";
 	static final String SET = "set";

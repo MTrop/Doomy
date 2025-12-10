@@ -58,7 +58,11 @@ To compile, JAR, test, and Zip up everything:
 
 	ant release
 
-To create a distribution (Bash and CMD):
+To create a Windows Installer in the `dist` folder:
+
+	ant dist.installer -Dinno.setup.dir=[Path-To-Inno-Setup] -Dapp.version.number=[APPVERSION]
+
+To create a distribution (Bash and CMD and Installer):
 
 	ant dist
 
@@ -70,6 +74,14 @@ To create a distribution and deploy it (THIS WILL DELETE AND REBUILD THE TARGET 
 To clean up everything:
 
 	ant clean
+
+
+### Installer Building
+
+Building a Windows Installer requires [Inno Setup 6.2.0](https://jrsoftware.org/isdl.php) or better, and requires that the property `inno.setup.dir` is set to Inno Setup's directory to make use of `iscc`.
+
+The installer target will be skipped if the `inno.setup.dir` property is not set.
+
 
 ### Other
 
