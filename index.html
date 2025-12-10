@@ -1,6 +1,157 @@
 <!DOCTYPE html>
 <html>
+<html>
+	<head>
+		<title>Doomy</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		
+		<!-- Standard -->
+		<meta name="description" content="Doom frontend launcher for Java GUI (and command-line)." />
+		<meta name="generator" content="VSCode" />
+		<meta name="copyright" content="Matt &quot;MTrop&quot; Tropiano" />
+
+		<!-- Schema.org markup for Google+ -->
+		<meta itemprop="name" content="Doomy" />
+		<meta itemprop="description" content="Doom frontend launcher for Java GUI (and command-line)." />
+		<meta itemprop="image" content="https://mtrop.github.io/Doomy/images/logo.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary" />
+		<meta name="twitter:url" content="https://mtrop.github.io/Doomy/index.html" />
+		<meta name="twitter:title" content="Doomy" />
+		<meta name="twitter:description" content="Doom frontend launcher for Java GUI (and command-line)." />
+		<meta name="twitter:image:src" content="https://mtrop.github.io/Doomy/images/logo.png" />
+
+		<!-- Open Graph -->
+		<meta property="og:type" content="article" />
+		<meta property="og:url" content="https://mtrop.github.io/Doomy/index.html" />
+		<meta property="og:title" content="Doomy" />
+		<meta property="og:image" content="https://mtrop.github.io/Doomy/images/logo.png" />
+		<meta property="og:description" content="Doom frontend launcher for Java GUI (and command-line)." />
+
+		<!-- Style and Scripts -->
+		<link rel="StyleSheet" type="text/css" href="css/w3.css" />
+		<link rel="StyleSheet" type="text/css" href="css/site.css" />
+		<script type="text/javascript">
+			var REPO_OWNER = 'MTrop';
+			var REPO_NAME = 'Doomy';
+		</script>
+	</head>
 	<body>
-		Coming Soon: Doomy!
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center w3-xxxlarge">
+				<img src="images/d.png">oomy
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				Yet another Doom Engine launcher by MTrop
+			</div>
+		</div>
+		<div id="releases-loading" class="w3-container w3-center">
+			<img alt="Loading" class="w3-image" src="images/ajax-loader.gif" />
+		</div>
+		<div id="releases" class="w3-container site-start-hidden">
+			<div class="w3-row">
+				<div class="w3-col l12 w3-center">
+					<h2>Latest Release: <span id="release-version"></span></h2>
+				</div>
+			</div>
+			<div class="w3-row site-release-links">
+				<!-- Filled Later -->
+			</div>
+		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				Requires <strong>Java 1.8 or better</strong> installed on your computer/device.
+			</div>
+			<div class="w3-col l12 w3-center">
+				Get Java from <a href="https://www.azul.com/downloads/">Azul</a>, <a href="https://adoptium.net/temurin/releases/">Adoptium</a>, 
+				<a href="https://www.microsoft.com/openjdk">Microsoft</a>, or <a href="https://java.com/en/download/">Oracle</a>.
+			</div>
+		</div>
+
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p>
+					<strong>To install,</strong> unzip/untar the release to its own directory, and then 
+					add that directory to the list of directories in your PATH environment variable.
+				</p>
+				<p>
+					<strong>OR, optionally, if you use Windows:</strong> Use one of the provided Windows 
+					Installers, which will do that stuff automatically!
+				</p>
+			</div>
+		</div>
+
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>What is Doomy?</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p class="site-blurb">
+					<strong>Doomy</strong> is a minimalist, <em>preset-based</em> Doom Engine frontend launcher.
+					So minimal, in fact, that it can be run from command-line instead of its normal GUI process!
+				</p>
+				<p class="site-blurb">
+					Doomy makes a locally-stored database of Engines, IWADs, and PWADs to be grouped together into
+					launchable presets. It can run practially every engine you can throw at it, including running
+					the original executables using your favorite flavor of DOSBox!
+				</p>
+				<p class="site-blurb">
+					Doomy can also store screenshots, demos, and saved games per preset so that you can also keep 
+					those nice and organized, without interfering with your other loaded presets.
+				</p>
+			</div>
+		</div>
+
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>What does it look like?</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p>
+					Doomy looks like this:
+				</p>
+				<p>
+					<img src="images/doomy-gui.png" class="img-responsive">
+				</p>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				Snazzy, eh? Not very flashy, but it's still got a lot of power under the hood.
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col w3-center">
+				<a href="images/doomy-engines.png"><img src="images/doomy-engines-thumb.jpg"></a>
+				<a href="images/doomy-iwads.png"><img src="images/doomy-iwads-thumb.jpg"></a>
+				<a href="images/doomy-wads.png"><img src="images/doomy-wads-thumb.jpg"></a>
+				<a href="images/doomy-idgames.png"><img src="images/doomy-idgames-thumb.jpg"></a>
+				<a href="images/doomy-doomfetch.png"><img src="images/doomy-doomfetch-thumb.jpg"></a>
+			</div>
+		</div>
+
+		<div class="w3-row site-footer">
+			<div class="w3-col s12 w3-center w3-small">
+				Copyright (C) Matt "MTrop" Tropiano<br/>
+				<a href="https://www.dafont.com/amazdoom.font">AmazDoom Font</a> by Amazingmax<br/>
+				Doom is a registered trademark of id Software, LLC<br/>
+				Not affiliated with id Software LLC, Bethesda Softworks LLC, nor ZeniMax Media Inc.
+			</div>
+		</div>
+		<!-- This page's JS. -->
+		<script type="text/javascript" src="js/domjunk.min.js"></script>
+		<script type="text/javascript" src="js/site.js"></script>
 	</body>
 </html>
