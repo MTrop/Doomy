@@ -91,8 +91,8 @@
 					add that directory to the list of directories in your PATH environment variable.
 				</p>
 				<p>
-					<strong>OR, optionally, if you use Windows:</strong> Use one of the provided Windows 
-					Installers, which will do that stuff automatically!
+					<strong>OR, optionally, if you use Windows:</strong> Use the provided Windows 
+					Installer, which will do that stuff automatically!
 				</p>
 			</div>
 		</div>
@@ -142,6 +142,7 @@
 				Snazzy, eh? Not very flashy, but it's still got a lot of power under the hood.
 			</div>
 		</div>
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
 		<div class="w3-row">
 			<div class="w3-col w3-center">
 				<a href="images/doomy-engines.png"><img src="images/doomy-engines-thumb.jpg"></a>
@@ -149,6 +150,50 @@
 				<a href="images/doomy-wads.png"><img src="images/doomy-wads-thumb.jpg"></a>
 				<a href="images/doomy-idgames.png"><img src="images/doomy-idgames-thumb.jpg"></a>
 				<a href="images/doomy-doomfetch.png"><img src="images/doomy-doomfetch-thumb.jpg"></a>
+			</div>
+		</div>
+
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>How does Doomy store its data?</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p class="site-blurb">
+					Doomy uses <a href="https://sqlite.org/index.html">SQLite</a> to store its data.
+					The SQLite DB schema that it uses is available in the documentation, or just open
+					up <kbd>doomy.db</kbd> using a SQLite database browser. This way, if you feel so 
+					inclined, you can write a different frontend for it using the same data. Hopefully 
+					it's not too cryptic.
+				</p>
+				<p class="site-blurb">
+					The preset data is stored in the <kbd>preset</kbd> folder in Doomy's config folder,
+					each preset corresponding to a preset's hash. If you enter in the same preset (and
+					not clean up the folder), the exact same config will line up with that preset.
+				</p>
+				<p class="site-blurb">
+					As for WADs and IWADs and Engines, that's for you to decide - Doomy makes no 
+					assumptions about how you organize your Doom collection, though it works best on
+					an organized hierarchy of folders.
+				</p>
+			</div>
+		</div>
+
+		<div class="w3-row"><div class="w3-col l12 w3-center">&nbsp;</div></div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<h2>How do I run the GUI on Linux/macOS?</h2>
+			</div>
+		</div>
+		<div class="w3-row">
+			<div class="w3-col l12 w3-center">
+				<p class="site-blurb">
+					Assuming Doomy is on your PATH, just type <kbd>doomy --gui</kbd> at the terminal.
+					I need to make this a little bit better, somehow. Also, just running the JAR as-is
+					will bring up the GUI version.
+				</p>
 			</div>
 		</div>
 

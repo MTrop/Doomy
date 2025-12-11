@@ -18,7 +18,7 @@ BODY {
 }
 
 KBD {
-	background-color: #061e24;
+	background-color: rgb(25, 34, 30);
 	border-radius: 4px;
 	padding: 4px;
 	font-weight: 600;
