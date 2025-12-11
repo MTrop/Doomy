@@ -421,6 +421,7 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 40, "        --text, -t [result]             Print text file of result [result].");
 			handler.outln();
 		}
+		/*
 		if (commandName == null || DoomyCommand.DOOMFETCH.equalsIgnoreCase(commandName))
 		{
 			wrapPrint(handler, 80, 40, "  doomfetch                             Print this subsection's help and terminate.");
@@ -428,6 +429,7 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 40, "    [driver] [name]                     Search for package named [name] using driver [driver].");
 			handler.outln();
 		}
+		*/
 	}
 	
 }

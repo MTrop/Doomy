@@ -103,6 +103,7 @@
 	<property name="build.versions.dir" value="${build.dir}/versions" />
 	<property name="build.installer.dir" value="${build.dir}/installer" />
 	<property name="installer.dist.name" value="${project.archive}-setup-${build.version.number}" />
+	<property name="jar.dist.filename" value="${project.archive}-jar-${build.version.number}.zip" />
 	<property name="zip.dist.filename" value="${project.archive}-cmd-${build.version.number}.zip" />
 	<property name="tar.dist.filename" value="${project.archive}-bash-${build.version.number}.tar.gz" />
 
@@ -141,7 +142,7 @@
 			<zipgroupfileset file="${dependencies.dir}/${sql.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${sqlite.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
-			<zipgroupfileset file="${dependencies.dir}/${jsoup.jat}"/>
+			<zipgroupfileset file="${dependencies.dir}/${jsoup.jar}"/>
 		</jar>
 		<copy todir="${bin.dir}/net/mtrop/doomy">
 			<fileset dir="${build.versions.dir}" includes="*.version" />
@@ -187,6 +188,14 @@
 	</target>
 
 	<!-- Shells -->
+
+	<target name="dist.jar" depends="init.jar, jar.one, init.dist">
+		<zip destfile="${dist.dir}/${jar.dist.filename}" compress="true">
+			<zipfileset file="${jar.dir}/${jar.filename}" />
+			<zipfileset refid="fileset.documents" prefix="docs" />
+			<zipfileset dir="docs" prefix="docs" />
+		</zip>
+	</target>
 
 	<target name="dist.cmd" depends="init.jar, jar.one, scripts, init.dist">
 		<zip destfile="${dist.dir}/${zip.dist.filename}" compress="true">
@@ -248,7 +257,7 @@
 	<target name="dist.installer" depends="init.dist, dist.installer.copy, dist.installer.dirs.exist, dist.installer.compile" description="Build available Windows installer distributions (requires Inno Setup Path).">
 	</target>	
 	
-	<target name="dist" depends="dist.bash, dist.cmd, dist.installer" description="Zips together the application and shell scripts and makes the installer, if possible.">
+	<target name="dist" depends="dist.bash, dist.cmd, dist.jar, dist.installer" description="Zips together the application and shell scripts and makes the installer, if possible.">
 	</target>
 
 	<!-- Deployments -->
