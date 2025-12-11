@@ -30,6 +30,7 @@ public class AboutPanel extends JPanel
 	private static final String VERSION_SQL = DoomyCommon.getVersionString("sql");
 	private static final String VERSION_SQLITE = DoomyCommon.getVersionString("sqlite");
 	private static final String VERSION_FLATLAF = DoomyCommon.getVersionString("flatlaf");
+	private static final String VERSION_JSOUP = DoomyCommon.getVersionString("jsoup");
 
 	private static final String VERSION_TEXT = (new StringBuilder())
 		.append("Doomy v").append(VERSION).append("\n")
@@ -38,6 +39,7 @@ public class AboutPanel extends JPanel
 		.append("Black Rook SQL v").append(VERSION_SQL).append("\n")
 		.append("SQLite JDBC v").append(VERSION_SQLITE).append("\n")
 		.append("FlatLaf v").append(VERSION_FLATLAF).append("\n")
+		.append("JSoup v").append(VERSION_JSOUP).append("\n")
 	.toString();
 	
 	/**
@@ -53,6 +55,7 @@ public class AboutPanel extends JPanel
 		sb.append("Using <b>Black Rook SQL v").append(VERSION_SQL).append("</b>").append("<br/>");
 		sb.append("Using <b>SQLite JDBC v").append(VERSION_SQLITE).append("</b>").append("<br/>");
 		sb.append("Using <b>FlatLaf v").append(VERSION_FLATLAF).append("</b>").append("<br/>");
+		sb.append("Using <b>JSoup v").append(VERSION_JSOUP).append("</b>").append("<br/>");
 		sb.append("<br/>");
 		sb.append("<b>FlatLaf</b> Look And Feel (C) 2003-2022 FormDev Software GmbH").append("<br/>");
 		sb.append("<b>FamFamFam Silk</b> Icons by Mark James").append("<br/>");
