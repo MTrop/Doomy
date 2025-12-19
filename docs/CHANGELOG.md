@@ -3,6 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.6.3
+-----
+
+- `Fixed` Deleting a single WAD would cause a SQL Exception.
+
+
 0.6.2
 -----
 

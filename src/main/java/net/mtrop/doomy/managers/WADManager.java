@@ -51,10 +51,6 @@ public final class WADManager
 	private static final String QUERY_UPDATE_URL
 		= "UPDATE WADs SET url = ? WHERE name = ?";
 	
-	private static final String QUERY_CLEAR_DEPENDENCIES1
-		= "DELETE FROM WADDependencies WHERE wadId = ?";
-	private static final String QUERY_CLEAR_DEPENDENCIES2
-		= "DELETE FROM WADDependencies WHERE needsWadId = ?";
 	private static final String QUERY_CLEAR_DATA
 		= "DELETE FROM WADData WHERE wadId = ?";
 	private static final String QUERY_GET_PRESET_IDS
@@ -206,8 +202,6 @@ public final class WADManager
 		{
 			// Add other missing WAD references to clear.
 			trn.getUpdateResult(QUERY_CLEAR_DATA, wad.id);
-			trn.getUpdateResult(QUERY_CLEAR_DEPENDENCIES2, wad.id);
-			trn.getUpdateResult(QUERY_CLEAR_DEPENDENCIES1, wad.id);
 			
 			SQLResult result = trn.getResult(QUERY_GET_PRESET_IDS, wad.id);
 			for (SQLRow row : result)
