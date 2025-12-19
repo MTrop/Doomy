@@ -17,13 +17,13 @@ import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.Preset;
 
 /**
- * A command that shows detailed info about a preset.
+ * A command that executes a preset.
  * @author Matthew Tropiano
  */
 public class PresetRunCommand implements DoomyCommand
 {
 	private static final String SWITCH_ARGS = "--";
-	//private static final String SWITCH_NOCLEANUP = "--no-cleanup";
+	private static final String SWITCH_NOCLEANUP = "--no-cleanup";
 
 	private String name;
 	private String[] additionalArgs;
@@ -43,6 +43,8 @@ public class PresetRunCommand implements DoomyCommand
 		{
 			if (matchArgument(args, SWITCH_ARGS))
 				state = STATE_ARGS;
+			else if (matchArgument(args, SWITCH_NOCLEANUP))
+				skipCleanup = true;
 			else
 				throw new BadArgumentException("Invalid switch: " + args.peekFirst());
 		}

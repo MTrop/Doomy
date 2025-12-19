@@ -8,6 +8,7 @@ package net.mtrop.doomy;
 import java.util.Deque;
 
 import net.mtrop.doomy.commands.ConfigCommand;
+import net.mtrop.doomy.commands.DefaultCommand;
 import net.mtrop.doomy.commands.EngineCommand;
 import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.IWADCommand;
@@ -354,6 +355,10 @@ public interface DoomyCommand
 			}
 			else
 				return new IdGamesCommand();
+		}
+		else if (!args.isEmpty())
+		{
+			return new DefaultCommand();		
 		}
 		
 		return new UsageCommand();

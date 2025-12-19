@@ -191,8 +191,8 @@ public final class DoomyCommon
 	{
 		handler.outln("Usage: doomy version");
 		handler.outln("       doomy help");
-		handler.outln("       doomy config");
-		handler.outln("       doomy engine");
+		handler.outln("       doomy [preset]");
+		handler.outln("       doomy [engine] [iwad] [wads]");
 	}
 
 	/**
@@ -386,8 +386,8 @@ public final class DoomyCommon
 		if (commandName == null || DoomyCommand.RUN.equalsIgnoreCase(commandName))
 		{
 			wrapPrint(handler, 80, 40, "  run [engine]                          Run engine [engine]");
-			wrapPrint(handler, 80, 45, "    --wads, -w [wads...]                  ...with these WADs (by name, dependency-expanded).");
 			wrapPrint(handler, 80, 45, "    --iwad, -i [iwad]                     ...with IWAD name [iwad] (may not be required if specified in engine settings).");
+			wrapPrint(handler, 80, 45, "    --wads, -w [wads...]                  ...with these WADs (by name).");
 			wrapPrint(handler, 80, 45, "    --name, -n [name]                     ...and assign the created preset [name].");
 			wrapPrint(handler, 80, 40, "    --                                  Send args verbatim after this token.");
 			handler.outln();
@@ -430,6 +430,17 @@ public final class DoomyCommon
 			handler.outln();
 		}
 		*/
+		if (commandName == null)
+		{
+			wrapPrint(handler, 80, 40, "  [preset]                              Run preset [preset] (takes precedence).");
+			wrapPrint(handler, 80, 40, "    --                                  Send args verbatim after this token.");
+			wrapPrint(handler, 80, 40, "  [engine]                              Run (and make a preset) from [engine].");
+			wrapPrint(handler, 80, 45, "    [iwad]                                ...using IWAD [iwad].");
+			wrapPrint(handler, 80, 45, "    [wads]                                ...using WADS [wads] (list).");
+			wrapPrint(handler, 80, 45, "    --name, -n [name]                     ...and assign the created preset [name].");
+			wrapPrint(handler, 80, 40, "    --                                  Send args verbatim after this token.");
+			handler.outln();
+		}
 	}
 	
 }

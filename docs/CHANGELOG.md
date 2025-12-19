@@ -3,10 +3,11 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
-0.6.3
+0.7.0
 -----
 
 - `Fixed` Deleting a single WAD would cause a SQL Exception.
+- `Added` Default command line behavior for running presets/engines (Enh. #3).
 
 
 0.6.2
