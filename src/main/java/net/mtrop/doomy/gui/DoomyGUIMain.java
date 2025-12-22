@@ -17,6 +17,7 @@ import net.mtrop.doomy.struct.util.ObjectUtils;
 import net.mtrop.doomy.struct.util.StringUtils;
 
 import java.awt.Dialog.ModalityType;
+import java.awt.GraphicsEnvironment;
 
 import javax.swing.JScrollPane;
 
@@ -48,6 +49,12 @@ public final class DoomyGUIMain
 	
 	public static void main(String[] args)
 	{
+		if (GraphicsEnvironment.isHeadless())
+		{
+			System.err.println("ERROR: Can't initialize GUI. Environment is headless!");
+			System.exit(1);
+		}
+		
 		setLAF();
 		setExceptionHandler();
 		
