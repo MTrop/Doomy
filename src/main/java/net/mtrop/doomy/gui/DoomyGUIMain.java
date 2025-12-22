@@ -42,6 +42,9 @@ public final class DoomyGUIMain
 	 */
 	public static void setLAF() 
 	{
+		// Fool OS into properly setting DPI constraints
+		System.setProperty("sun.java2d.dpiaware", "false");
+		
 		if (OSUtils.isOSX())
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
 		SwingUtils.setLAF(GUIManager.get().getThemeType().className);

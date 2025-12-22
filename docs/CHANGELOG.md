@@ -7,6 +7,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 -----
 
 - `Fixed` Attempting to start the GUI in a headless environment should error out (Issue #5).
+- `Fixed` Disabled "DPI Awareness" so that the OS can set DPI settings properly (Issue #7).
 - `Added` Name suffixes can be added to IWADs added via scan (Enh. #11).
 - `Added` Name suffixes can be added to WADs added via scan.
 
