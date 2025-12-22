@@ -422,6 +422,45 @@ public final class LauncherManager
 		cmdWriter.flush();
 	}
 
+	private ProcessCallable createDOSBoxProcess(LaunchContext context, EngineSettings settings, File presetDirectory, File tempDirectory, String[] extraArgs) throws LaunchException
+	{
+		File cmdlineFile = createCommandLineFile(context, settings, tempDirectory, extraArgs);
+		context.cleanup.add(cmdlineFile);
+
+		List<String> commandList = new LinkedList<>();
+		commandList.add("-c");
+			commandList.add("mount C: " + "'" + context.engineExecutable.getParentFile() + "'");
+		commandList.add("-c");
+			commandList.add("mount " + DOSBOX_PRESET_MOUNT + " " + "'" + presetDirectory.getPath() + "'");
+		commandList.add("-c");
+			commandList.add("mount " + DOSBOX_TEMP_MOUNT + " " + "'" + tempDirectory.getPath() + "'");
+		commandList.add("-c");
+			commandList.add("C:");
+		commandList.add("-c");
+			commandList.add(context.engineExecutable.getName() + " @" + cmdlineFile.getPath());
+		commandList.add("-c");
+			commandList.add("exit");
+		if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
+			commandList.add(s);
+		
+		ProcessCallable callable = ProcessCallable.create(context.dosboxExecutable.getPath(), commandList.toArray(new String[commandList.size()]))
+			.setWorkingDirectory(context.dosboxExecutable.getParentFile());
+		
+		return callable;
+	}
+	
+	private ProcessCallable createStandardProcess(LaunchContext context, EngineSettings settings, File presetDirectory, File tempDirectory, String[] extraArgs) throws LaunchException
+	{
+		String[] cmdlineArray = createCommandLineArray(context, settings, tempDirectory, extraArgs);
+
+		ProcessCallable callable = ProcessCallable.create(context.engineExecutable.getPath());
+		callable
+			.args(cmdlineArray)
+			.setWorkingDirectory(context.workingDirectory);
+		
+		return callable;
+	}
+	
 	/**
 	 * Runs a preset.
 	 * @param handler the handler to use.
@@ -458,8 +497,6 @@ public final class LauncherManager
 			for (UnzipSet uzs : context.zipSets)
 				IOUtils.close(uzs);
 
-			String[] cmdlineArray = createCommandLineArray(context, settings, tempDirectory, extraArgs);
-
 			File engineDir = context.engineExecutable.getParentFile();
 			
 			// Pre-Launch (copy screenshots, demos)
@@ -482,39 +519,18 @@ public final class LauncherManager
 			// Launch.
 			handler.outln("Launching...");
 			InstancedFuture<Integer> process; 
+			ProcessCallable callable;
+			
 			if (context.dosboxExecutable != null)
 			{
-				File cmdlineFile = createCommandLineFile(context, settings, tempDirectory, extraArgs);
-				context.cleanup.add(cmdlineFile);
-
-				List<String> commandList = new LinkedList<>();
-				commandList.add("-c");
-					commandList.add("mount C: " + "'" + context.engineExecutable.getParentFile() + "'");
-				commandList.add("-c");
-					commandList.add("mount " + DOSBOX_PRESET_MOUNT + " " + "'" + presetDirectory.getPath() + "'");
-				commandList.add("-c");
-					commandList.add("mount " + DOSBOX_TEMP_MOUNT + " " + "'" + tempDirectory.getPath() + "'");
-				commandList.add("-c");
-					commandList.add("C:");
-				commandList.add("-c");
-					commandList.add(context.engineExecutable.getName() + " @" + cmdlineFile.getPath());
-				commandList.add("-c");
-					commandList.add("exit");
-				if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
-					commandList.add(s);
-				
-				ProcessCallable callable = ProcessCallable.create(context.dosboxExecutable.getPath(), commandList.toArray(new String[commandList.size()]))
-					.setWorkingDirectory(context.dosboxExecutable.getParentFile());
-				process = TaskManager.get().spawn(callable);
+				callable = createDOSBoxProcess(context, settings, presetDirectory, tempDirectory, extraArgs);
 			}
 			else
 			{
-				ProcessCallable callable = ProcessCallable.create(context.engineExecutable.getPath());
-				callable
-					.args(cmdlineArray)
-					.setWorkingDirectory(context.workingDirectory);
-				process = TaskManager.get().spawn(callable);
+				callable = createStandardProcess(context, settings, presetDirectory, tempDirectory, extraArgs);
 			}
+
+			process = TaskManager.get().spawn(callable);
 			
 			retval = process.result();
 		
