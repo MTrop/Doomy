@@ -3,6 +3,13 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.8.0
+-----
+
+- `Added` Name suffixes can be added to IWADs added via scan (Enh. #11).
+- `Added` Name suffixes can be added to WADs added via scan.
+
+
 0.7.0
 -----
 

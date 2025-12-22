@@ -31,6 +31,8 @@ public class WADScanCommand implements DoomyCommand
 	private static final String SWITCH_RECURSE2 = "-r";
 	private static final String SWITCH_PREFIX1 = "--prefix";
 	private static final String SWITCH_PREFIX2 = "-p";
+	private static final String SWITCH_SUFFIX1 = "--suffix";
+	private static final String SWITCH_SUFFIX2 = "-s";
 	private static final String SWITCH_FORCEADD = "--force-add-existing";
 
 	private static final String[] FILETYPES = {"PK3", "PK7", "PKE", "WAD", "ZIP"};
@@ -45,6 +47,7 @@ public class WADScanCommand implements DoomyCommand
 
 	private String path;
 	private String prefix;
+	private String suffix;
 	private boolean recurse;
 	private boolean force;
 
@@ -61,6 +64,7 @@ public class WADScanCommand implements DoomyCommand
 		
 		final int STATE_START = 0;
 		final int STATE_PREFIX = 1;
+		final int STATE_SUFFIX = 2;
 		int state = STATE_START;
 		while (!args.isEmpty())
 		{
@@ -72,6 +76,8 @@ public class WADScanCommand implements DoomyCommand
 						recurse = true;
 					else if (matchArgument(args, SWITCH_PREFIX1) || matchArgument(args, SWITCH_PREFIX2))
 						state = STATE_PREFIX;
+					else if (matchArgument(args, SWITCH_SUFFIX1) || matchArgument(args, SWITCH_SUFFIX2))
+						state = STATE_SUFFIX;
 					else if (matchArgument(args, SWITCH_FORCEADD))
 						force = true;
 					else
@@ -85,17 +91,26 @@ public class WADScanCommand implements DoomyCommand
 					state = STATE_START;
 				}
 				break;
+
+				case STATE_SUFFIX:
+				{
+					suffix = args.pollFirst();
+					state = STATE_START;
+				}
+				break;
 			}
 		}
 		
 		if (state == STATE_PREFIX)
 			throw new BadArgumentException("Expected name prefix after prefix switch.");
+		if (state == STATE_SUFFIX)
+			throw new BadArgumentException("Expected name suffix after suffix switch.");
 	}
 
 	@Override
 	public int call(IOHandler handler)
 	{
-		return execute(handler, path, prefix, recurse, force);
+		return execute(handler, path, prefix, suffix, recurse, force);
 	}
 
 	/**
@@ -103,11 +118,12 @@ public class WADScanCommand implements DoomyCommand
 	 * @param handler the handler to use for I/O.
 	 * @param path the path to scan.
 	 * @param prefix the prefix to add to each name. 
+	 * @param suffix the suffix to add to each name. 
 	 * @param recurse if true, recurse down the path.
 	 * @param force if true, update existing IWADs.
 	 * @return the return code from running the command.
 	 */
-	public static int execute(IOHandler handler, String path, String prefix, boolean recurse, boolean force)
+	public static int execute(IOHandler handler, String path, String prefix, String suffix, boolean recurse, boolean force)
 	{
 		File startDir = new File(path);
 		
@@ -127,7 +143,7 @@ public class WADScanCommand implements DoomyCommand
 		DoomyCommon.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 		{
 			WADManager manager = WADManager.get();
-			String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
+			String name = (prefix + FileUtils.getFileNameWithoutExtension(file) + suffix).toLowerCase();
 			if (manager.containsWAD(name) && force)
 			{
 				handler.out("\rFinding WADs.... " + updated.incrementAndGet());

@@ -247,6 +247,7 @@ public class WadTableControlPanel extends JPanel
 	private void onScan()
 	{
 		final JFormField<String> prefixField = stringField("", false, true);
+		final JFormField<String> suffixField = stringField("", false, true);
 		final JFormField<Boolean> recurseField = checkBoxField(checkBox(true));
 		final JFormField<Boolean> updateExistingField = checkBoxField(checkBox(false));
 		final JFormField<File> directoryField = fileField(null, language.getText("file.browse"), 
@@ -266,6 +267,7 @@ public class WadTableControlPanel extends JPanel
 				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("wads.scan.form.width")),
 					gui.formField("wads.scan.form.path", directoryField),
 					gui.formField("wads.scan.form.prefix", prefixField),
+					gui.formField("wads.scan.form.suffix", suffixField),
 					gui.formField("wads.scan.form.recurse", recurseField),
 					gui.formField("wads.scan.form.update", updateExistingField)
 				))
@@ -296,6 +298,7 @@ public class WadTableControlPanel extends JPanel
 		}
 		
 		String prefix = prefixField.getValue();
+		String suffix = suffixField.getValue();
 		boolean recurse = recurseField.getValue();
 		boolean force = updateExistingField.getValue();
 		
@@ -333,7 +336,7 @@ public class WadTableControlPanel extends JPanel
 					progressLabel.setText(file.getPath());
 				});
 				
-				String name = (prefix + FileUtils.getFileNameWithoutExtension(file)).toLowerCase();
+				String name = (prefix + FileUtils.getFileNameWithoutExtension(file) + suffix).toLowerCase();
 				boolean containsWAD = wadManager.containsWAD(name);
 				if (containsWAD && force)
 				{
