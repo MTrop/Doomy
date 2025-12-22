@@ -3,9 +3,13 @@
 REM ============================[ VARIABLES ]================================
 SETLOCAL
 SET JAVAEXE=
+SET JAVAJAR=
 SET JAVAOPTS={{JAVA_OPTIONS}}
-SET JAVAJAR={{JAR_NAME}}
 SET MAINCLASS={{MAIN_CLASSNAME}}
+
+REM ===== Get latest JAR.
+FOR /F %%F in ('dir "%~dp0\jar\*.jar" /a/b/n') DO ( SET JAVAJAR=jar\%%F )
+
 REM =========================================================================
 
 REM ===== Java Scan
@@ -17,13 +21,13 @@ where java > nul
 if ERRORLEVEL == 0 SET JAVAEXE=java
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JAVA_HOME%=="" SET JAVAEXE=%JAVA_HOME%\bin\java.exe
+if not "%JAVA_HOME%"=="" SET JAVAEXE=%JAVA_HOME%\bin\java.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JDK_HOME%=="" SET JAVAEXE=%JDK_HOME%\bin\java.exe
+if not "%JDK_HOME%"=="" SET JAVAEXE=%JDK_HOME%\bin\java.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
-if not %JRE_HOME%=="" SET JAVAEXE=%JRE_HOME%\java.exe
+if not "%JRE_HOME%"=="" SET JAVAEXE=%JRE_HOME%\java.exe
 if not "%JAVAEXE%"=="" goto _calljava
 
 REM ===== No Java.

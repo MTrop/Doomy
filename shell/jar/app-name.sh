@@ -1,7 +1,6 @@
 #!/bin/bash
 
-JAVAOPTS={{JAVA_OPTIONS}}
-JAVAJAR={{JAR_NAME}}
+JAVAOPTS="{{JAVA_OPTIONS}}"
 MAINCLASS={{MAIN_CLASSNAME}}
 
 CMD_READLINK="readlink -f"
@@ -12,6 +11,13 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 	CMD_READLINK="realpath"
 fi
 SCRIPTDIR="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
+
+DOOMY_JAR="jar/$((cd ${SCRIPTDIR}/jar && ls -1a *.jar) | sort | tail -1)"
+JAVAJAR="${SCRIPTDIR}/${DOOMY_JAR}"
+if [[ "$OSTYPE" == "cygwin"* ]]; then
+	JAVAJAR="$(cygpath -w -a "${JAR_PATH}")"
+fi
+
 
 # Test for Java
 if [ -f "$SCRIPTDIR/jre/bin/java" ]; then
