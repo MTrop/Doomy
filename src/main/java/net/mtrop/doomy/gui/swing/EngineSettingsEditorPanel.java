@@ -97,8 +97,7 @@ public class EngineSettingsEditorPanel extends JPanel
 					language.getText("file.browse.file.title"), 
 					language.getText("file.browse.select"),
 					() -> current != null ? current : gui.getDefaultFile(),
-					gui::setDefaultFile,
-					gui.createExecutableFilter()
+					gui::setDefaultFile
 				);
 				return chosen != null ? chosen : current;
 			},
@@ -177,8 +176,7 @@ public class EngineSettingsEditorPanel extends JPanel
 					language.getText("file.browse.file.title"), 
 					language.getText("file.browse.select"), 
 					() -> current != null ? current : gui.getDefaultFile(),
-					gui::setDefaultFile,
-					gui.createExecutableFilter()
+					gui::setDefaultFile
 				);
 				return chosen != null ? chosen : current;
 			},

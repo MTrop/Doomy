@@ -37,7 +37,7 @@
 	<property name="jsoup.lib.version" value="1.15.3" />
 	<property name="jsoup.jar" value="jsoup-${jsoup.lib.version}.jar" />
 
-	<property name="flatlaf.lib.version" value="2.0.2" />
+	<property name="flatlaf.lib.version" value="3.7" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
 
 	<!-- Project Info -->
@@ -183,8 +183,8 @@
 	<!-- Scripts -->
 
 	<target name="scripts" description="Creates application shell scripts.">
-		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  options="--enable-native-access=ALL-UNNAMED" jarname="jar\*" mainclass="net.mtrop.doomy.DoomyMain" />
-		<shell-bash name="doomy" todir="${build.dir}/shell/bash" options="--enable-native-access=ALL-UNNAMED" jarname="jar/*" mainclass="net.mtrop.doomy.DoomyMain" />
+		<shell-cmd  name="doomy" todir="${build.dir}/shell/cmd"  options="--enable-native-access=ALL-UNNAMED" mainclass="net.mtrop.doomy.DoomyMain" />
+		<shell-bash name="doomy" todir="${build.dir}/shell/bash" options="--enable-native-access=ALL-UNNAMED" mainclass="net.mtrop.doomy.DoomyMain" />
 	</target>
 
 	<!-- Shells -->

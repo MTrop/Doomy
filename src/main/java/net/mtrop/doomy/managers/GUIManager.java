@@ -11,7 +11,7 @@ import static javax.swing.BorderFactory.createTitledBorder;
 import static net.mtrop.doomy.struct.swing.ContainerFactory.*;
 import static net.mtrop.doomy.struct.swing.ComponentFactory.*;
 import static net.mtrop.doomy.struct.swing.ModalFactory.*;
-import static net.mtrop.doomy.struct.swing.FileChooserFactory.*;
+import static net.mtrop.doomy.struct.swing.SystemFileChooserFactory.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -44,15 +44,16 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
-import javax.swing.filechooser.FileFilter;
+
+import com.formdev.flatlaf.util.SystemFileChooser.FileFilter;
 
 import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.struct.SingletonProvider;
-import net.mtrop.doomy.struct.swing.FileChooserFactory;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel;
 import net.mtrop.doomy.struct.swing.SwingUtils;
+import net.mtrop.doomy.struct.swing.SystemFileChooserFactory;
 import net.mtrop.doomy.struct.util.EnumUtils;
 
 public class GUIManager 
@@ -67,7 +68,10 @@ public class GUIManager
 		LIGHT("com.formdev.flatlaf.FlatLightLaf"),
 		DARK("com.formdev.flatlaf.FlatDarkLaf"),
 		INTELLIJ("com.formdev.flatlaf.FlatIntelliJLaf"),
-		DARCULA("com.formdev.flatlaf.FlatDarculaLaf");
+		DARCULA("com.formdev.flatlaf.FlatDarculaLaf"),
+		MACOSLIGHT("com.formdev.flatlaf.themes.FlatMacLightLaf"),
+		MACOSDARK("com.formdev.flatlaf.themes.FlatMacDarkLaf"),
+		;
 		
 		public static final Map<String, GUIThemeType> MAP = EnumUtils.createCaseInsensitiveNameMap(GUIThemeType.class);
 		
@@ -240,30 +244,6 @@ public class GUIManager
 	}
 
 	/**
-	 * @return the executable file filter.
-	 */
-	public FileFilter createExecutableFilter()
-	{
-		return fileFilter(language.getText("filefilter.executables"), (f) -> f.canExecute());
-	}
-
-	/**
-	 * @return the directory file filter.
-	 */
-	public FileFilter createDirectoryFilter()
-	{
-		return fileDirectoryFilter(language.getText("filefilter.directories"));
-	}
-
-	/**
-	 * @return the all files file filter.
-	 */
-	public FileFilter createAllFilesFilter()
-	{
-		return fileFilter(language.getText("filefilter.allfiles"), (f) -> true);
-	}
-
-	/**
 	 * Adds a form field to a form, attaching a tool tip, if any.
 	 * @param formPanel the form panel.
 	 * @param formFields the list of fields to add.
@@ -344,7 +324,7 @@ public class GUIManager
 			lastPath = getFileChooserDefault();
 		
 		File selected;
-		if ((selected = FileChooserFactory.chooseFile(parent, title, lastPath, approveText, transformFileFunction, choosableFilters)) != null)
+		if ((selected = SystemFileChooserFactory.chooseFile(parent, title, lastPath, approveText, transformFileFunction, choosableFilters)) != null)
 			lastPathSaver.accept(selected);
 		return selected;
 	}
@@ -382,71 +362,8 @@ public class GUIManager
 			lastPath = getFileChooserDefault();
 		
 		File selected;
-		if ((selected = FileChooserFactory.chooseDirectory(parent, title, lastPath, approveText, createDirectoryFilter())) != null)
+		if ((selected = SystemFileChooserFactory.chooseDirectory(parent, title, lastPath, approveText)) != null)
 			lastPathSaver.accept(selected);
-		return selected;
-	}
-
-	/**
-	 * Brings up the file chooser to select a file, but on successful selection, returns the file
-	 * and sets the last file path used in settings. Initial file is also the last file used.
-	 * @param parent the parent component for the chooser modal.
-	 * @param title the dialog title.
-	 * @param approveText the text to put on the approval button.
-	 * @param lastPathSupplier the supplier to call for the last path used.
-	 * @param lastPathSaver the consumer to call for saving the chosen path, if valid.
-	 * @param transformFileFunction if a file is selected, use this function to set the final file name.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public File chooseFileOrDirectory(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, BiFunction<FileFilter, File, File> transformFileFunction, FileFilter ... choosableFilters)
-	{
-		File lastPath = lastPathSupplier.get();
-		if (lastPath == null)
-			lastPath = getFileChooserDefault();
-		
-		File selected;
-		if ((selected = FileChooserFactory.chooseFileOrDirectory(parent, title, lastPath, approveText, transformFileFunction, choosableFilters)) != null)
-			lastPathSaver.accept(selected);
-		return selected;
-	}
-
-	/**
-	 * Brings up the file chooser to select a file, but on successful selection, returns the file
-	 * and sets the last file path used in settings. Initial file is also the last file used.
-	 * @param parent the parent component for the chooser modal.
-	 * @param title the dialog title.
-	 * @param approveText the text to put on the approval button.
-	 * @param lastPathSupplier the supplier to call for the last path used.
-	 * @param lastPathSaver the consumer to call for saving the chosen path, if valid.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public File chooseFileOrDirectory(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, FileFilter ... choosableFilters)
-	{
-		return chooseFileOrDirectory(parent, title, approveText, lastPathSupplier, lastPathSaver, (x, file) -> file, choosableFilters);
-	}
-
-	/**
-	 * Brings up the file chooser to select multiple files, but on successful selection, returns the file
-	 * and sets the last file path used in settings. Initial file is also the last file used.
-	 * @param parent the parent component for the chooser modal.
-	 * @param title the dialog title.
-	 * @param approveText the text to put on the approval button.
-	 * @param lastPathSupplier the supplier to call for the last path used.
-	 * @param lastPathSaver the consumer to call for saving the chosen path, if valid.
-	 * @param choosableFilters the choosable filters.
-	 * @return the selected file, or null if no file was selected for whatever reason.
-	 */
-	public File[] chooseFilesOrDirectories(Component parent, String title, String approveText, Supplier<File> lastPathSupplier, Consumer<File> lastPathSaver, FileFilter ... choosableFilters)
-	{
-		File lastPath = lastPathSupplier.get();
-		if (lastPath == null)
-			lastPath = getFileChooserDefault();
-		
-		File[] selected;
-		if ((selected = FileChooserFactory.chooseFilesOrDirectories(parent, title, lastPath, approveText, choosableFilters)) != null)
-			lastPathSaver.accept(selected[selected.length - 1]);
 		return selected;
 	}
 
