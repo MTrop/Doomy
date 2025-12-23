@@ -23,7 +23,7 @@ import net.mtrop.doomy.managers.WADManager;
 
 
 /**
- * A command that [DOES NOTHING].
+ * A command that runs or creates presets and runs them.
  * @author Matthew Tropiano
  */
 public class DefaultCommand implements DoomyCommand
@@ -102,6 +102,8 @@ public class DefaultCommand implements DoomyCommand
 						state = STATE_ARGS;
 					else if (matchArgument(args, SWITCH_NOCLEANUP))
 						skipCleanup = true;
+					else
+						argsList.add(args.pollFirst());
 				}
 				break;
 
