@@ -6,6 +6,8 @@
 package net.mtrop.doomy.gui.swing;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
+import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -43,12 +45,15 @@ import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileContent;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesFileResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSearchResponse;
 import net.mtrop.doomy.managers.IdGamesManager.IdGamesSingleFileContent;
+import net.mtrop.doomy.managers.IdGamesManager.IdGamesStatusResponse;
 import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.managers.LoggerManager;
 import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.struct.swing.SwingUtils;
 import net.mtrop.doomy.struct.InstancedFuture;
+import net.mtrop.doomy.struct.LoggingFactory.Logger;
 import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
@@ -72,6 +77,12 @@ public class IdGamesSearchControlPanel extends JPanel
 {
 	private static final long serialVersionUID = 5500042924527901695L;
 
+	private static final Logger LOG = LoggerManager.getLogger(IdGamesSearchControlPanel.class); 
+	
+	private static final String CARD_PINGIDGAMES = "pingidgames";
+	private static final String CARD_NOIDGAMES = "noidgames";
+	private static final String CARD_MAIN = "main";
+	
 	private final ConfigManager config;
 	private final MessengerManager messenger;
 	private final GUIManager gui;
@@ -136,7 +147,15 @@ public class IdGamesSearchControlPanel extends JPanel
 		printSuccessStatus(language.getText("idgames.messages.ready"));
 		onSelection();
 		
-		containerOf(this, borderLayout(8, 8),
+		Container pingIdGamesContainer = containerOf(borderLayout(0, 0),
+			node(BorderLayout.CENTER, label(JLabel.CENTER, icons.getImage("activity.gif"), language.getText("idgames.pingidgames")))
+		);
+			
+		Container noIdGamesContainer = containerOf(borderLayout(0, 0),
+			node(BorderLayout.CENTER, label(JLabel.CENTER, icons.getImage("error.png"), language.getText("idgames.noidgames")))
+		);
+			
+		Container mainContainer = containerOf(borderLayout(8, 8),
 			node(BorderLayout.CENTER, containerOf(borderLayout(0, 8),
 				node(BorderLayout.NORTH, gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("idgames.search.labelwidth")),
 					gui.formField("idgames.search.for", searchField),
@@ -154,6 +173,34 @@ public class IdGamesSearchControlPanel extends JPanel
 			)),
 			node(BorderLayout.SOUTH, statusLabel)
 		);
+		
+		// Detect idGames
+		
+		CardLayout cards = cardLayout();
+		
+		containerOf(this, cards,
+			node(CARD_PINGIDGAMES, pingIdGamesContainer),
+			node(CARD_NOIDGAMES, noIdGamesContainer),
+			node(CARD_MAIN, mainContainer)
+		);
+		
+		try {
+			LOG.info("Pinging idGames....");
+			IdGamesStatusResponse resp = idGames.ping();
+			if (resp.content.status.equalsIgnoreCase("true"))
+			{
+				cards.show(this, CARD_MAIN);
+				LOG.info("idGames present.");
+			}
+			else
+			{
+				cards.show(this, CARD_NOIDGAMES);
+				LOG.info("idGames unavailable.");
+			}
+		} catch (IOException e1) {
+			LOG.error(e1, "IdGames could not be read.");
+			cards.show(this, CARD_NOIDGAMES);
+		}
 	}
 
 	private void printSuccessStatus(String message)

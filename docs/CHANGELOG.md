@@ -7,6 +7,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 -----
 
 - `Added` More themes to Doomy.
+- `Changed` Doomy GUI will ping idGames before it concludes that it is available (Issue #12).
 
 
 0.8.0
