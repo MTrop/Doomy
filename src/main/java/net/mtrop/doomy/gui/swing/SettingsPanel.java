@@ -11,7 +11,9 @@ import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.util.Arrays;
+import java.util.List;
 
+import net.mtrop.doomy.gui.DoomyGUIMain;
 import net.mtrop.doomy.managers.ConfigManager;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.GUIManager.GUIThemeType;
@@ -50,7 +52,13 @@ public class SettingsPanel extends JPanel
 		this.gui = GUIManager.get();
 		this.language = LanguageManager.get();
 		
-		this.guiThemeTypeField = comboField(comboBox(Arrays.asList(GUIThemeType.values()), (v) -> gui.setThemeType(v)));
+		List<GUIThemeType> guiThemes = Arrays.asList(GUIThemeType.values());
+		guiThemes.sort((a, b) -> a.toString().compareToIgnoreCase(b.toString()));
+		
+		this.guiThemeTypeField = comboField(comboBox(guiThemes, (v) -> {
+			gui.setThemeType(v);
+			DoomyGUIMain.setLAF();
+		}));
 		this.guiThemeTypeField.setValue(gui.getThemeType());
 
 		this.initialDirectoryField = fileField(

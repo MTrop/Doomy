@@ -39,6 +39,8 @@
 
 	<property name="flatlaf.lib.version" value="3.7" />
 	<property name="flatlaf.jar" value="flatlaf-${flatlaf.lib.version}.jar" />
+	<property name="flatlaf.themes.lib.version" value="3.7" />
+	<property name="flatlaf.themes.jar" value="flatlaf-intellij-themes-${flatlaf.lib.version}.jar" />
 
 	<!-- Project Info -->
 	
@@ -49,6 +51,7 @@
 		${S}${dev.base}/${sql.jar}
 		${S}${dev.base}/${sqlite.jar}
 		${S}${dev.base}/${flatlaf.jar}
+		${S}${dev.base}/${flatlaf.themes.jar}
 		${S}${dev.base}/${jsoup.jar}
 		" />
 	<property name="project.compiler.bootclasspath" value="" />
@@ -142,6 +145,7 @@
 			<zipgroupfileset file="${dependencies.dir}/${sql.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${sqlite.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${flatlaf.jar}"/>
+			<zipgroupfileset file="${dependencies.dir}/${flatlaf.themes.jar}"/>
 			<zipgroupfileset file="${dependencies.dir}/${jsoup.jar}"/>
 		</jar>
 		<copy todir="${bin.dir}/net/mtrop/doomy">
@@ -171,6 +175,8 @@
 	<target name="dependency.flatlaf">
 		<maven-jar-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
 		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf" version="${flatlaf.lib.version}" />
+		<maven-jar-dl group-path="com/formdev" artifact="flatlaf-intellij-themes" version="${flatlaf.themes.lib.version}" />
+		<maven-jar-sources-dl group-path="com/formdev" artifact="flatlaf-intellij-themes" version="${flatlaf.themes.lib.version}" />
 	</target>
 	<target name="dependency.jsoup">
 		<maven-jar-dl group-path="org/jsoup" artifact="jsoup" version="${jsoup.lib.version}" />

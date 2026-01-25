@@ -7,6 +7,7 @@ package net.mtrop.doomy.gui;
 
 import net.mtrop.doomy.managers.DatabaseManager;
 import net.mtrop.doomy.managers.GUIManager;
+import net.mtrop.doomy.managers.GUIManager.GUIThemeType;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.LoggerManager;
 import net.mtrop.doomy.struct.LoggingFactory.Logger;
@@ -47,7 +48,8 @@ public final class DoomyGUIMain
 		
 		if (OSUtils.isOSX())
 			System.setProperty("apple.laf.useScreenMenuBar", "true");
-		SwingUtils.setLAF(GUIManager.get().getThemeType().className);
+		GUIThemeType theme = GUIManager.get().getThemeType();
+		SwingUtils.setLAF(theme != null ? theme.getClassName() : GUIThemeType.LIGHT.getClassName());
 	}
 	
 	public static void main(String[] args)
