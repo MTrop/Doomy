@@ -20,6 +20,7 @@ import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.swing.ComponentFactory;
+import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelSide;
 import net.mtrop.doomy.struct.swing.SwingUtils;
@@ -75,6 +76,7 @@ public class WadTableControlPanel extends JPanel
 	
 	private WadTablePanel wadTable;
 	private Action addAction;
+	private Action renameAction;
 	private Action removeAction;
 	private Action scanAction;
 	private Action cleanupAction;
@@ -95,6 +97,7 @@ public class WadTableControlPanel extends JPanel
 		this.wadTable = new WadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
 
 		this.addAction = actionItem(language.getText("wads.add"), (e) -> onAdd());
+		this.renameAction = actionItem(language.getText("wads.rename"), (e) -> onRename());
 		this.removeAction = actionItem(language.getText("wads.remove"), (e) -> onRemove());
 		this.scanAction = actionItem(language.getText("wads.scan"), (e) -> onScan());
 		this.cleanupAction = actionItem(language.getText("wads.cleanup"), (e) -> onCleanup());
@@ -112,6 +115,7 @@ public class WadTableControlPanel extends JPanel
 					node(button(openAction)),
 					node(button(addAction)),
 					node(button(textAction)),
+					node(button(renameAction)),
 					node(button(removeAction)),
 					node(button(scanAction)),
 					node(button(cleanupAction))
@@ -184,6 +188,33 @@ public class WadTableControlPanel extends JPanel
 		
 		wadManager.addWAD(name, path.getAbsolutePath(), null);
 		wadTable.refreshWADs();
+	}
+	
+	// Called on WAD rename.
+	private void onRename()
+	{
+		WAD selected = wadTable.getSelectedWADs().get(0);
+		
+		final JFormField<String> nameField = stringField(selected.name, false, true);
+		Boolean doRename = modal(this, language.getText("wads.rename.title"), containerOf(dimension(350, 32),
+				node(BorderLayout.CENTER, nameField)
+			),
+			gui.createChoiceFromLanguageKey("wads.rename.rename", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (doRename == Boolean.TRUE)
+		{
+			if (ObjectUtils.isEmpty(nameField.getValue()))
+			{
+				SwingUtils.error(this, language.getText("wads.rename.error.blank"));
+			}
+			else if (wadManager.renameWAD(selected.name, nameField.getValue()))
+			{
+				wadTable.refreshWADs();
+				messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
+			}
+		}
 	}
 	
 	// Called on WAD removal.
@@ -630,9 +661,11 @@ public class WadTableControlPanel extends JPanel
 	
 	private void onSelection()
 	{
+		cleanupAction.setEnabled(wadManager.getWADCount() > 0);
+
 		List<WAD> selectedWADs = wadTable.getSelectedWADs();
 		removeAction.setEnabled(!selectedWADs.isEmpty());
-		cleanupAction.setEnabled(wadManager.getWADCount() > 0);
+		renameAction.setEnabled(selectedWADs.size() == 1);
 		textAction.setEnabled(selectedWADs.size() == 1);
 		openAction.setEnabled(selectedWADs.size() == 1);
 	}

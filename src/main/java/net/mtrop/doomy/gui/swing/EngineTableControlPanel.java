@@ -57,6 +57,7 @@ public class EngineTableControlPanel extends JPanel
 	
 	private EngineTablePanel engineTable;
 	private Action addAction;
+	private Action renameAction;
 	private Action copyAction;
 	private Action editAction;
 	private Action removeAction;
@@ -75,6 +76,7 @@ public class EngineTableControlPanel extends JPanel
 		this.engineTable = new EngineTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
 
 		this.addAction = actionItem(language.getText("engine.add"), (e) -> onAdd());
+		this.renameAction = actionItem(language.getText("engine.rename"), (e) -> onRename());
 		this.copyAction = actionItem(language.getText("engine.copy"), (e) -> onCopy());
 		this.editAction = actionItem(language.getText("engine.edit"), (e) -> onEdit());
 		this.removeAction = actionItem(language.getText("engine.remove"), (e) -> onRemove());
@@ -92,6 +94,7 @@ public class EngineTableControlPanel extends JPanel
 					node(button(openFolderAction)),
 					node(button(setupAction)),
 					node(button(addAction)),
+					node(button(renameAction)),
 					node(button(copyAction)),
 					node(button(editAction)),
 					node(button(removeAction))
@@ -194,6 +197,33 @@ public class EngineTableControlPanel extends JPanel
 		addEngine(name, settings);
 		
 		engineTable.refreshEngines();
+	}
+
+	// Called on Engine rename.
+	private void onRename()
+	{
+		Engine selected = engineTable.getSelectedEngines().get(0);
+		
+		final JFormField<String> nameField = stringField(selected.name, false, true);
+		Boolean doRename = modal(this, language.getText("engine.rename.title"), containerOf(dimension(350, 32),
+				node(BorderLayout.CENTER, nameField)
+			),
+			gui.createChoiceFromLanguageKey("engine.rename.rename", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (doRename == Boolean.TRUE)
+		{
+			if (ObjectUtils.isEmpty(nameField.getValue()))
+			{
+				SwingUtils.error(this, language.getText("engine.rename.error.blank"));
+			}
+			else if (engineManager.renameEngine(selected.name, nameField.getValue()))
+			{
+				engineTable.refreshEngines();
+				messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
+			}
+		}
 	}
 
 	// Called when copying an engine.
@@ -393,6 +423,7 @@ public class EngineTableControlPanel extends JPanel
 		copyAction.setEnabled(engines.size() == 1);
 		editAction.setEnabled(engines.size() == 1);
 		openFolderAction.setEnabled(engines.size() == 1);
+		renameAction.setEnabled(engines.size() == 1);
 	}
 	
 }

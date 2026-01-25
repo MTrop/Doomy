@@ -63,6 +63,7 @@ public class IwadTableControlPanel extends JPanel
 	private IwadTablePanel iwadTable;
 	private Action addAction;
 	private Action removeAction;
+	private Action renameAction;
 	private Action scanAction;
 	private Action cleanupAction;
 	private Action openAction;
@@ -78,6 +79,7 @@ public class IwadTableControlPanel extends JPanel
 		this.iwadTable = new IwadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
 
 		this.addAction = actionItem(language.getText("iwads.add"), (e) -> onAdd());
+		this.renameAction = actionItem(language.getText("iwads.rename"), (e) -> onRename());
 		this.removeAction = actionItem(language.getText("iwads.remove"), (e) -> onRemove());
 		this.scanAction = actionItem(language.getText("iwads.scan"), (e) -> onScan());
 		this.cleanupAction = actionItem(language.getText("iwads.cleanup"), (e) -> onCleanup());
@@ -93,6 +95,7 @@ public class IwadTableControlPanel extends JPanel
 				node(BorderLayout.NORTH, containerOf(gridLayout(0, 1, 0, 2),
 					node(button(openAction)),
 					node(button(addAction)),
+					node(button(renameAction)),
 					node(button(removeAction)),
 					node(button(scanAction)),
 					node(button(cleanupAction))
@@ -167,6 +170,33 @@ public class IwadTableControlPanel extends JPanel
 		iwadTable.refreshIWADs();
 	}
 
+	// Called on IWAD rename.
+	private void onRename()
+	{
+		IWAD selected = iwadTable.getSelectedIWADs().get(0);
+		
+		final JFormField<String> nameField = stringField(selected.name, false, true);
+		Boolean doRename = modal(this, language.getText("iwads.rename.title"), containerOf(dimension(350, 32),
+				node(BorderLayout.CENTER, nameField)
+			),
+			gui.createChoiceFromLanguageKey("iwads.rename.rename", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (doRename == Boolean.TRUE)
+		{
+			if (ObjectUtils.isEmpty(nameField.getValue()))
+			{
+				SwingUtils.error(this, language.getText("iwads.rename.error.blank"));
+			}
+			else if (iwadManager.renameIWAD(selected.name, nameField.getValue()))
+			{
+				iwadTable.refreshIWADs();
+				messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
+			}
+		}
+	}
+	
 	// Called on WAD removal.
 	private void onRemove()
 	{
@@ -520,10 +550,12 @@ public class IwadTableControlPanel extends JPanel
 	
 	private void onSelection()
 	{
+		cleanupAction.setEnabled(iwadManager.getIWADCount() > 0);
+
 		List<IWAD> selectedIWADs = iwadTable.getSelectedIWADs();
 		removeAction.setEnabled(!selectedIWADs.isEmpty());
-		cleanupAction.setEnabled(iwadManager.getIWADCount() > 0);
 		openAction.setEnabled(selectedIWADs.size() == 1);
+		renameAction.setEnabled(selectedIWADs.size() == 1);
 	}
 	
 }
