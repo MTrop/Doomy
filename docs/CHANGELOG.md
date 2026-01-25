@@ -3,6 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.9.0
+-----
+
+- `Added` More themes to Doomy.
+
+
 0.8.0
 -----
 
