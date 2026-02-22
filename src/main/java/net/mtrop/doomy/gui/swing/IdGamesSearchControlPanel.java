@@ -34,6 +34,8 @@ import javax.swing.JProgressBar;
 import javax.swing.JTextField;
 import javax.swing.event.MouseInputAdapter;
 
+import com.blackrook.json.JSONConversionException;
+
 import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.managers.ConfigManager;
 import net.mtrop.doomy.managers.DownloadManager;
@@ -197,8 +199,11 @@ public class IdGamesSearchControlPanel extends JPanel
 				cards.show(this, CARD_NOIDGAMES);
 				LOG.info("idGames unavailable.");
 			}
-		} catch (IOException e1) {
-			LOG.error(e1, "IdGames could not be read.");
+		} catch (JSONConversionException e) {
+			LOG.error(e, "IdGames response could not be read.");
+			cards.show(this, CARD_NOIDGAMES);
+		} catch (IOException e) {
+			LOG.error(e, "IdGames could not be read.");
 			cards.show(this, CARD_NOIDGAMES);
 		}
 	}

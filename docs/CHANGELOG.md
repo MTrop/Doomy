@@ -3,6 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.9.1
+-----
+
+- `Fixed` Pinging idGames and getting back unexpected data will not cause Doomy to crash (Issue #12).
+
+
 0.9.0
 -----
 
