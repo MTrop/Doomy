@@ -7,6 +7,7 @@ Copyright (c) 2019-2025 Matt Tropiano
 [Black Rook SQL](https://github.com/BlackRookSoftware/SQL) 1.0.0+  
 [Black Rook JSON](https://github.com/BlackRookSoftware/JSON) 1.0.0+  
 [SQLite JDBC](https://github.com/xerial/sqlite-jdbc) 3.21.0.1+  
+[Jsoup](https://github.com/jhy/jsoup/) 1.15.3+
 
 ### Required Modules
 
