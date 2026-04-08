@@ -3,6 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.9.2
+-----
+
+- `Fixed` A label for the uncaught exception window showed the wrong program name.
+
+
 0.9.1
 -----
 
