@@ -4,7 +4,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 
 
 0.10.0
------
+------
 
 - `Fixed` Allow cut/copy-paste out of file text fields.
 - `Added` Optional launch with command-line options.
