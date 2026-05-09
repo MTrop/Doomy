@@ -7,6 +7,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 -----
 
 - `Fixed` Allow cut/copy-paste out of file text fields.
+- `Added` Optional launch with command-line options.
 
 
 0.9.2

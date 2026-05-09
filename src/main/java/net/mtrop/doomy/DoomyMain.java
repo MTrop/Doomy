@@ -59,7 +59,12 @@ public final class DoomyMain
 		return retval;
 	}
 	
-	private static Deque<String> parseInput(String input)
+	/**
+	 * Parses an input line into a Deque of tokens.
+	 * @param input the input string.
+	 * @return a Deque of String tokens.
+	 */
+	public static Deque<String> parseInput(String input)
 	{
 		Deque<String> out = new LinkedList<>();
 		

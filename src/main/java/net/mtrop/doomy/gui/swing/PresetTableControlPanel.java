@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -21,12 +22,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.swing.Action;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyEnvironment;
+import net.mtrop.doomy.DoomyMain;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.IWADManager;
@@ -76,7 +80,11 @@ public class PresetTableControlPanel extends JPanel
 	private Action openFolderAction;
 	private Action cleanupFoldersAction;
 	private Action launchAction;
+	private Action launchArgsAction;
 
+	private JButton launchOtherbutton;
+	private JPopupMenu launchPopupMenu;
+	
 	public PresetTableControlPanel()
 	{
 		this.messenger = MessengerManager.get();
@@ -93,7 +101,14 @@ public class PresetTableControlPanel extends JPanel
 		this.openFolderAction = actionItem(language.getText("preset.open"), (e) -> onOpen());
 		this.cleanupFoldersAction = actionItem(language.getText("preset.cleanup"), (e) -> onCleanup());
 		this.launchAction = actionItem(language.getHTML("preset.launch"), (e) -> onLaunch());
+		this.launchArgsAction = actionItem(language.getHTML("preset.launch.title.args"), (e) -> onLaunchWithArgs());
 
+		this.launchOtherbutton = button("\u25bc" /* Black Down-pointing Triangle */, this::doLaunchOptionsPopupTrigger); 
+
+		this.launchPopupMenu = popupMenu(
+			menuItem(launchArgsAction)
+		);
+		
 		onSelection();
 
 		this.messenger.subscribe(MessengerManager.CHANNEL_PRESETS_CHANGED, (message) -> presetTable.refreshPresets());
@@ -106,7 +121,10 @@ public class PresetTableControlPanel extends JPanel
 					node(button(removeAction)),
 					node(button(openFolderAction)),
 					node(button(cleanupFoldersAction)),
-					node(button(launchAction))
+					node(containerOf(borderLayout(),
+						node(BorderLayout.CENTER, button(launchAction)),
+						node(BorderLayout.LINE_END, launchOtherbutton)
+					))
 				)),
 				node(BorderLayout.CENTER, containerOf())
 			))
@@ -399,12 +417,43 @@ public class PresetTableControlPanel extends JPanel
 			SwingUtils.info(this, language.getText("preset.cleanup.folders", progressIndex.get()));
 	}
 	
-	private void onLaunch() 
+	private void onLaunch()
 	{
 		List<PresetInfo> selectedPresets = presetTable.getSelectedPresets();
 		if (selectedPresets.isEmpty())
 			return;
 
+		doLaunchTask(selectedPresets.get(0));
+	}
+
+	private void onLaunchWithArgs()
+	{
+		List<PresetInfo> selectedPresets = presetTable.getSelectedPresets();
+		if (selectedPresets.isEmpty())
+			return;
+
+		JFormField<String> argsInputField = stringField(false, true);
+		
+		Boolean ok = modal(this,
+			language.getText("preset.launch.title.args"),
+			containerOf(dimension(256, 24), borderLayout(),
+				node(BorderLayout.CENTER, argsInputField)
+			),
+			gui.createChoiceFromLanguageKey("preset.launch.choice", (Boolean)true),
+			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
+		).openThenDispose();
+		
+		if (ok != Boolean.TRUE)
+			return;
+		
+		Deque<String> argDeque = DoomyMain.parseInput(argsInputField.getValue());
+		String[] args = argDeque.toArray(new String[argDeque.size()]);
+		
+		doLaunchTask(selectedPresets.get(0), args);
+	}
+
+	private void doLaunchTask(PresetInfo selectedPreset, final String ... args)
+	{
 		final TextOutputPanel textOutputPanel = new TextOutputPanel();
 		final PrintStream outStream = textOutputPanel.getPrintStream();
 		final PrintStream errStream = textOutputPanel.getErrorPrintStream();
@@ -453,12 +502,13 @@ public class PresetTableControlPanel extends JPanel
 		
 		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 
+		final Preset preset = presetManager.getPreset(selectedPreset.id);
+		
 		taskManager.spawn(() -> 
 		{
 			signal.poll();
-			Preset preset = presetManager.getPreset(selectedPresets.get(0).id); 
 			try {
-				launcherManager.run(ioHandler, preset, new String[]{}, false);
+				launcherManager.run(ioHandler, preset, args, false);
 			} catch (LaunchException e) {
 				SwingUtils.error(this, e.getLocalizedMessage());
 			} finally {
@@ -470,11 +520,17 @@ public class PresetTableControlPanel extends JPanel
 		outputModal.openThenDispose();
 	}
 
+	private void doLaunchOptionsPopupTrigger(JButton b)
+	{
+		launchPopupMenu.show(b, 0, b.getHeight());
+	}
+	
 	private void onSelection()
 	{
 		List<PresetInfo> presets = presetTable.getSelectedPresets();
 		removeAction.setEnabled(!presets.isEmpty());
 		launchAction.setEnabled(presets.size() == 1);
+		launchOtherbutton.setEnabled(presets.size() == 1);
 		openFolderAction.setEnabled(presets.size() == 1);
 	}
 
