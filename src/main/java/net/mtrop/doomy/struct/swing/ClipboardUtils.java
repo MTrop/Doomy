@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2019-2022 Black Rook Software
+ * Copyright (c) 2019-2026 Black Rook Software
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
@@ -97,7 +97,30 @@ public final class ClipboardUtils
 	 */
 	public static void sendFilesToClipboard(File[] files, ClipboardOwner ownerLossFunction)
 	{
-		TOOLKIT.getSystemClipboard().setContents(new FileListTransferable(Arrays.asList(files)), ownerLossFunction);
+		TOOLKIT.getSystemClipboard().setContents(new FileListTransferable(files), ownerLossFunction);
+	}
+
+	/**
+	 * Sends a list of files to the system clipboard.
+	 * @param files the file references to send.
+	 * @throws HeadlessException if <code>GraphicsEnvironment.isHeadless()</code> returns true.
+	 * @throws IllegalStateException  if the system clipboard is not available.
+	 */
+	public static void sendFilesToClipboard(List<File> files)
+	{
+		sendFilesToClipboard(files, BLANK_OWNER);
+	}
+
+	/**
+	 * Sends a list of files to the system clipboard.
+	 * @param files the file references to send.
+	 * @param ownerLossFunction the function to call when this program loses the clipboard content ownership.
+	 * @throws HeadlessException if <code>GraphicsEnvironment.isHeadless()</code> returns true.
+	 * @throws IllegalStateException  if the system clipboard is not available.
+	 */
+	public static void sendFilesToClipboard(List<File> files, ClipboardOwner ownerLossFunction)
+	{
+		TOOLKIT.getSystemClipboard().setContents(new FileListTransferable(files), ownerLossFunction);
 	}
 
 	/**
@@ -162,13 +185,20 @@ public final class ClipboardUtils
 		return null;
 	}
 
-	private static class StringTransferable implements Transferable
+	/**
+	 * A Transferable for moving string data.
+	 */
+	public static class StringTransferable implements Transferable
 	{
 		private static final DataFlavor[] FLAVORS = new DataFlavor[]{ DataFlavor.stringFlavor };
 		
 		private String data;
 		
-		private StringTransferable(String data)
+		/**
+		 * Creates a new StringTransferable.
+		 * @param data the string data.
+		 */
+		public StringTransferable(String data)
 		{
 			this.data = data;
 		}
@@ -195,14 +225,21 @@ public final class ClipboardUtils
 		}
 	}
 	
-	private static class ImageTransferable implements Transferable
+	/**
+	 * A Transferable for moving image data.
+	 */
+	public static class ImageTransferable implements Transferable
 	{
 		private static final DataFlavor[] FLAVORS = new DataFlavor[]{ DataFlavor.imageFlavor, DataFlavor.stringFlavor };
 		
 		private Image data;
 		private String imageString;
 
-		private ImageTransferable(Image data)
+		/**
+		 * Creates a new ImageTransferable.
+		 * @param data the image data.
+		 */
+		public ImageTransferable(Image data)
 		{
 			this.data = data;
 			this.imageString = "Image[width="+ data.getWidth(null) + ", height=" + data.getHeight(null) + "]";
@@ -233,19 +270,39 @@ public final class ClipboardUtils
 		}
 	}
 	
-	private static class FileListTransferable implements Transferable
+	/**
+	 * A Transferable for moving file list data.
+	 */
+	public static class FileListTransferable implements Transferable
 	{
 		private static final DataFlavor[] FLAVORS = new DataFlavor[]{ DataFlavor.javaFileListFlavor, DataFlavor.stringFlavor };
 		
 		private List<File> fileList;
 		private String fileListString;
 		
-		private FileListTransferable(List<File> fileList)
+		/**
+		 * Creates a new FileListTransferable.
+		 * @param files the file list data.
+		 */
+		public FileListTransferable(File ... files)
+		{
+			this(Arrays.asList(files));
+		}
+		
+		/**
+		 * Creates a new FileListTransferable.
+		 * @param fileList the file list data.
+		 */
+		public FileListTransferable(List<File> fileList)
 		{
 			this.fileList = fileList;
 			StringBuilder sb = new StringBuilder();
 			for (File file : fileList)
-				sb.append(file.getPath()).append("\n");
+			{
+				if (sb.length() > 0)
+					sb.append("\n");
+				sb.append(file.getPath());
+			}
 			this.fileListString = sb.toString();
 		}
 		
