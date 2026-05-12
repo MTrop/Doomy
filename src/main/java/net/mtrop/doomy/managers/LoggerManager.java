@@ -15,7 +15,7 @@ import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.util.FileUtils;
 
 /**
- * DoomTools GUI logger singleton.
+ * Doomy GUI logger singleton.
  * @author Matthew Tropiano
  */
 public final class LoggerManager 
@@ -23,7 +23,7 @@ public final class LoggerManager
 	/** Logging filename. */
 	private static final String LOG_FILENAME = "doomy.log";
 	/** Configuration file. */
-	private static final File LOG_FILE = new File(DoomyEnvironment.getConfigBasePath() + LOG_FILENAME);
+	private static final File LOG_FILE = new File(DoomyEnvironment.getApplicationStatePath() + File.separator + LOG_FILENAME);
 
 	/** The instance encapsulator. */
 	private static final SingletonProvider<LoggerManager> INSTANCE = new SingletonProvider<>(() -> new LoggerManager()); 

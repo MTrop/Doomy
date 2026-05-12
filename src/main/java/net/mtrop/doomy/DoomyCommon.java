@@ -276,6 +276,11 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 40, "  help                                  Print all of this help.");
 			handler.outln();
 		}
+		if (commandName == null || DoomyCommand.ENV.equalsIgnoreCase(commandName))
+		{
+			wrapPrint(handler, 80, 40, "  env                                   Print environment paths that Doomy uses.");
+			handler.outln();
+		}
 		if (commandName == null || DoomyCommand.CONFIG.equalsIgnoreCase(commandName))
 		{
 			wrapPrint(handler, 80, 40, "  config                                Print this subsection's help and terminate.");

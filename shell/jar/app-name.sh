@@ -12,6 +12,8 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 SCRIPTDIR="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
 
+DOOMY_PATH=${SCRIPTDIR}
+
 DOOMY_JAR="jar/$((cd ${SCRIPTDIR}/jar && ls -1a *.jar) | sort | tail -1)"
 JAVAJAR="${SCRIPTDIR}/${DOOMY_JAR}"
 if [[ "$OSTYPE" == "cygwin"* ]]; then

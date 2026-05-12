@@ -17,7 +17,7 @@ import net.mtrop.doomy.struct.LoggingFactory.Logger;
 import net.mtrop.doomy.struct.SingletonProvider;
 
 /**
- * DoomTools GUI logger singleton.
+ * Doomy GUI task manager singleton.
  * @author Matthew Tropiano
  */
 public final class TaskManager 
@@ -42,7 +42,7 @@ public final class TaskManager
 	
 	private TaskManager()
 	{
-		this.executor = Executors.newFixedThreadPool(4, new DefaultThreadFactory("DoomToolsThread"));
+		this.executor = Executors.newFixedThreadPool(4, new DefaultThreadFactory("DoomyThread"));
 	}
 
 	/**

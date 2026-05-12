@@ -45,7 +45,7 @@ public class ConfigCommand implements DoomyCommand
 			handler.errln("ERROR: Unknown command: " + badCommand);
 			
 		DoomyCommon.help(handler, CONFIG);
-		handler.outln("\nConfig directory is: " + (new File(DoomyEnvironment.getConfigBasePath())).getAbsolutePath());
+		handler.outln("\nConfig directory is: " + (new File(DoomyEnvironment.getApplicationConfigPath())).getAbsolutePath());
 		return ERROR_NONE;
 	}
 	

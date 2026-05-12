@@ -153,7 +153,14 @@ public class DoomFetchControlPanel extends JPanel
 			if (cancelSwitch.get())
 				return;
 
-			targetFile.set(new File(DoomyEnvironment.getTempDirectoryPath() + File.separator + response.getFilename()));
+			targetFile.set(new File(DoomyEnvironment.getApplicationCachePath() + File.separator + response.getFilename()));
+			
+			if (!FileUtils.createPathForFile(targetFile.get()))
+			{
+				SwingUtils.error(this, language.getText("doomfetch.search.error.direrror", targetFile.get().getAbsolutePath()));
+				return;
+			}
+			
 			textOutputPanel.getPrintStream().println("Downloading file...");
 			
 			try (HTTPResponse httpResponse = response.getHTTPResponse(); FileOutputStream fos = new FileOutputStream(targetFile.get()))

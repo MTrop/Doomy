@@ -3,6 +3,17 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.11.0
+------
+
+- `Changed` Doomy now uses different directories for storing config and its data, and uses XDG config layouts on Linux, if available. (Enh. #4)
+
+In order to MIGRATE your data to this version from a previous one, you'll have to go to your settings directory, 
+and move your `presets` folder and `doomy.db` file into a folder in the same directory called `data`.
+
+If you have an XDG environment on Linux, you'll figure it out.
+
+
 0.10.0
 ------
 

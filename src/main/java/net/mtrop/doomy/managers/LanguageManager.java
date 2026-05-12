@@ -25,7 +25,7 @@ import net.mtrop.doomy.struct.util.IOUtils;
 import net.mtrop.doomy.struct.util.OSUtils;
 
 /**
- * DoomTools Language Manager.
+ * Doomy Language Manager.
  * @author Matthew Tropiano
  */
 public final class LanguageManager

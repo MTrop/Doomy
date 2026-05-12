@@ -122,7 +122,7 @@ public final class LauncherManager
 	
 	private File checkTempDirectory() throws LaunchException
 	{
-		File tempDirectory = new File(DoomyEnvironment.getTempDirectoryPath());
+		File tempDirectory = new File(DoomyEnvironment.getApplicationCachePath());
 		
 		if (!FileUtils.createPath(tempDirectory.getAbsolutePath()))
 			throw new LaunchException("Could not create temp directory '" + tempDirectory.getPath() + "'.");

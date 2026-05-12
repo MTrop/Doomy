@@ -10,6 +10,7 @@ import java.util.Deque;
 import net.mtrop.doomy.commands.ConfigCommand;
 import net.mtrop.doomy.commands.DefaultCommand;
 import net.mtrop.doomy.commands.EngineCommand;
+import net.mtrop.doomy.commands.EnvironmentCommand;
 import net.mtrop.doomy.commands.HelpCommand;
 import net.mtrop.doomy.commands.IWADCommand;
 import net.mtrop.doomy.commands.IdGamesCommand;
@@ -97,6 +98,7 @@ public interface DoomyCommand
 	static final String VERSION = "version";
 	static final String HELP = "help";
 	static final String CONFIG = "config";
+	static final String ENV = "env";
 	static final String ENGINE = "engine";
 	static final String TEMPLATE = "template";
 	static final String IWAD = "iwad";
@@ -200,6 +202,8 @@ public interface DoomyCommand
 			return new VersionCommand();
 		else if (matchArgument(args, HELP))
 			return new HelpCommand();
+		else if (matchArgument(args, ENV))
+			return new EnvironmentCommand();
 		else if (matchArgument(args, CONFIG))
 		{
 			if (matchArgument(args, LIST))

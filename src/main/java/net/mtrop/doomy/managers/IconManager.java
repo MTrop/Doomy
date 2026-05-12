@@ -17,7 +17,7 @@ import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.util.IOUtils;
 
 /**
- * DoomTools GUI icon loader singleton.
+ * Doomy GUI icon loader singleton.
  * @author Matthew Tropiano
  */
 public final class IconManager 

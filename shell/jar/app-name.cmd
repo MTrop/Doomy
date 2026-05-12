@@ -10,6 +10,9 @@ SET MAINCLASS={{MAIN_CLASSNAME}}
 REM ===== Get latest JAR.
 FOR /F %%F in ('dir "%~dp0\jar\*.jar" /a/b/n') DO (SET JAVAJAR=jar\%%F)
 
+SET DOOMY_PATH=%~dp0
+SET DOOMY_JAR=%JAVAJAR%
+
 REM =========================================================================
 
 REM ===== Java Scan

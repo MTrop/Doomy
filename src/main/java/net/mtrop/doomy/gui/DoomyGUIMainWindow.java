@@ -145,7 +145,7 @@ public class DoomyGUIMainWindow extends JFrame
 	private void onOpenConfigFolder()
 	{
 		try {
-			Desktop.getDesktop().open(new File(DoomyEnvironment.getConfigBasePath()));
+			Desktop.getDesktop().open(new File(DoomyEnvironment.getApplicationConfigPath()));
 		} catch (IOException e) {
 			SwingUtils.error(this, language.getText("config.open.error"));
 		}
