@@ -251,7 +251,7 @@ public final class DoomyEnvironment
 		@Override
 		public String getApplicationStatePath()
 		{
-			return APPDATA_PATH;
+			return getApplicationDataPath();
 		}
 
 		@Override

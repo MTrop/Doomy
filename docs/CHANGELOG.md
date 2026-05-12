@@ -11,7 +11,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 In order to MIGRATE your data to this version from a previous one, you'll have to go to your settings directory, 
 and move your `presets` folder and `doomy.db` file into a folder in the same directory called `data`.
 
-If you have an XDG environment on Linux, you'll figure it out.
+If you have an XDG environment on Linux, you'll figure it out. Run `doomy env` to get the folder locations.
 
 
 0.10.0
