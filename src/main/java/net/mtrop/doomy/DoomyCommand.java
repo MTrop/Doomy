@@ -94,6 +94,9 @@ public interface DoomyCommand
 	static final int ERROR_SOCKET_TIMEOUT = 10;
 	static final int ERROR_SERVICE_ERROR =  11;
 	static final int ERROR_LAUNCH_ERROR =	12;
+	static final int ERROR_TASK_CANCELLED = 13;
+	static final int ERROR_SITE_ERROR =     14;
+	static final int ERROR_TIMEOUT =        15;
 
 	static final String VERSION = "version";
 	static final String HELP = "help";

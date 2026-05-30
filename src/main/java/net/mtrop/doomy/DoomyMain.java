@@ -1,10 +1,11 @@
 /*******************************************************************************
- * Copyright (c) 2019-2025 Matt Tropiano
+ * Copyright (c) 2019-2026 Matt Tropiano
  * This program and the accompanying materials are made available under 
  * the terms of the MIT License, which accompanies this distribution.
  ******************************************************************************/
 package net.mtrop.doomy;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Deque;
@@ -29,6 +30,8 @@ public final class DoomyMain
 	public static final String SWITCH_SCRIPT = "--script";
 	/** Start in GUI mode. */
 	public static final String SWITCH_GUI = "--gui";
+	/** Update Doomy. */
+	public static final String SWITCH_UPDATE = "--update";
 
 	/** Exit command. */
 	public static final String COMMAND_EXIT = "exit";
@@ -184,6 +187,99 @@ public final class DoomyMain
 		return returnValue;
 	}
 	
+	private static String getProgressBar(long current, Long max)
+	{
+		final int MAXPIPS = 40;
+		if (max != null && max != 0)
+		{
+			StringBuilder sb = new StringBuilder("[");
+			
+			int i;
+			long pips = current / (max / MAXPIPS);
+			for (i = 0; i < pips; i++)
+				sb.append('.');
+			for (; i < MAXPIPS; i++)
+				sb.append(' ');
+			sb.append("] %d KB / %d KB");
+			return String.format(sb.toString(), current / 1024, max / 1024);
+		}
+		else
+		{
+			return String.format(" ... %d KB", current / 1024);
+		}
+	}
+
+	private static int doUpdate(IOHandler handler)
+	{
+		if (DoomyEnvironment.getDoomyPath() == null)
+		{
+			handler.errln("ERROR: Not running from Doomy (running from an IDE?).");
+			return DoomyCommand.ERROR_BAD_COMMAND;
+		}
+		
+		try {
+			return (new DoomyUpdater(new File(DoomyEnvironment.getDoomyPath()), new DoomyUpdater.Listener()
+			{
+				@Override
+				public boolean shouldContinue(String versionString)
+				{
+					return true;
+				}
+				
+				@Override
+				public void onUpdateSuccessful()
+				{
+					handler.outln("Update successful!");
+				}
+				
+				@Override
+				public void onUpdateAbort()
+				{
+					handler.outln("Update aborted!");
+				}
+				
+				@Override
+				public void onUpToDate()
+				{
+					handler.outln("Doomy is up-to-date.");
+				}
+				
+				@Override
+				public void onMessage(String message)
+				{
+					handler.outln(message);
+				}
+				
+				@Override
+				public void onError(String message)
+				{
+					handler.errln("ERROR: " + message);
+				}
+				
+				@Override
+				public void onDownloadTransfer(long current, Long max)
+				{
+					handler.out("\r" + getProgressBar(current, max));
+				}
+				
+				@Override
+				public void onDownloadStart() 
+				{
+					// Do nothing.
+				}
+				
+				@Override
+				public void onDownloadFinish()
+				{
+					handler.outln();
+				}
+				
+			})).call();
+		} catch (Exception e) {
+			return DoomyCommand.ERROR_BAD_COMMAND;
+		}
+	}
+	
 	private static int runShell(IOHandler handler)
 	{
 		// Pre-warm DB connection.
@@ -213,6 +309,10 @@ public final class DoomyMain
 		if (arguments.isEmpty())
 		{
 			returnValue = runShell(handler);
+		}
+		else if (DoomyCommand.matchArgument(arguments, SWITCH_UPDATE))
+		{
+			returnValue = doUpdate(handler);
 		}
 		else if (DoomyCommand.matchArgument(arguments, SWITCH_SCRIPT))
 		{
