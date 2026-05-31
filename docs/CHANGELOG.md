@@ -6,7 +6,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 0.12.0
 ------
 
-- `Added` An updater built-in to Doomy. (Enh. #14)
+- `Added` An updater built-in to Doomy (`doomy --update`). (Enh. #14)
 
 
 0.11.0
