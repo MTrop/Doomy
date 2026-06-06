@@ -3,6 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.13.0
+------
+
+- `Fixed` XDG environment paths for Linux systems were a bit wrong.
+
+
 0.12.0
 ------
 

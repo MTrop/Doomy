@@ -354,7 +354,7 @@ public final class DoomyEnvironment
 		{
 			String path = System.getenv("XDG_CONFIG_HOME");
 			if (ObjectUtils.isEmpty(path))
-				return "~/.config" + File.separator + "Doomy";
+				return System.getenv("HOME") + File.separator + ".config" + File.separator + "Doomy";
 			else
 				return path + File.separator + "Doomy";
 		}
@@ -364,7 +364,7 @@ public final class DoomyEnvironment
 		{
 			String path = System.getenv("XDG_DATA_HOME");
 			if (ObjectUtils.isEmpty(path))
-				return "~/.local/share" + File.separator + "Doomy";
+				return System.getenv("HOME") + File.separator + ".local/share" + File.separator + "Doomy";
 			else
 				return path + File.separator + "Doomy";
 		}
@@ -374,7 +374,7 @@ public final class DoomyEnvironment
 		{
 			String path = System.getenv("XDG_CACHE_HOME");
 			if (ObjectUtils.isEmpty(path))
-				return "~/.cache" + File.separator + "Doomy";
+				return System.getenv("HOME") + File.separator + ".cache" + File.separator + "Doomy";
 			else
 				return path + File.separator + "Doomy";
 		}
@@ -384,7 +384,7 @@ public final class DoomyEnvironment
 		{
 			String path = System.getenv("XDG_STATE_HOME");
 			if (ObjectUtils.isEmpty(path))
-				return "~/.local/state" + File.separator + "Doomy";
+				return System.getenv("HOME") + File.separator + ".local/state" + File.separator + "Doomy";
 			else
 				return path + File.separator + "Doomy";
 		}
