@@ -1,29 +1,32 @@
 #!/bin/bash
 
-JAVAOPTS="{{JAVA_OPTIONS}}"
-MAINCLASS={{MAIN_CLASSNAME}}
+# ===========================================================================
 
 CMD_READLINK="readlink -f"
 if [[ "$OSTYPE" == "darwin"* ]]; then
 	function realpath {
-    	[ "." = "${1}" ] && n=${PWD} || n=${1}; while nn=$( readlink -n "$n" ); do n=$nn; done; echo "$n"
+		[ "." = "${1}" ] && n=${PWD} || n=${1}; while nn=$( readlink -n "$n" ); do n=$nn; done; echo "$n"
 	}
 	CMD_READLINK="realpath"
 fi
-SCRIPTDIR="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
 
-DOOMY_PATH=${SCRIPTDIR}
+# ===========================================================================
 
-DOOMY_JAR="jar/$((cd ${SCRIPTDIR}/jar && ls -1a *.jar) | sort | tail -1)"
-JAVAJAR="${SCRIPTDIR}/${DOOMY_JAR}"
+JAVAOPTS="{{JAVA_OPTIONS}}"
+MAINCLASS={{MAIN_CLASSNAME}}
+
+export DOOMY_PATH="$(cd "$(dirname $($CMD_READLINK "$0"))"; pwd)"
+export DOOMY_JAR="jar/$((cd ${DOOMY_PATH}/jar && ls -1a *.jar) | sort | tail -1)"
+JAR_PATH="${DOOMY_PATH}/${DOOMY_JAR}"
 if [[ "$OSTYPE" == "cygwin"* ]]; then
-	JAVAJAR="$(cygpath -w -a "${JAR_PATH}")"
+	JAR_PATH="$(cygpath -w -a "${JAR_PATH}")"
+	DOOMY_PATH="$(cygpath -w -a "${DOOMY_PATH}")"
 fi
 
-
+# ===========================================================================
 # Test for Java
-if [ -f "$SCRIPTDIR/jre/bin/java" ]; then
-	JAVACMD="$SCRIPTDIR/jre/bin/java"
+if [ -f "${DOOMY_PATH}/jre/bin/java" ]; then
+	JAVACMD="${DOOMY_PATH}/jre/bin/java"
 elif hash java 2>/dev/null; then
 	JAVACMD=java
 elif [ -n "${JAVA_HOME}" ]; then
@@ -35,12 +38,12 @@ elif [ -n "${JRE_HOME}" ]; then
 fi
 
 if [[ -n "$JAVACMD" ]]; then
-	"$JAVACMD" -cp "$SCRIPTDIR/$JAVAJAR" $JAVAOPTS $MAINCLASS $*
+	"$JAVACMD" -cp "${JAR_PATH}" $JAVAOPTS $MAINCLASS $*
 else
 	echo "Java 8 or higher could not be detected. To use these tools, a JRE must be"
 	echo "installed."
 	echo
-	echo "The enviroment variables JAVA_HOME, JRE_HOME, or JDK_HOME are not set to"
+	echo "The environment variables JAVA_HOME, JRE_HOME, or JDK_HOME are not set to"
 	echo "your JRE or JDK directories, nor were Java binaries detected on your PATH."
 	echo
 	echo "For help, visit https://www.java.com/."
