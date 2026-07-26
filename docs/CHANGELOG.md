@@ -3,6 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.14.0
+------
+
+- `Fixed` Certain rare idGames searches would break on response parse (Issue #17). 
+
+
 0.13.0
 ------
 
