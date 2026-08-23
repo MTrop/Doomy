@@ -9,6 +9,8 @@ import java.awt.BorderLayout;
 import java.awt.CardLayout;
 import java.awt.Container;
 import java.awt.Font;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.FileInputStream;
@@ -117,6 +119,18 @@ public class IdGamesSearchControlPanel extends JPanel
 		this.wadManager = WADManager.get();
 		
 		this.searchField = stringField(false, true);
+		this.searchField.getFormInputComponent().addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				{
+					SwingUtils.invoke(() -> onSearch());
+				}
+			}
+		});
+		
 		this.fieldTypeField = comboField(comboBox(Arrays.asList(FieldType.values())));
 		this.fieldTypeField.setValue(FieldType.FILENAME);
 		this.searchButtonField = buttonField(button(language.getText("idgames.search.button"), (b) -> taskManager.spawn(() -> onSearch())));

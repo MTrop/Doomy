@@ -30,6 +30,8 @@ import static net.mtrop.doomy.struct.swing.ModalFactory.*;
 import static net.mtrop.doomy.struct.swing.LayoutFactory.*;
 
 import java.awt.BorderLayout;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -71,6 +73,18 @@ public class DoomFetchControlPanel extends JPanel
 		this.wadManager = WADManager.get();
 		
 		this.searchField = stringField(false, true);
+		this.searchField.getFormInputComponent().addKeyListener(new KeyAdapter()
+		{
+			@Override
+			public void keyPressed(KeyEvent e)
+			{
+				if (e.getKeyCode() == KeyEvent.VK_ENTER)
+				{
+					SwingUtils.invoke(() -> onSearch());
+				}
+			}
+		});
+
 		this.driverField = comboField(comboBox(FetchDriver.DRIVER_LIST.keySet()));
 		this.searchButtonField = buttonField(button(language.getText("doomfetch.search.button"), (b) -> onSearch()));
 		
