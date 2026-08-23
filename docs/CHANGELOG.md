@@ -6,7 +6,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 0.14.0
 ------
 
-- `Fixed` Certain idGames searches would cause a cast error on return (Issue #17).
+- `Fixed` Certain rare idGames searches would break on response parse (Issue #17). 
 - `Added` Pressing enter in the idGames search and DoomFetch search field will execute a search (Enh. #18).
 
 
