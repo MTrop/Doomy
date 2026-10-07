@@ -3,6 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
+0.14.1
+------
+
+- `Fixed` Fixes to potential file separators in XDG paths.
+
+
 0.14.0
 ------
 

@@ -9,6 +9,7 @@ import java.io.File;
 
 import net.mtrop.doomy.struct.util.OSUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
+import net.mtrop.doomy.struct.util.StringUtils;
 
 /**
  * Environment class for getting runtime paths.
@@ -356,7 +357,7 @@ public final class DoomyEnvironment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".config" + File.separator + "Doomy";
 			else
-				return path + File.separator + "Doomy";
+				return StringUtils.addEndingSequence(path, File.separator) + "Doomy";
 		}
 
 		@Override
@@ -366,7 +367,7 @@ public final class DoomyEnvironment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".local/share" + File.separator + "Doomy";
 			else
-				return path + File.separator + "Doomy";
+				return StringUtils.addEndingSequence(path, File.separator) + "Doomy";
 		}
 	
 		@Override
@@ -376,7 +377,7 @@ public final class DoomyEnvironment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".cache" + File.separator + "Doomy";
 			else
-				return path + File.separator + "Doomy";
+				return StringUtils.addEndingSequence(path, File.separator) + "Doomy";
 		}
 	
 		@Override
@@ -386,7 +387,7 @@ public final class DoomyEnvironment
 			if (ObjectUtils.isEmpty(path))
 				return System.getenv("HOME") + File.separator + ".local/state" + File.separator + "Doomy";
 			else
-				return path + File.separator + "Doomy";
+				return StringUtils.addEndingSequence(path, File.separator) + "Doomy";
 		}
 
 		@Override
@@ -398,7 +399,7 @@ public final class DoomyEnvironment
 			else
 			{
 				String[] paths = path.split(File.pathSeparator);
-				return paths[paths.length - 1] + "Doomy";
+				return StringUtils.addEndingSequence(paths[paths.length - 1], File.separator) + "Doomy";
 			}
 		}
 
@@ -411,7 +412,7 @@ public final class DoomyEnvironment
 			else
 			{
 				String[] paths = path.split(File.pathSeparator);
-				return paths[paths.length - 1] + "Doomy";
+				return StringUtils.addEndingSequence(paths[paths.length - 1], File.separator) + "Doomy";
 			}
 		}
 
