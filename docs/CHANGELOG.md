@@ -7,6 +7,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 ------
 
 - `Fixed` Fixes to potential file separators in XDG paths.
+- `Fixed` Doomy will build the environment directories on launch (Issue #16).
 
 
 0.14.0

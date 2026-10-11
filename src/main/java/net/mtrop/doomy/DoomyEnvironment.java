@@ -7,6 +7,7 @@ package net.mtrop.doomy;
 
 import java.io.File;
 
+import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.OSUtils;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 import net.mtrop.doomy.struct.util.StringUtils;
@@ -44,7 +45,22 @@ public final class DoomyEnvironment
 				ENV_STATE = new LinuxEnvironmentState();
 		}
 		else
-			ENV_STATE = new DefaultEnvironmentState(); 
+			ENV_STATE = new DefaultEnvironmentState();
+		
+		buildEnvironment();
+	}
+	
+	private static void buildEnvironment()
+	{
+		FileUtils.createPath(getApplicationConfigPath());
+		FileUtils.createPath(getApplicationDataPath());
+		FileUtils.createPath(getApplicationCachePath());
+		FileUtils.createPath(getApplicationStatePath());
+		FileUtils.createPath(getSystemConfigPath());
+		FileUtils.createPath(getSystemDataPath());
+		FileUtils.createPath(getSystemTempPath());
+		FileUtils.createPath(getPresetDirectoryPath());
+		FileUtils.createPath(getDownloadDirectoryPath());
 	}
 	
 	private static boolean isXDGEnvironmentPresent()
@@ -60,7 +76,7 @@ public final class DoomyEnvironment
 	
 	private static boolean isPortableEnvironmentPresent()
 	{
-		return (new File(getDoomyPath() + File.separator + "portable.txt")).exists();
+		return FileUtils.canonizeFile(new File(getDoomyPath() + File.separator + "portable.txt")).exists();
 	}
 	
     /** 
