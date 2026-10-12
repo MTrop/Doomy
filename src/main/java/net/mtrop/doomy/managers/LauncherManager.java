@@ -519,7 +519,8 @@ public final class LauncherManager
 			
 			// Combine arguments.
 			
-			extraArgs = ArrayUtils.joinArrays(preset.commandLine.split("\\s+"), extraArgs);
+			if (preset.commandLine.trim().length() > 0)
+				extraArgs = ArrayUtils.joinArrays(preset.commandLine.split("\\s+"), extraArgs);
 			
 			// Launch.
 			handler.outln("Launching...");
