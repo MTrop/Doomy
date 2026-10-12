@@ -395,7 +395,7 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 45, "    --iwad, -i [iwad]                     ...with IWAD name [iwad] (may not be required if specified in engine settings).");
 			wrapPrint(handler, 80, 45, "    --wads, -w [wads...]                  ...with these WADs (by name).");
 			wrapPrint(handler, 80, 45, "    --name, -n [name]                     ...and assign the created preset [name].");
-			wrapPrint(handler, 80, 40, "    --                                  Send args verbatim after this token.");
+			wrapPrint(handler, 80, 40, "    --                                  Send (and store with preset) args verbatim after this token.");
 			handler.outln();
 		}
 		if (commandName == null || DoomyCommand.IDGAMES.equalsIgnoreCase(commandName))
@@ -444,7 +444,7 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 45, "    [iwad]                                ...using IWAD [iwad].");
 			wrapPrint(handler, 80, 45, "    [wads]                                ...using WADS [wads] (list).");
 			wrapPrint(handler, 80, 45, "    --name, -n [name]                     ...and assign the created preset [name].");
-			wrapPrint(handler, 80, 40, "    --                                  Send args verbatim after this token.");
+			wrapPrint(handler, 80, 40, "    --                                  Send (and store with preset) args verbatim after this token.");
 			handler.outln();
 		}
 	}

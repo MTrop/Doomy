@@ -48,6 +48,7 @@ public class PresetListCommand implements DoomyCommand
 			int namelen = 4;
 			int enginelen = 6;
 			int iwadlen = 4;
+			int wadslen = 4;
 			
 			int hashlen = getDistinctHashLength(records);
 			
@@ -56,15 +57,17 @@ public class PresetListCommand implements DoomyCommand
 				namelen = Math.max(ObjectUtils.isNull(records[i].name, "").length() + 1, namelen);
 				enginelen = Math.max(ObjectUtils.isNull(records[i].engineName, "").length() + 1, enginelen);
 				iwadlen = Math.max(ObjectUtils.isNull(records[i].iwadName, "").length() + 1, iwadlen);
+				String wadliststr = Arrays.toString(records[i].wads);
+				wadslen = Math.max(ObjectUtils.isNull(wadliststr, "").length() + 1, wadslen);
 			}
 			
-			String format = "%-" + namelen + "s %-" + (hashlen + 3) + "s %-" + enginelen + "s %-" + iwadlen + "s %s\n";
-			handler.outf(format, "Name", "Hash", "Engine", "IWAD", "Wads");
-			handler.outf(format, "====", "====", "======", "====", "====");
+			String format = "%-" + namelen + "s %-" + (hashlen + 3) + "s %-" + enginelen + "s %-" + iwadlen + "s %-" + wadslen + "s %s\n";
+			handler.outf(format, "Name", "Hash", "Engine", "IWAD", "Wads", "CMDL");
+			handler.outf(format, "====", "====", "======", "====", "====", "====");
 			for (int i = 0; i < records.length; i++)
 			{
 				String wadliststr = Arrays.toString(records[i].wads);
-				handler.outf(format, records[i].name, records[i].hash.substring(0, hashlen) + "...", records[i].engineName, ObjectUtils.isNull(records[i].iwadName, ""), wadliststr.substring(1, wadliststr.length() - 1));
+				handler.outf(format, records[i].name, records[i].hash.substring(0, hashlen) + "...", records[i].engineName, ObjectUtils.isNull(records[i].iwadName, ""), wadliststr.substring(1, wadliststr.length() - 1), records[i].commandLine);
 			}
 		}
 		handler.outln(records.length + " presets found.");
