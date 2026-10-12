@@ -3,11 +3,12 @@ Doomy (C) Matt Tropiano
 by Matt Tropiano et al. (see AUTHORS.txt)
 
 
-0.14.1
+0.15.0
 ------
 
 - `Fixed` Fixes to potential file separators in XDG paths.
 - `Fixed` Doomy will build the environment directories on launch (Issue #16).
+- `Added` Preset-stored command line options (Enh. #19).
 
 
 0.14.0

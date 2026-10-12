@@ -23,6 +23,7 @@ import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.LauncherManager.LaunchException;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
+import net.mtrop.doomy.struct.util.StringUtils;
 
 /**
  * A command that creates a new preset.
@@ -130,8 +131,7 @@ public class RunCommand implements DoomyCommand
 		
 		wads = new String[wadlist.size()];
 		wadlist.toArray(wads);
-		additionalArgs = new String[moreArgs.size()];
-		moreArgs.toArray(additionalArgs);
+		additionalArgs = moreArgs.toArray(new String[moreArgs.size()]);
 	}
 
 	@Override
@@ -208,7 +208,8 @@ public class RunCommand implements DoomyCommand
 		PresetManager presetManager = PresetManager.get();
 		
 		Preset preset;
-		String hash = PresetManager.calculatePresetHash(engineId, iwadId, wadIds);
+		String commandLine = StringUtils.joinStrings(" ", additionalArgs);
+		String hash = PresetManager.calculatePresetHash(engineId, iwadId, commandLine, wadIds);
 		
 		// check if combo exists - if not, add.
 		if (presetManager.countPreset(hash) == 1)
@@ -240,7 +241,7 @@ public class RunCommand implements DoomyCommand
 			}
 			
 			Long pid;
-			if ((pid = presetManager.addPreset(name, engineId, iwadId, wadIds)) == null)
+			if ((pid = presetManager.addPreset(name, engineId, iwadId, commandLine, wadIds)) == null)
 			{
 				handler.errln("ERROR: Could not add preset.");
 				return ERROR_NOT_ADDED;

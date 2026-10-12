@@ -374,6 +374,7 @@ public final class DoomyCommon
 			wrapPrint(handler, 80, 45, "      --wads, -w [wads...]                ...with these WADs (by name, dependency-expanded).");
 			wrapPrint(handler, 80, 45, "      --iwad, -i [iwad]                   ...with IWAD name [iwad] (may not be required if specified in engine settings).");
 			wrapPrint(handler, 80, 45, "      --name, -n [name]                   ...set to name [name].");
+			wrapPrint(handler, 80, 45, "      -- [...]                            ...with these command line arguments.");
 			wrapPrint(handler, 80, 40, "    remove                              Print this subsection's help and terminate.");
 			wrapPrint(handler, 80, 40, "      [name]                            Remove preset named [name] (takes precedence, must confirm).");
 			wrapPrint(handler, 80, 45, "        --quiet, -q                       ...and skip confirm.");

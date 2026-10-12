@@ -5,6 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doomy.managers;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
@@ -43,7 +44,8 @@ public final class PresetManager
 			.append("p.hash,").append('\n')
 			.append("p.name,").append('\n')
 			.append("e.name as engineName,").append('\n')
-			.append("i.name as iwadName").append('\n')
+			.append("i.name as iwadName,").append('\n')
+			.append("p.commandLine as commandLine").append('\n')
 		.append("FROM Presets p").append('\n')
 		.append("LEFT JOIN Engines e ON p.engineId = e.id").append('\n')
 		.append("LEFT JOIN IWADs i ON p.iwadId = i.id AND p.iwadId IS NOT NULL").append('\n')
@@ -64,7 +66,7 @@ public final class PresetManager
 		= "SELECT COUNT(*) FROM Presets WHERE hash LIKE ?"; 
 
 	private static final String QUERY_ADD 
-		= "INSERT INTO Presets (hash, name, engineId, iwadId) VALUES (?, ?, ?, ?)"; 
+		= "INSERT INTO Presets (hash, name, engineId, iwadId, commandLine) VALUES (?, ?, ?, ?, ?)"; 
 	private static final String QUERY_ADD_ITEM
 		= "INSERT INTO PresetItems (presetId, wadId, sort) VALUES (?, ?, ?)";
 
@@ -141,10 +143,11 @@ public final class PresetManager
 	 * Calculates a preset hash.
 	 * @param engineId the engine record id.
 	 * @param iwadId the IWAD record id.
+	 * @param commandLine the preset command line.
 	 * @param wadIds the WAD record ids.
 	 * @return a new hash string.
 	 */
-	public static String calculatePresetHash(long engineId, Long iwadId, long... wadIds) 
+	public static String calculatePresetHash(long engineId, Long iwadId, String commandLine, long... wadIds) 
 	{
 		MessageDigest sha1;
 		try {
@@ -163,6 +166,7 @@ public final class PresetManager
 			longToBytes(id, true, buffer, 0);
 			sha1.update(buffer);
 		}
+		sha1.update(commandLine.getBytes(StandardCharsets.UTF_8));
 		
 		StringBuilder hashsb = new StringBuilder();
 		for (byte b : sha1.digest())
@@ -300,17 +304,18 @@ public final class PresetManager
 	 * @param name the name of the preset (can be null).
 	 * @param engineId the id of the engine to use.
 	 * @param iwadId the id of the IWAD to use (can be null).
+	 * @param commandLine the preset command line.
 	 * @param wadIds the wad ids to use (already assumed to be expanded out in least-to-most dependent order).
 	 * @return the id of the created preset record.
 	 */
-	public Long addPreset(String name, long engineId, Long iwadId, long... wadIds)
+	public Long addPreset(String name, long engineId, Long iwadId, String commandLine, long... wadIds)
 	{
-		String hash = calculatePresetHash(engineId, iwadId, wadIds);
+		String hash = calculatePresetHash(engineId, iwadId, commandLine, wadIds);
 		
 		long addedId;
 		try (Transaction trn = connection.startTransaction(TransactionLevel.READ_UNCOMMITTED))
 		{
-			SQLResult added = trn.getUpdateResult(QUERY_ADD, hash, name, engineId, iwadId);
+			SQLResult added = trn.getUpdateResult(QUERY_ADD, hash, name, engineId, iwadId, commandLine);
 			if (added.getRowCount() == 0)
 				return null;
 			addedId = (Long)added.getId();
@@ -422,6 +427,8 @@ public final class PresetManager
 		/** Preset IWAD. */
 		@Column(name = "IWAD", order = 2, sortable = true, editable = false)
 		public String iwadName;
+		@Column(name = "CMDL", order = 4, sortable = false, editable = false)
+		public String commandLine;
 		/** Preset WADs. */
 		public String[] wads;
 		
@@ -437,6 +444,7 @@ public final class PresetManager
 			}
 			return sb.toString();
 		}
+		
 	}
 	
 	/**
@@ -459,6 +467,8 @@ public final class PresetManager
 		public Long iwadId;
 		/** Preset WADs (in the sort order). */
 		public long[] wadIds;
+		/** Additional command line options. */
+		public String commandLine;
 	}
 
 	public static class PresetItem

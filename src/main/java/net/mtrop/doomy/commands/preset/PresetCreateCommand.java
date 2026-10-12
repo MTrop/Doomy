@@ -35,11 +35,13 @@ public class PresetCreateCommand implements DoomyCommand
 	private static final String SWITCH_IWAD2 = "-i";
 	private static final String SWITCH_NAME1 = "--name";
 	private static final String SWITCH_NAME2 = "-n";
+	private static final String SWITCH_CMDL1 = "--";
 
 	private String name;
 	private String engine;
 	private String iwad;
 	private String[] wads;
+	private String commandLine;
 	
 	@Override
 	public void init(Deque<String> args) throws BadArgumentException
@@ -51,6 +53,7 @@ public class PresetCreateCommand implements DoomyCommand
 		name = null;
 		iwad = null;
 		wads = NO_WADS;
+		commandLine = "";
 		
 		List<String> wadlist = new LinkedList<>();
 		
@@ -58,6 +61,7 @@ public class PresetCreateCommand implements DoomyCommand
 		final int STATE_IWAD = 1;
 		final int STATE_NAME = 2;
 		final int STATE_WADS = 3;
+		final int STATE_CMDL = 4;
 		int state = STATE_START;
 		while (!args.isEmpty())
 		{
@@ -71,6 +75,8 @@ public class PresetCreateCommand implements DoomyCommand
 						state = STATE_NAME;
 					else if (matchArgument(args, SWITCH_WADS1) || matchArgument(args, SWITCH_WADS2))
 						state = STATE_WADS;
+					else if (matchArgument(args, SWITCH_CMDL1))
+						state = STATE_CMDL;
 					else
 						throw new BadArgumentException("Invalid switch: " + args.peekFirst());
 				}
@@ -98,8 +104,18 @@ public class PresetCreateCommand implements DoomyCommand
 						state = STATE_NAME;
 					else if (matchArgument(args, SWITCH_WADS1) || matchArgument(args, SWITCH_WADS2))
 						state = STATE_WADS;
+					else if (matchArgument(args, SWITCH_CMDL1))
+						state = STATE_CMDL;
 					else
 						wadlist.add(args.pollFirst());
+				}
+				break;
+				
+				case STATE_CMDL:
+				{
+					if (commandLine.length() > 0)
+						commandLine += " ";
+					commandLine += args.pollFirst();
 				}
 				break;
 			}
@@ -117,7 +133,7 @@ public class PresetCreateCommand implements DoomyCommand
 	@Override
 	public int call(IOHandler handler)
 	{
-		return execute(handler, name, engine, iwad, wads);
+		return execute(handler, name, engine, iwad, wads, commandLine);
 	}
 
 	/**
@@ -127,9 +143,10 @@ public class PresetCreateCommand implements DoomyCommand
 	 * @param engine the engine name.
 	 * @param iwad the IWAD name.
 	 * @param wads the names of the WADs to use, in order.
+	 * @param commandLine the preset command line.
 	 * @return the return code from running the command.
 	 */
-	public static int execute(IOHandler handler, String name, String engine, String iwad, String[] wads)
+	public static int execute(IOHandler handler, String name, String engine, String iwad, String[] wads, String commandLine)
 	{
 		long engineId;
 		Long iwadId;
@@ -185,7 +202,7 @@ public class PresetCreateCommand implements DoomyCommand
 		
 		PresetManager presetManager = PresetManager.get();
 		
-		String hash = PresetManager.calculatePresetHash(engineId, iwadId, wadIds);
+		String hash = PresetManager.calculatePresetHash(engineId, iwadId, commandLine, wadIds);
 		
 		if (presetManager.getPresetByHash(hash).length > 0)
 		{
@@ -215,7 +232,7 @@ public class PresetCreateCommand implements DoomyCommand
 			return ERROR_NOT_ADDED;
 		}
 		
-		if (presetManager.addPreset(name, engineId, iwadId, wadIds) == null)
+		if (presetManager.addPreset(name, engineId, iwadId, commandLine, wadIds) == null)
 		{
 			handler.errln("ERROR: Could not add preset.");
 			return ERROR_NOT_ADDED;

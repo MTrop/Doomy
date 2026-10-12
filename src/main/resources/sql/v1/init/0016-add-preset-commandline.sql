@@ -1,0 +1,2 @@
+ALTER TABLE Presets 
+	ADD COLUMN commandLine TEXT NOT NULL DEFAULT ''

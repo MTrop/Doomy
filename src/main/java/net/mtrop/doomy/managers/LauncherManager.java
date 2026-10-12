@@ -28,6 +28,7 @@ import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.UnzipSet;
 import net.mtrop.doomy.struct.InstancedFuture;
+import net.mtrop.doomy.struct.util.ArrayUtils;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.IOUtils;
 
@@ -515,6 +516,10 @@ public final class LauncherManager
 				handler.outln("Copying demo files...");
 				copyMatchingFiles(presetDirectory, engineDir, false, createFileNamePatternFilter(settings.demoRegex));
 			}
+			
+			// Combine arguments.
+			
+			extraArgs = ArrayUtils.joinArrays(preset.commandLine.split("\\s+"), extraArgs);
 			
 			// Launch.
 			handler.outln("Launching...");

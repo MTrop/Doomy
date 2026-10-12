@@ -208,6 +208,7 @@ public class PresetTableControlPanel extends JPanel
 		final PresetWadsSelectionPanel presetWadsSelectionPanel = new PresetWadsSelectionPanel();
 		
 		final JFormField<String> presetNameField = stringField(true, true);
+		final JFormField<String> commandLineField = stringField(false, true);
 		
 		Boolean ok = modal(this, language.getText("preset.create.title"), 
 			ObjectUtils.apply(new JPanel(), (panel) -> containerOf(panel, dimension(350, 200), boxLayout(panel, BoxAxis.Y_AXIS),
@@ -216,7 +217,10 @@ public class PresetTableControlPanel extends JPanel
 					gui.formField("preset.create.engine", engineField),
 					gui.formField("preset.create.iwad", iwadField)
 				)),
-				node(presetWadsSelectionPanel)
+				node(presetWadsSelectionPanel),
+				node(gui.createForm(form(LabelSide.LEADING, LabelJustification.LEADING, language.getInteger("preset.create.labelwidth")),
+					gui.formField("preset.create.commandline", commandLineField)
+				))
 			)),
 			gui.createChoiceFromLanguageKey("preset.create.choice", (Boolean)true),
 			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)false)
@@ -252,6 +256,8 @@ public class PresetTableControlPanel extends JPanel
 				presetName = selectedWads.get(0).name;
 		}
 		
+		String commandLine = commandLineField.getValue();
+		
 		int i = 0;
 		long[] wadIds = new long[selectedWads.size()];
 		for (WAD wad : selectedWads)
@@ -263,7 +269,7 @@ public class PresetTableControlPanel extends JPanel
 			return;
 		}
 		
-		presetManager.addPreset(presetName, selectedEngine.id, selectedIWAD != null ? selectedIWAD.id : null, wadIds);
+		presetManager.addPreset(presetName, selectedEngine.id, selectedIWAD != null ? selectedIWAD.id : null, commandLine, wadIds);
 		presetTable.refreshPresets();
 	}
 
