@@ -16,8 +16,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -42,7 +40,6 @@ import net.mtrop.doomy.managers.LauncherManager.LaunchException;
 import net.mtrop.doomy.managers.PresetManager;
 import net.mtrop.doomy.managers.PresetManager.Preset;
 import net.mtrop.doomy.managers.PresetManager.PresetInfo;
-import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
@@ -69,7 +66,6 @@ public class PresetTableControlPanel extends JPanel
 	
 	private final MessengerManager messenger;
 	private final GUIManager gui;
-	private final TaskManager taskManager;
 	private final LanguageManager language;
 	private final PresetManager presetManager;
 	private final LauncherManager launcherManager;
@@ -89,7 +85,6 @@ public class PresetTableControlPanel extends JPanel
 	{
 		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
-		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		this.presetManager = PresetManager.get();
 		this.launcherManager = LauncherManager.get();
@@ -279,8 +274,6 @@ public class PresetTableControlPanel extends JPanel
 		if (SwingUtils.noTo(this, language.getText("preset.remove.message", selected.size())))
 			return;
 
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 	
@@ -298,9 +291,10 @@ public class PresetTableControlPanel extends JPanel
 			progressBar.setMaximum(selected.size());
 		});
 	
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			int c = 0;
 			for (PresetInfo engine : selected)
 			{
@@ -317,14 +311,8 @@ public class PresetTableControlPanel extends JPanel
 				presetManager.deletePresetByName(engine.name);
 				c++;
 			}
-			cancelProgressModal.dispose();
 		});
 		
-		signal.offer(true); // alert thread.
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
-
 		presetTable.refreshPresets();
 	}
 
@@ -340,8 +328,6 @@ public class PresetTableControlPanel extends JPanel
 		if (SwingUtils.noTo(this, language.getText("preset.cleanup.message")))
 			return;
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 	
@@ -358,11 +344,10 @@ public class PresetTableControlPanel extends JPanel
 		});
 	
 		AtomicInteger progressIndex = new AtomicInteger(0);
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 
-		taskManager.spawn(() -> 
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
-			
 			PresetInfo[] allPresets = presetManager.getAllPresets();
 			String presetParentPath = DoomyEnvironment.getPresetDirectoryPath();
 			Set<String> hashSet = new HashSet<>();
@@ -408,15 +393,8 @@ public class PresetTableControlPanel extends JPanel
 				});
 				
 			}
-
-			cancelProgressModal.dispose();
 		});
 		
-		signal.offer(true); // alert thread.
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
-
 		if (progressIndex.get() == 0)
 			SwingUtils.info(this, language.getText("preset.cleanup.nofolders"));
 		else
@@ -506,24 +484,16 @@ public class PresetTableControlPanel extends JPanel
 			node(BorderLayout.CENTER, textOutputPanel)
 		));
 		
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
-
 		final Preset preset = presetManager.getPreset(selectedPreset.id);
 		
-		taskManager.spawn(() -> 
+		gui.taskModal(outputModal, () -> 
 		{
-			signal.poll();
 			try {
 				launcherManager.run(ioHandler, preset, args, false);
 			} catch (LaunchException e) {
 				SwingUtils.error(this, e.getLocalizedMessage());
-			} finally {
-				outputModal.dispose();
 			}
 		});
-		
-		signal.offer(true);
-		outputModal.openThenDispose();
 	}
 
 	private void doLaunchOptionsPopupTrigger(JButton b)

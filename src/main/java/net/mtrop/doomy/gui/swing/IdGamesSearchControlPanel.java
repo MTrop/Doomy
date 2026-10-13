@@ -20,11 +20,9 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
@@ -410,8 +408,6 @@ public class IdGamesSearchControlPanel extends JPanel
 		
 		// start download
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("                 ");
 	
@@ -432,9 +428,10 @@ public class IdGamesSearchControlPanel extends JPanel
 		String downloadTarget = DoomyEnvironment.getDownloadDirectoryPath() + File.separator + uri.replace('/', File.separatorChar);
 		String downloadTempTarget = downloadTarget + ".temp";
 		
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			if (cancelSwitch.get())
 				return;
 	
@@ -455,13 +452,7 @@ public class IdGamesSearchControlPanel extends JPanel
 			})));
 			
 			downloadFuture.get().join();
-			cancelProgressModal.dispose();
 		});
-		
-		signal.offer(true); // alert thread.
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
 		
 		// handle downloaded file
 
@@ -497,9 +488,8 @@ public class IdGamesSearchControlPanel extends JPanel
 
 		final File outFile = new File(destinationDir.getAbsolutePath() + File.separator + response.content.filename);
 		
-		taskManager.spawn(() -> 
+		gui.taskModal(cancelCopyModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			if (cancelSwitch.get())
 				return;
 
@@ -532,14 +522,7 @@ public class IdGamesSearchControlPanel extends JPanel
 				SwingUtils.error(this, language.getText("idgames.download.copy.ioerror", e.getLocalizedMessage()));
 				cancelSwitch.set(true);
 			}
-	
-			cancelCopyModal.dispose();
 		});
-		
-		signal.offer(true); // alert thread.
-		out = cancelCopyModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
 		
 		downloadedFile.delete();
 		

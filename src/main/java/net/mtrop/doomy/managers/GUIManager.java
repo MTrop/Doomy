@@ -18,6 +18,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Image;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,6 +36,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -41,6 +46,7 @@ import java.util.function.Supplier;
 import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.JDialog;
 import javax.swing.JMenu;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -169,6 +175,7 @@ public class GUIManager
 	private final ConfigManager config;
 	private final LanguageManager language;
 	private final ImageManager images;
+	private final TaskManager taskManager;
 
 	private Properties properties;
 	private List<Image> windowIcons;
@@ -179,6 +186,8 @@ public class GUIManager
 		this.config = ConfigManager.get();
 		this.language = LanguageManager.get();
 		this.images = ImageManager.get();
+		this.taskManager = TaskManager.get();
+		
 		this.properties = new Properties();
 		
 		final Image icon16  = images.getImage("doomy16.png"); 
@@ -533,6 +542,68 @@ public class GUIManager
 	public <T> ModalChoice<T> createChoiceFromLanguageKey(String keyPrefix)
 	{
 		return createChoiceFromLanguageKey(keyPrefix, (T)null);
+	}
+	
+	/**
+	 * Starts a task-executing modal.
+	 * The current thread will hold until the modal closes.
+	 * The modal is opened on call to this method, and disposed when the task is complete.
+	 * @param <T> the modal return type.
+	 * @param modal the modal that is supposed to display the progress of the task.
+	 * @param runnable the runnable task changing the modal.
+	 * @return the returned data from the modal, if any.
+	 */
+	public <T> T taskModal(final Modal<T> modal, final Runnable runnable)
+	{
+		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
+		
+		taskManager.spawn(() -> {
+			signal.poll();  // wait for alert.
+			runnable.run();
+			modal.dispose();
+		});
+
+		signal.offer(true); // alert thread.
+		return modal.openThenDispose();
+	}
+
+	/**
+	 * Starts a task-executing modal with a cancel switch.
+	 * The current thread will hold until the modal closes.
+	 * The modal is opened on call to this method, and disposed when the task is complete.
+	 * The modal should return {@link Boolean#TRUE} if it was cancelled, which sets the cancel switch to true.
+	 * @param modal the modal that is supposed to display the progress of the task.
+	 * @param cancelSwitch the cancel switch.
+	 * @param runnable the runnable task changing the modal.
+	 * @return true if the 
+	 */
+	public boolean taskModal(final Modal<Boolean> modal, final AtomicBoolean cancelSwitch, final Runnable runnable)
+	{
+		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
+		
+		// tweak modal to set cancel switch on close.
+		modal.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
+		modal.addWindowListener(new WindowAdapter() 
+		{
+			@Override
+			public void windowClosing(WindowEvent e) 
+			{
+				modal.dispose();
+				cancelSwitch.set(true);
+			}
+		});
+		
+		taskManager.spawn(() -> {
+			signal.poll();  // wait for alert.
+			runnable.run();
+			modal.dispose();
+		});
+
+		signal.offer(true); // alert thread.
+		Boolean out = modal.openThenDispose();
+		if (out == Boolean.TRUE)
+			cancelSwitch.set(true);
+		return cancelSwitch.get();
 	}
 
 	/* ==================================================================== */

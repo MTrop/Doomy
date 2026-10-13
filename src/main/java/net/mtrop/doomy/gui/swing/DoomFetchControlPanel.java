@@ -11,7 +11,6 @@ import net.mtrop.doomy.managers.ConfigManager;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.MessengerManager;
-import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormPanel.LabelJustification;
@@ -37,8 +36,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -56,7 +53,6 @@ public class DoomFetchControlPanel extends JPanel
 	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final LanguageManager language;
-	private final TaskManager taskManager;
 	private final WADManager wadManager;
 
 	private JFormField<String> searchField;
@@ -69,7 +65,6 @@ public class DoomFetchControlPanel extends JPanel
 		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.language = LanguageManager.get();
-		this.taskManager = TaskManager.get();
 		this.wadManager = WADManager.get();
 		
 		this.searchField = stringField(false, true);
@@ -114,8 +109,6 @@ public class DoomFetchControlPanel extends JPanel
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("                 ");
 
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 		final Modal<Boolean> searchModal = modal(this, language.getText("doomfetch.search.title"), 
 			containerOf(borderLayout(0, 8),
 				node(BorderLayout.CENTER, textOutputPanel),
@@ -135,8 +128,9 @@ public class DoomFetchControlPanel extends JPanel
 		
 		final AtomicReference<File> targetFile = new AtomicReference<>();
 		
-		taskManager.spawn(() -> {
-			signal.poll();
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(searchModal, cancelSwitch, () -> {
 
 			// Do fetch.
 			
@@ -221,14 +215,7 @@ public class DoomFetchControlPanel extends JPanel
 			{
 				SwingUtils.error(this, language.getText("doomfetch.download.file.ioerror", e.getLocalizedMessage()));
 			}
-			
-			searchModal.dispose();
 		});
-		
-		signal.offer(true); // alert thread.
-		searchModal.openThenDispose();
-		if (searchModal.getValue() == Boolean.TRUE)
-			cancelSwitch.set(true);
 		
 		if (cancelSwitch.get())
 		{
@@ -319,9 +306,8 @@ public class DoomFetchControlPanel extends JPanel
 
 		final File outFile = new File(destinationDir.getAbsolutePath() + File.separator + driverResponse.get().getFilename());
 		
-		taskManager.spawn(() -> 
+		gui.taskModal(cancelCopyModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			if (cancelSwitch.get())
 				return;
 
@@ -354,14 +340,7 @@ public class DoomFetchControlPanel extends JPanel
 				SwingUtils.error(this, language.getText("doomfetch.copy.dialog.ioerror", e.getLocalizedMessage()));
 				cancelSwitch.set(true);
 			}
-	
-			cancelCopyModal.dispose();
 		});
-		
-		signal.offer(true); // alert thread.
-		Boolean out = cancelCopyModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
 		
 		targetFile.get().delete();
 		

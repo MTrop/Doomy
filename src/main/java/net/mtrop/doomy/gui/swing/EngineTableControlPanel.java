@@ -10,8 +10,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.Action;
@@ -27,7 +25,6 @@ import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.MessengerManager;
-import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
@@ -52,7 +49,6 @@ public class EngineTableControlPanel extends JPanel
 	private final GUIManager gui;
 	private final EngineManager engineManager;
 	private final EngineConfigManager engineConfigManager;
-	private final TaskManager taskManager;
 	private final LanguageManager language;
 	
 	private EngineTablePanel engineTable;
@@ -70,7 +66,6 @@ public class EngineTableControlPanel extends JPanel
 		this.gui = GUIManager.get();
 		this.engineManager = EngineManager.get();
 		this.engineConfigManager = EngineConfigManager.get();
-		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
 		this.engineTable = new EngineTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
@@ -292,8 +287,6 @@ public class EngineTableControlPanel extends JPanel
 		if (SwingUtils.noTo(this, language.getText("engine.remove.message", selected.size())))
 			return;
 
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 	
@@ -310,10 +303,11 @@ public class EngineTableControlPanel extends JPanel
 			progressBar.setIndeterminate(true);
 			progressBar.setMaximum(selected.size());
 		});
-	
-		taskManager.spawn(() -> 
+
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			int c = 0;
 			for (Engine engine : selected)
 			{
@@ -330,11 +324,8 @@ public class EngineTableControlPanel extends JPanel
 				engineManager.removeEngine(engine.name);
 				c++;
 			}
-			cancelProgressModal.dispose();
 		});
 		
-		signal.offer(true); // alert thread.
-		cancelProgressModal.openThenDispose();
 		engineTable.refreshEngines();
 		messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
 	}

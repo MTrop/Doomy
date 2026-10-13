@@ -77,10 +77,11 @@ public class PresetTablePanel extends JPanel
 			}
 		});
 			
-		this.presetTable.getColumnModel().getColumn(0).setPreferredWidth(150);
-		this.presetTable.getColumnModel().getColumn(1).setPreferredWidth(100);
-		this.presetTable.getColumnModel().getColumn(2).setPreferredWidth(100);
+		this.presetTable.getColumnModel().getColumn(0).setPreferredWidth(120);
+		this.presetTable.getColumnModel().getColumn(1).setPreferredWidth(75);
+		this.presetTable.getColumnModel().getColumn(2).setPreferredWidth(75);
 		this.presetTable.getColumnModel().getColumn(3).setPreferredWidth(200);
+		this.presetTable.getColumnModel().getColumn(4).setPreferredWidth(80);
 		
 		containerOf(this, dimension(650, 300), borderLayout(0, 8),
 			node(BorderLayout.NORTH, containerOf(borderLayout(8, 0),

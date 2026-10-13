@@ -9,6 +9,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 - `Fixed` Fixes to potential file separators in XDG paths.
 - `Fixed` Doomy will build the environment directories on launch (Issue #16).
 - `Added` Preset-stored command line options (Enh. #19).
+- `Changed` Some changes to task-oriented modals.
 
 
 0.14.0

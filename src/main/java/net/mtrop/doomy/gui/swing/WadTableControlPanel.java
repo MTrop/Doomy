@@ -16,7 +16,6 @@ import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.MessengerManager;
-import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.managers.WADManager;
 import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.swing.ComponentFactory;
@@ -46,8 +45,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -71,7 +68,6 @@ public class WadTableControlPanel extends JPanel
 	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final WADManager wadManager;
-	private final TaskManager taskManager;
 	private final LanguageManager language;
 	
 	private WadTablePanel wadTable;
@@ -91,7 +87,6 @@ public class WadTableControlPanel extends JPanel
 		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.wadManager = WADManager.get();
-		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
 		this.wadTable = new WadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
@@ -224,8 +219,6 @@ public class WadTableControlPanel extends JPanel
 		if (SwingUtils.noTo(this, language.getText("wads.remove.message", selected.size())))
 			return;
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 
@@ -243,9 +236,10 @@ public class WadTableControlPanel extends JPanel
 			progressBar.setMaximum(selected.size());
 		});
 
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			int c = 0;
 			for (WAD wad : selected)
 			{
@@ -262,14 +256,8 @@ public class WadTableControlPanel extends JPanel
 				wadManager.removeWAD(wad.name);
 				c++;
 			}
-			cancelProgressModal.dispose();
 		});
 		
-		signal.offer(true); // alert thread.
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
-
 		wadTable.refreshWADs();
 		messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
 	}
@@ -343,7 +331,6 @@ public class WadTableControlPanel extends JPanel
 			return Arrays.binarySearch(FILETYPES, ext) >= 0;
 		};
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 		final AtomicInteger addedCount = new AtomicInteger(0);
 		final AtomicInteger updatedCount = new AtomicInteger(0);
 		final List<File> filesToAdd = new LinkedList<>();
@@ -357,10 +344,9 @@ public class WadTableControlPanel extends JPanel
 			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 		);
 		
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			DoomyCommon.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 			{
 				SwingUtils.invoke(() -> {
@@ -380,14 +366,7 @@ public class WadTableControlPanel extends JPanel
 					filesToAdd.add(file);
 				}
 			});
-			cancelProgressModal.dispose();
 		});
-
-		signal.offer(true); // alert thread
-		
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
 
 		if (cancelSwitch.get())
 			return;
@@ -414,10 +393,8 @@ public class WadTableControlPanel extends JPanel
 				gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 			);
 			
-			taskManager.spawn(() -> 
+			gui.taskModal(cancelProgressModal2, cancelSwitch, () -> 
 			{
-				signal.poll();
-
 				// Do update.
 				AtomicInteger count = new AtomicInteger(0);
 				
@@ -450,14 +427,7 @@ public class WadTableControlPanel extends JPanel
 						});
 					}
 				}
-				cancelProgressModal2.dispose();
 			});
-
-			signal.offer(true); // alert thread
-			
-			out = cancelProgressModal2.openThenDispose();
-			if (out == Boolean.TRUE)
-				cancelSwitch.set(true);
 
 			wadTable.refreshWADs();
 			
@@ -473,7 +443,6 @@ public class WadTableControlPanel extends JPanel
 	{
 		WAD[] allWads = wadManager.getAllWADs();
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 		final List<WAD> missingWads = new LinkedList<>();
 		
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
@@ -493,10 +462,10 @@ public class WadTableControlPanel extends JPanel
 			progressBar.setMaximum(allWads.length);
 		});
 		
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			for (int i = 0; i < allWads.length; i++)
 			{
 				if (cancelSwitch.get())
@@ -513,15 +482,8 @@ public class WadTableControlPanel extends JPanel
 				if (!new File(allWads[i].path).exists())
 					missingWads.add(allWads[i]);
 			}
-			cancelProgressModal.dispose();
 		});
 		
-		signal.offer(true); // alert task
-		
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
-
 		if (cancelSwitch.get())
 			return;
 		

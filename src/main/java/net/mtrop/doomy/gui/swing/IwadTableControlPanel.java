@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -32,7 +30,6 @@ import net.mtrop.doomy.managers.IWADManager;
 import net.mtrop.doomy.managers.IWADManager.IWAD;
 import net.mtrop.doomy.managers.LanguageManager;
 import net.mtrop.doomy.managers.MessengerManager;
-import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.struct.swing.ComponentFactory;
 import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
 import net.mtrop.doomy.struct.swing.FormFactory.JFormField;
@@ -57,7 +54,6 @@ public class IwadTableControlPanel extends JPanel
 	private final MessengerManager messenger;
 	private final GUIManager gui;
 	private final IWADManager iwadManager;
-	private final TaskManager taskManager;
 	private final LanguageManager language;
 	
 	private IwadTablePanel iwadTable;
@@ -73,7 +69,6 @@ public class IwadTableControlPanel extends JPanel
 		this.messenger = MessengerManager.get();
 		this.gui = GUIManager.get();
 		this.iwadManager = IWADManager.get();
-		this.taskManager = TaskManager.get();
 		this.language = LanguageManager.get();
 		
 		this.iwadTable = new IwadTablePanel(SelectionPolicy.MULTIPLE_INTERVAL, (model, event) -> onSelection(), (event) -> onOpen());
@@ -204,8 +199,6 @@ public class IwadTableControlPanel extends JPanel
 		if (SwingUtils.noTo(this, language.getText("iwads.remove.message", selected.size())))
 			return;
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
 		final JLabel progressLabel = label("0%");
 	
@@ -223,9 +216,10 @@ public class IwadTableControlPanel extends JPanel
 			progressBar.setMaximum(selected.size());
 		});
 	
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			int c = 0;
 			for (IWAD wad : selected)
 			{
@@ -242,13 +236,8 @@ public class IwadTableControlPanel extends JPanel
 				iwadManager.removeIWAD(wad.name);
 				c++;
 			}
-			cancelProgressModal.dispose();
 		});
 		
-		signal.offer(true); // alert thread.
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
 		iwadTable.refreshIWADs();
 		messenger.publish(MessengerManager.CHANNEL_PRESETS_CHANGED, true);
 	}
@@ -322,7 +311,6 @@ public class IwadTableControlPanel extends JPanel
 			return Arrays.binarySearch(FILETYPES, ext) >= 0;
 		};
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 		final AtomicInteger addedCount = new AtomicInteger(0);
 		final AtomicInteger updatedCount = new AtomicInteger(0);
 		final List<File> filesToAdd = new LinkedList<>();
@@ -336,10 +324,9 @@ public class IwadTableControlPanel extends JPanel
 			gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 		);
 		
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			DoomyCommon.scanAndListen(startDir, recurse, WADFILTER, (file) -> 
 			{
 				SwingUtils.invoke(() -> {
@@ -359,14 +346,7 @@ public class IwadTableControlPanel extends JPanel
 					filesToAdd.add(file);
 				}
 			});
-			cancelProgressModal.dispose();
 		});
-	
-		signal.offer(true); // alert thread
-		
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
 	
 		if (cancelSwitch.get())
 			return;
@@ -393,10 +373,8 @@ public class IwadTableControlPanel extends JPanel
 				gui.createChoiceFromLanguageKey("choice.cancel", (Boolean)true)
 			);
 			
-			taskManager.spawn(() -> 
+			gui.taskModal(cancelProgressModal2, cancelSwitch, () -> 
 			{
-				signal.poll();
-	
 				// Do update.
 				AtomicInteger count = new AtomicInteger(0);
 				
@@ -429,14 +407,7 @@ public class IwadTableControlPanel extends JPanel
 						});
 					}
 				}
-				cancelProgressModal2.dispose();
 			});
-	
-			signal.offer(true); // alert thread
-			
-			out = cancelProgressModal2.openThenDispose();
-			if (out == Boolean.TRUE)
-				cancelSwitch.set(true);
 	
 			iwadTable.refreshIWADs();
 			
@@ -452,7 +423,6 @@ public class IwadTableControlPanel extends JPanel
 	{
 		IWAD[] allWads = iwadManager.getAllIWADs();
 		
-		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
 		final List<IWAD> missingWads = new LinkedList<>();
 		
 		final JProgressBar progressBar = progressBar(ProgressBarOrientation.HORIZONTAL);
@@ -472,10 +442,10 @@ public class IwadTableControlPanel extends JPanel
 			progressBar.setMaximum(allWads.length);
 		});
 		
-		final BlockingQueue<Boolean> signal = new LinkedBlockingQueue<>();
-		taskManager.spawn(() -> 
+		final AtomicBoolean cancelSwitch = new AtomicBoolean(false);
+
+		gui.taskModal(cancelProgressModal, cancelSwitch, () -> 
 		{
-			signal.poll();
 			for (int i = 0; i < allWads.length; i++)
 			{
 				if (cancelSwitch.get())
@@ -492,15 +462,8 @@ public class IwadTableControlPanel extends JPanel
 				if (!new File(allWads[i].path).exists())
 					missingWads.add(allWads[i]);
 			}
-			cancelProgressModal.dispose();
 		});
 		
-		signal.offer(true); // alert task
-		
-		Boolean out = cancelProgressModal.openThenDispose();
-		if (out == Boolean.TRUE)
-			cancelSwitch.set(true);
-	
 		if (cancelSwitch.get())
 			return;
 		
