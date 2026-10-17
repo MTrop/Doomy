@@ -62,100 +62,6 @@ public final class DoomyMain
 		return retval;
 	}
 	
-	/**
-	 * Parses an input line into a Deque of tokens.
-	 * @param input the input string.
-	 * @return a Deque of String tokens.
-	 */
-	public static Deque<String> parseInput(String input)
-	{
-		Deque<String> out = new LinkedList<>();
-		
-		final int STATE_START = 0;
-		final int STATE_TOKEN = 1;
-		final int STATE_INDQUOTE = 2;
-		final int STATE_INSQUOTE = 3;
-		int state = STATE_START;
-		StringBuilder sb = new StringBuilder();
-		
-		for (int i = 0; i < input.length(); i++)
-		{
-			char c = input.charAt(i);
-			switch (state)
-			{
-				default:
-					throw new RuntimeException("Bad state.");
-				case STATE_START:
-				{
-					if (c == '\'')
-					{
-						state = STATE_INSQUOTE;
-					}
-					else if (c == '"')
-					{
-						state = STATE_INDQUOTE;
-					}
-					else if (!Character.isWhitespace(c))
-					{
-						state = STATE_TOKEN;
-						sb.append(c);
-					}
-				}
-				break;
-				
-				case STATE_TOKEN:
-				{
-					if (Character.isWhitespace(c))
-					{
-						state = STATE_START;
-						out.add(sb.toString());
-						sb.delete(0, sb.length());
-					}
-					else
-					{
-						sb.append(c);
-					}
-				}
-				break;
-				
-				case STATE_INSQUOTE:
-				{
-					if (c == '\'')
-					{
-						state = STATE_START;
-						out.add(sb.toString());
-						sb.delete(0, sb.length());
-					}
-					else
-					{
-						sb.append(c);
-					}
-				}
-				break;
-
-				case STATE_INDQUOTE:
-				{
-					if (c == '"')
-					{
-						state = STATE_START;
-						out.add(sb.toString());
-						sb.delete(0, sb.length());
-					}
-					else
-					{
-						sb.append(c);
-					}
-				}
-				break;
-			}
-		}
-		
-		if (sb.length() != 0)
-			out.add(sb.toString());
-		
-		return out;
-	}
-	
 	private static int doShellLoop(IOHandler handler)
 	{
 		String line;
@@ -167,7 +73,7 @@ public final class DoomyMain
 			if (COMMAND_EXIT.equalsIgnoreCase(line))
 				break;
 			if (!line.isEmpty())
-				returnValue = executeCommand(parseInput(line), handler);
+				returnValue = executeCommand(DoomyCommon.parseInput(line), handler);
 		}
 		return returnValue;
 	}
@@ -182,7 +88,7 @@ public final class DoomyMain
 			if (COMMAND_EXIT.equalsIgnoreCase(line))
 				break;
 			if (!line.isEmpty())
-				returnValue = executeCommand(parseInput(line), handler);
+				returnValue = executeCommand(DoomyCommon.parseInput(line), handler);
 		}
 		return returnValue;
 	}

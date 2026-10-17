@@ -17,6 +17,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyEnvironment;
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.IOHandler;
@@ -391,7 +392,9 @@ public final class LauncherManager
 
 		if (settings.commandLine != null)
 		{
-			stringList.add(settings.commandLine);
+			Deque<String> cmdl = DoomyCommon.parseInput(settings.commandLine);
+			while (!cmdl.isEmpty())
+				stringList.add(cmdl.pollFirst());
 		}
 
 		for (String arg : extraArgs)
@@ -423,7 +426,11 @@ public final class LauncherManager
 			cmdWriter.append(settings.screenshotDirectorySwitch).append(' ').append(quoteEscape(context.screenshotDir.getPath())).print(' ');
 
 		if (settings.commandLine != null)
-			cmdWriter.append(settings.commandLine).print(' ');
+		{
+			Deque<String> cmdl = DoomyCommon.parseInput(settings.commandLine);
+			while (!cmdl.isEmpty())
+				cmdWriter.append(quoteEscape(cmdl.pollFirst())).print(' ');
+		}
 
 		for (String arg : extraArgs)
 			cmdWriter.append(quoteEscape(arg)).print(' ');
@@ -449,8 +456,12 @@ public final class LauncherManager
 			commandList.add(context.engineExecutable.getName() + " @" + cmdlineFile.getPath());
 		commandList.add("-c");
 			commandList.add("exit");
-		if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
-			commandList.add(s);
+		if (settings.dosboxCommandLine != null)
+		{
+			Deque<String> cmdl = DoomyCommon.parseInput(settings.dosboxCommandLine);
+			while (!cmdl.isEmpty())
+				commandList.add(cmdl.pollFirst());
+		}
 		
 		ProcessCallable callable = ProcessCallable.create(context.dosboxExecutable.getPath(), commandList.toArray(new String[commandList.size()]))
 			.setWorkingDirectory(context.dosboxExecutable.getParentFile());
@@ -528,7 +539,11 @@ public final class LauncherManager
 			// Combine arguments.
 			
 			if (preset.commandLine.trim().length() > 0)
-				extraArgs = ArrayUtils.joinArrays(preset.commandLine.split("\\s+"), extraArgs);
+			{
+				Deque<String> cmdl = DoomyCommon.parseInput(preset.commandLine);
+				String[] cmdlarray = cmdl.toArray(new String[cmdl.size()]);
+				extraArgs = ArrayUtils.joinArrays(cmdlarray, extraArgs);
+			}
 			
 			// Launch.
 			handler.outln("Launching...");

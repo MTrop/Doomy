@@ -28,7 +28,6 @@ import javax.swing.JProgressBar;
 
 import net.mtrop.doomy.DoomyCommon;
 import net.mtrop.doomy.DoomyEnvironment;
-import net.mtrop.doomy.DoomyMain;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.IWADManager;
@@ -430,7 +429,7 @@ public class PresetTableControlPanel extends JPanel
 		if (ok != Boolean.TRUE)
 			return;
 		
-		Deque<String> argDeque = DoomyMain.parseInput(argsInputField.getValue());
+		Deque<String> argDeque = DoomyCommon.parseInput(argsInputField.getValue());
 		String[] args = argDeque.toArray(new String[argDeque.size()]);
 		
 		doLaunchTask(selectedPresets.get(0), args);
