@@ -249,13 +249,21 @@ public final class LauncherManager
 		return outList;
 	}
 
+	private static boolean fileIsRemote(File f)
+	{
+		String path = f.getPath();
+		if (path.startsWith("//") || path.startsWith("\\\\")) // remote machine
+			return true;
+		return false;
+	}
+	
 	private void setUpWADs(IOHandler handler, LaunchContext context, Long iwadId, long[] wadIds, File tempDirectory) throws LaunchException
 	{
 		if (iwadId != null)
 		{
 			File iwadPath = new File(IWADManager.get().getIWAD(iwadId).path);
 			// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
-			if (iwadPath.isAbsolute() || context.dosboxExecutable != null)
+			if (fileIsRemote(iwadPath) || context.dosboxExecutable != null)
 				context.iwadFile = tempFileCopy(handler, iwadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null);
 			else
 				context.iwadFile = iwadPath;

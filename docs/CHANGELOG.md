@@ -10,6 +10,7 @@ by Matt Tropiano et al. (see AUTHORS.txt)
 - `Fixed` Doomy will build the environment directories on launch (Issue #16).
 - `Added` Preset-stored command line options (Enh. #19).
 - `Changed` Some changes to task-oriented modals.
+- `Changed` Copying of IWAD on launch only happens with verifiably remote paths.
 
 
 0.14.0
