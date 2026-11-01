@@ -47,13 +47,22 @@ public class EngineSettingsEditorPanel extends JPanel
 	private EngineSettings settings;
 	
 	/** EXE Path. */
-	public JFormField<File> exePathField;
+	public JFormField<File> exePathField;	
 	/** SETUP EXE name. */
 	public JFormField<String> setupFileNameField;
 	/** Server EXE name. */
 	public JFormField<String> serverFileNameField;
 	/** Working directory override for engine. */
 	public JFormField<File> workingDirectoryPathField;
+	/** Extra command line options (passed in before literal options). */
+	public JFormField<String> commandLineField;
+
+	/** DOSBOX Path. */
+	public JFormField<File> dosboxPathField;
+	/** DOSBOX command line. */
+	public JFormField<String> dosboxCommandLineField;
+
+	
 	/** IWAD switch. */
 	public JFormField<String> iwadSwitchField;
 	/** File switch. */
@@ -72,13 +81,6 @@ public class EngineSettingsEditorPanel extends JPanel
 	public JFormField<String> screenshotRegexField;
 	/** RegEx for demo cleanup. */
 	public JFormField<String> demoRegexField;
-	/** Extra command line options (passed in before literal options). */
-	public JFormField<String> commandLineField;
-
-	/** DOSBOX Path. */
-	public JFormField<File> dosboxPathField;
-	/** DOSBOX command line. */
-	public JFormField<String> dosboxCommandLineField;
 
 	/**
 	 * Creates a new panel.

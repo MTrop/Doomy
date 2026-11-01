@@ -7,16 +7,6 @@ Depends:
 	SQLite
 	DoomStruct ?
 
-Filesystem
-----------
-
-/ [config-folder]
-	doomy.db			The database.
-	/ download			Permanent storage for downloaded WADs.
-	/ presets			Contains presets.
-		/ [hash]		A single preset data, created on engine execution (saves/demos/shots).
-	/ temp				Cleared on program startup and after engine execution (extracted data for engine call).
-	
 SQL Layout
 ----------
 
@@ -107,26 +97,13 @@ CREATE TABLE WADData (
 			ON UPDATE CASCADE
 );
 
-CREATE TABLE WADDependencies (
-	wadId INTEGER NOT NULL,
-	needsWadId INTEGER NOT NULL,
-	UNIQUE (wadId, needsWadId),
-	FOREIGN KEY (wadId) 
-		REFERENCES WADs(id)
-			ON DELETE CASCADE
-			ON UPDATE CASCADE,
-	FOREIGN KEY (needsWadId) 
-		REFERENCES WADs(id)
-			ON DELETE CASCADE
-			ON UPDATE CASCADE
-);
-
-CREATE TABLE Preset (
+CREATE TABLE Presets (
 	id INTEGER,
 	hash TEXT NOT NULL,
 	name TEXT NULL,
 	engineName TEXT NOT NULL,
 	iwadName TEXT NOT NULL,
+	commandLine TEXT NOT NULL DEFAULT '',
 	PRIMARY KEY (id),
 	UNIQUE (hash),
 	UNIQUE (name),
@@ -171,3 +148,21 @@ CREATE TABLE EngineTemplateSettings (
 			ON DELETE CASCADE
 			ON UPDATE CASCADE
 );
+
+..............................................................................
+
+CREATE TABLE ExecutionPlans (
+	engineId INTEGER,
+	planTypeId INTEGER NOT NULL,          -- Enum ordinal in Doomy
+	workDir TEXT NULL,                    -- If RAW, use parent if NULL, this dir if present for working dir.
+	packageName TEXT NULL,                -- NULL if RAW, path to DOSBOX if DOSBOX, package name if image runner
+	clientName TEXT NOT NULL,             -- Path to exe if RAW or DOSBOX, app client/main image name if image runner
+	setupName TEXT NULL,                  -- Path to exe if RAW or DOSBOX, app setup image name if image runner
+	serverName TEXT NULL,                 -- Path to exe if RAW or DOSBOX, app server image name if image runner
+	commandLine TEXT NOT NULL DEFAULT '', -- If not empty, this command line is appended (but before the as-is passed-in options).
+	PRIMARY KEY (engineId),
+	FOREIGN KEY (engineId)
+		REFERENCES Engines(id)
+			ON DELETE CASCADE
+			ON UPDATE CASCADE
+)

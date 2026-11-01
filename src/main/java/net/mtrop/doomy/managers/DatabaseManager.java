@@ -53,7 +53,11 @@ public final class DatabaseManager
 		"sql/v1/init/0013-create-enginetemplatessettings.sql",
 		"sql/v1/init/0014-insert-enginetemplates.sql",
 		"sql/v1/init/0015-insert-enginetemplatessettings.sql",
-		"sql/v1/init/0016-add-preset-commandline.sql"
+		"sql/v1/init/0016-add-preset-commandline.sql",
+		"sql/v1/init/0017-create-executionplans.sql",
+		"sql/v1/init/0018-migrate-enginesettings-executionplans.sql",
+		"sql/v1/init/0019-delete-enginesettings.sql",
+		"sql/v1/init/0020-delete-enginetemplatesettings.sql"
 	};
 
 	// Initializes/creates the connector.
