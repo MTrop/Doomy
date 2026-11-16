@@ -3,6 +3,7 @@ INSERT INTO ExecutionPlans
 	settings.dosboxPresent AS planTypeId, -- 0 is RAW, 1 is DOSBOX
 	settings.workDir,
 	settings.packageName,
+	settings.packageCommandLine,
 	settings.clientName,
 	settings.setupName,
 	settings.serverName,
@@ -12,6 +13,7 @@ INSERT INTO ExecutionPlans
 		w.value AS workDir,
 		(CASE WHEN d.name IS NULL THEN 0 ELSE 1 END) AS dosboxPresent,
 		d.value AS packageName,
+		NULL AS packageCommandLine,
 		c.value AS clientName,
 		s.value AS setupName,
 		v.value AS serverName,

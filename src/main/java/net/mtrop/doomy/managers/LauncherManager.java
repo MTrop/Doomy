@@ -23,8 +23,8 @@ import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.IOHandler;
 import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
 import net.mtrop.doomy.managers.EngineManager.Engine;
+import net.mtrop.doomy.managers.ExecutionPlanManager.ExecutionPlan;
 import net.mtrop.doomy.managers.PresetManager.Preset;
-import net.mtrop.doomy.managers.WADManager.WAD;
 import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.UnzipSet;
@@ -32,6 +32,7 @@ import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.struct.util.ArrayUtils;
 import net.mtrop.doomy.struct.util.FileUtils;
 import net.mtrop.doomy.struct.util.IOUtils;
+import net.mtrop.doomy.struct.util.ObjectUtils;
 
 /**
  * Launcher manager.
@@ -59,6 +60,9 @@ public final class LauncherManager
 			|| ext.equalsIgnoreCase("bex");
 	};
 
+	private static final LanguageManager language = LanguageManager.get();
+	
+
 	// =======================================================================
 	
 	// Singleton instance.
@@ -85,10 +89,9 @@ public final class LauncherManager
 
 	private static class LaunchContext
 	{
-		private File dosboxExecutable;
-		private File engineExecutable;
-		private File workingDirectory;
-	
+		private IOHandler handler;
+		private Preset preset;
+		
 		private File iwadFile;
 		private Deque<File> wads;
 		private Deque<File> dehs;
@@ -100,9 +103,8 @@ public final class LauncherManager
 	
 		public LaunchContext()
 		{
-			this.dosboxExecutable = null;
-			this.engineExecutable = null;
-			this.workingDirectory = null;
+			this.handler = null;
+			this.preset = null;
 			
 			this.iwadFile = null;
 			this.wads = new LinkedList<File>();
@@ -115,6 +117,324 @@ public final class LauncherManager
 		}
 	}
 
+	@FunctionalInterface
+	public interface LaunchFileFunction<T, U>
+	{
+		U apply(T t) throws LaunchException;
+	}
+	
+	public interface PlanExecutable
+	{
+		void checkValidity(Engine engine, ExecutionPlan plan) throws LaunchException;
+		void setupRuntimeFiles(LaunchContext context, Preset preset, File tempDirectory) throws LaunchException;
+		ProcessCallable createSetupProcess(ExecutionPlan plan) throws LaunchException;
+		ProcessCallable createClientProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException;
+		ProcessCallable createServerProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException;
+	}
+
+	/**
+	 * PlanTypes for execution.
+	 * <p>
+	 * <b> DO NOT CHANGE THE ORDER OF THESE ENUMS!</b>
+	 * The ordinals are saved to the database! 
+	 */
+	public enum PlanType implements PlanExecutable
+	{
+		NORMAL
+		{
+			@Override
+			public void checkValidity(Engine engine, ExecutionPlan plan) throws LaunchException
+			{
+				if (ObjectUtils.isEmpty(plan.workDir))
+					throw new LaunchException(language.getText("engine.setup.noworkdir"));
+				
+				if (!new File(plan.workDir).exists())
+					throw new LaunchException(language.getText("engine.setup.noexist"));
+			}
+			
+			@Override
+			public void setupRuntimeFiles(LaunchContext context, Preset preset, File tempDirectory) throws LaunchException
+			{
+				Long iwadId = preset.iwadId;
+				long[] wadIds = preset.wadIds;
+				setUpWADs(context, iwadId, wadIds, tempDirectory,
+					(iwadFile) -> 
+					{
+						if (fileIsRemote(iwadFile))
+						{
+							context.handler.outln("Copying "+iwadFile.getName()+"...");
+							return tempFileCopy(iwadFile, tempDirectory, context.cleanup, false);
+						}
+						else
+						{
+							return iwadFile;
+						}
+					},
+					(wadFile) -> 
+					{
+						if (fileIsRemote(wadFile))
+						{
+							context.handler.outln("Copying "+wadFile.getName()+"...");
+							return tempFileCopy(wadFile, tempDirectory, context.cleanup, false);
+						}
+						else
+							return wadFile;
+					},
+					(unzippedFile) -> unzippedFile 
+				);
+			}
+
+			@Override
+			public ProcessCallable createSetupProcess(ExecutionPlan plan) throws LaunchException
+			{
+				if (ObjectUtils.isEmpty(plan.setupName))
+					throw new LaunchException(language.getText("engine.setup.nosetup"));
+				
+				File path = new File(plan.workDir + File.separator + plan.setupName);
+				ProcessCallable proc = ProcessCallable.create(path).setWorkingDirectory(new File(plan.workDir));
+				
+				return proc;
+			}
+
+			@Override
+			public ProcessCallable createClientProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				if (ObjectUtils.isEmpty(settings.plan.clientName))
+					throw new LaunchException("Engine has no main executable specified.");
+
+				File tempDirectory = new File(DoomyEnvironment.getSystemTempPath());
+				String[] cmdlineArray = createCommandLineArray(context, settings, tempDirectory, extraArgs);
+
+				ProcessCallable callable = ProcessCallable.create(settings.plan.clientName);
+				callable
+					.args(cmdlineArray)
+					.setWorkingDirectory(new File(settings.plan.workDir));
+				
+				return callable;
+			}
+	
+			@Override
+			public ProcessCallable createServerProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				File tempDirectory = new File(DoomyEnvironment.getSystemTempPath());
+				String[] cmdlineArray = createCommandLineArray(context, settings, tempDirectory, extraArgs);
+
+				File path = new File(settings.plan.workDir + File.separator + settings.plan.serverName);
+				ProcessCallable callable = ProcessCallable.create(path.getPath());
+				callable
+					.args(cmdlineArray)
+					.setWorkingDirectory(new File(settings.plan.workDir));
+				
+				return callable;
+			}
+		},
+		
+		DOSBOX
+		{
+			@Override
+			public void checkValidity(Engine engine, ExecutionPlan plan) throws LaunchException
+			{
+				if (ObjectUtils.isEmpty(plan.packageName))
+					throw new LaunchException(language.getText("engine.setup.nodosbox"));
+			
+				if (ObjectUtils.isEmpty(plan.workDir))
+					throw new LaunchException(language.getText("engine.setup.noworkdir"));
+				
+				if (!new File(plan.workDir).exists())
+					throw new LaunchException(language.getText("engine.setup.noexist"));
+			}
+
+			@Override
+			public void setupRuntimeFiles(LaunchContext context, Preset preset, File tempDirectory) throws LaunchException
+			{
+				Long iwadId = preset.iwadId;
+				long[] wadIds = preset.wadIds;
+				setUpWADs(context, iwadId, wadIds, tempDirectory,
+					(iwadFile) -> 
+					{
+						context.handler.outln("Copying "+iwadFile.getName()+"...");
+						return tempFileCopy(iwadFile, tempDirectory, context.cleanup, true);
+					},
+					(wadFile) -> 
+					{
+						context.handler.outln("Copying "+wadFile.getName()+"...");
+						return tempFileCopy(wadFile, tempDirectory, context.cleanup, true);
+					},
+					(unzippedFile) -> new File(DOSBOX_TEMP_MOUNT + "\\" + unzippedFile.getName())
+				);
+			}
+
+			@Override
+			public ProcessCallable createSetupProcess(ExecutionPlan plan) throws LaunchException
+			{
+				if (ObjectUtils.isEmpty(plan.setupName))
+					throw new LaunchException(language.getText("engine.setup.nosetup"));
+
+				File path = new File(plan.packageName);
+				
+				List<String> commandList = new LinkedList<>();
+				commandList.add("-c");
+					commandList.add("mount C: " + "'" + plan.workDir + "'");
+				commandList.add("-c");
+					commandList.add("C:");
+				commandList.add("-c");
+					commandList.add(plan.setupName);
+				commandList.add("-c");
+					commandList.add("exit");
+				if (plan.packageCommandLine != null) for (String s : DoomyCommon.parseInput(plan.packageCommandLine))
+					commandList.add(s);
+				
+				ProcessCallable proc = ProcessCallable.create(path.getPath())
+					.setWorkingDirectory(path.getParentFile())
+					.args(commandList.toArray(new String[commandList.size()]));
+				
+				return proc;
+			}
+
+			@Override
+			public ProcessCallable createClientProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				File tempDirectory = new File(DoomyEnvironment.getSystemTempPath());
+				File cmdlineFile = createCommandLineFile(context, settings, tempDirectory, extraArgs, true);
+				context.cleanup.add(cmdlineFile);
+
+				List<String> commandList = new LinkedList<>();
+				commandList.add("-c");
+					commandList.add("mount C: " + "'" + (new File(settings.plan.clientName)).getParentFile() + "'");
+				commandList.add("-c");
+					commandList.add("mount " + DOSBOX_PRESET_MOUNT + " " + "'" + checkPresetDirectory(context.preset).getPath() + "'");
+				commandList.add("-c");
+					commandList.add("mount " + DOSBOX_TEMP_MOUNT + " " + "'" + tempDirectory.getPath() + "'");
+				commandList.add("-c");
+					commandList.add("C:");
+				commandList.add("-c");
+					commandList.add(settings.plan.clientName + " @" + cmdlineFile.getPath());
+				commandList.add("-c");
+					commandList.add("exit");
+				if (settings.plan.packageCommandLine != null)
+				{
+					Deque<String> cmdl = DoomyCommon.parseInput(settings.plan.packageCommandLine);
+					while (!cmdl.isEmpty())
+						commandList.add(cmdl.pollFirst());
+				}
+				
+				ProcessCallable callable = ProcessCallable.create(settings.plan.packageName, commandList.toArray(new String[commandList.size()]))
+					.setWorkingDirectory(new File(settings.plan.workDir));
+				
+				return callable;
+			}
+	
+			@Override
+			public ProcessCallable createServerProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				File tempDirectory = new File(DoomyEnvironment.getSystemTempPath());
+				File cmdlineFile = createCommandLineFile(context, settings, tempDirectory, extraArgs, true);
+				context.cleanup.add(cmdlineFile);
+
+				List<String> commandList = new LinkedList<>();
+				commandList.add("-c");
+					commandList.add("mount C: " + "'" + (new File(settings.plan.clientName)).getParentFile() + "'");
+				commandList.add("-c");
+					commandList.add("mount " + DOSBOX_PRESET_MOUNT + " " + "'" + checkPresetDirectory(context.preset).getPath() + "'");
+				commandList.add("-c");
+					commandList.add("mount " + DOSBOX_TEMP_MOUNT + " " + "'" + tempDirectory.getPath() + "'");
+				commandList.add("-c");
+					commandList.add("C:");
+				commandList.add("-c");
+					commandList.add(settings.plan.serverName + " @" + cmdlineFile.getPath());
+				commandList.add("-c");
+					commandList.add("exit");
+				if (settings.plan.packageCommandLine != null)
+				{
+					Deque<String> cmdl = DoomyCommon.parseInput(settings.plan.packageCommandLine);
+					while (!cmdl.isEmpty())
+						commandList.add(cmdl.pollFirst());
+				}
+				
+				ProcessCallable callable = ProcessCallable.create(settings.plan.packageName, commandList.toArray(new String[commandList.size()]))
+					.setWorkingDirectory(new File(settings.plan.workDir));
+				
+				return callable;
+			}
+		},
+		
+		FLATPAK
+		{
+			@Override
+			public void checkValidity(Engine engine, ExecutionPlan plan) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void setupRuntimeFiles(LaunchContext context, Preset preset, File tempDirectory) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public ProcessCallable createSetupProcess(ExecutionPlan plan) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public ProcessCallable createClientProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+				return null;
+			}
+	
+			@Override
+			public ProcessCallable createServerProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+				return null;
+			}
+		},
+		
+		APPIMAGE
+		{
+			@Override
+			public void checkValidity(Engine engine, ExecutionPlan plan) throws LaunchException 
+			{
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public void setupRuntimeFiles(LaunchContext context, Preset preset, File tempDirectory) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+			}
+
+			@Override
+			public ProcessCallable createSetupProcess(ExecutionPlan plan) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+				return null;
+			}
+
+			@Override
+			public ProcessCallable createClientProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+				return null;
+			}
+	
+			@Override
+			public ProcessCallable createServerProcess(LaunchContext context, EngineSettings settings, String[] extraArgs) throws LaunchException
+			{
+				// TODO Auto-generated method stub
+				return null;
+			}
+		},
+		;
+	
+	}
+
+	// =======================================================================
+
 	private LauncherManager() {}
 
 	private FileFilter createFileNamePatternFilter(final Pattern pattern)
@@ -122,7 +442,7 @@ public final class LauncherManager
 		return (file) -> pattern.matcher(file.getName()).matches();
 	}
 	
-	private File checkTempDirectory() throws LaunchException
+	private static File checkTempDirectory() throws LaunchException
 	{
 		File tempDirectory = new File(DoomyEnvironment.getApplicationCachePath());
 		
@@ -135,7 +455,7 @@ public final class LauncherManager
 		return tempDirectory;
 	}
 
-	private File checkPresetDirectory(Preset preset) throws LaunchException
+	private static File checkPresetDirectory(Preset preset) throws LaunchException
 	{
 		File presetDirectory = new File(DoomyEnvironment.getPresetDirectoryPath(preset.hash));
 		
@@ -148,11 +468,8 @@ public final class LauncherManager
 		return presetDirectory;
 	}
 
-	private void checkPresetValidity(Preset preset, Engine engine, EngineSettings settings) throws LaunchException
+	private static void checkPresetValidity(Preset preset, Engine engine, EngineSettings settings) throws LaunchException
 	{
-		if (settings.exePath == null)
-			throw new LaunchException("Engine '" + engine.name + "' has no main executable specified (" + EngineConfigManager.SETTING_EXEPATH + ").");
-	
 		if (settings.fileSwitch == null)
 			throw new LaunchException("Engine '" + engine.name + "' has no file switch specified (" + EngineConfigManager.SETTING_FILESWITCH + ").");
 	
@@ -165,51 +482,9 @@ public final class LauncherManager
 		}
 	}
 
-	private void setExecutables(LaunchContext context, EngineSettings settings) throws LaunchException
-	{
-		if (settings.dosboxPath != null)
-		{
-			context.dosboxExecutable = new File(settings.dosboxPath);
-			if (!context.dosboxExecutable.exists())
-				throw new LaunchException("DOSBox executable '" + context.dosboxExecutable.getPath() + "' cannot be found.");
-		}
-	
-		context.engineExecutable = new File(settings.exePath);
-		if (!context.engineExecutable.exists())
-			throw new LaunchException("Engine executable '" + context.engineExecutable.getPath() + "' cannot be found.");
-	
-		if (settings.workingDirectoryPath != null)
-			context.workingDirectory = new File(settings.workingDirectoryPath);
-		else
-			context.workingDirectory = context.engineExecutable.getParentFile();
-	
-		if (!context.workingDirectory.exists())
-			throw new LaunchException("Working directory '" + context.workingDirectory.getPath() + "' not found.");
-	}
-
-	private void setDirectories(LaunchContext context, Preset preset, EngineSettings settings) throws LaunchException
-	{
-		// DOSBox
-		if (context.dosboxExecutable != null)
-		{
-			if (settings.saveDirectorySwitch != null)
-				context.saveDir = new File(DOSBOX_PRESET_MOUNT + "\\");
-			if (settings.screenshotDirectorySwitch != null)
-				context.screenshotDir = new File(DOSBOX_PRESET_MOUNT + "\\");
-		}
-		else
-		{
-			if (settings.saveDirectorySwitch != null)
-				context.saveDir = new File(DoomyEnvironment.getPresetDirectoryPath(preset.hash));
-			if (settings.screenshotDirectorySwitch != null)
-				context.screenshotDir = new File(DoomyEnvironment.getPresetDirectoryPath(preset.hash));
-		}
-	}
-
-	private File tempFileCopy(IOHandler handler, File sourcePath, File tempDirectory, Deque<File> cleanupList, boolean dosBox) throws LaunchException
+	private static File tempFileCopy(File sourcePath, File tempDirectory, Deque<File> cleanupList, boolean dosBox) throws LaunchException
 	{
 		File outFile = new File(tempDirectory + File.separator + sourcePath.getName());
-		handler.outln("Copying "+sourcePath.getName()+"...");
 		try (FileInputStream fis = new FileInputStream(sourcePath); FileOutputStream fos = new FileOutputStream(outFile))
 		{
 			IOUtils.relay(fis, fos, 8192);
@@ -228,7 +503,7 @@ public final class LauncherManager
 			return outFile;
 	}
 
-	private List<File> copyMatchingFiles(File sourceDirectory, File targetDirectory, boolean cleanup, FileFilter filter) throws LaunchException
+	private static List<File> copyMatchingFiles(File sourceDirectory, File targetDirectory, boolean cleanup, FileFilter filter) throws LaunchException
 	{
 		List<File> outList = new LinkedList<>();
 		for (File matchingFile : sourceDirectory.listFiles(filter))
@@ -258,39 +533,30 @@ public final class LauncherManager
 		return false;
 	}
 	
-	private void setUpWADs(IOHandler handler, LaunchContext context, Long iwadId, long[] wadIds, File tempDirectory) throws LaunchException
+	private static void setUpWADs(LaunchContext context, Long iwadId, long[] wadIds, File tempDirectory, 
+		LaunchFileFunction<File, File> iwadResolverFunction, 
+		LaunchFileFunction<File, File> wadResolverFunction,
+		LaunchFileFunction<File, File> unzippedFileDecoratorFunction
+	) throws LaunchException
 	{
 		if (iwadId != null)
 		{
 			File iwadPath = new File(IWADManager.get().getIWAD(iwadId).path);
-			// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
-			if (fileIsRemote(iwadPath) || context.dosboxExecutable != null)
-				context.iwadFile = tempFileCopy(handler, iwadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null);
-			else
-				context.iwadFile = iwadPath;
+			context.iwadFile = iwadResolverFunction.apply(iwadPath);
 		}
 		
 		for (long id : wadIds)
 		{
-			WAD wad = WADManager.get().getWAD(id);
-			File wadPath = new File(wad.path);
+			File wadPath = new File(WADManager.get().getWAD(id).path);
 			String ext = FileUtils.getFileExtension(wadPath);
 			
 			if (ext.equalsIgnoreCase("wad") || ext.equalsIgnoreCase("pk3") || ext.equalsIgnoreCase("pke") || ext.equalsIgnoreCase("pk7"))
 			{
-				// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
-				if (wadPath.isAbsolute() || context.dosboxExecutable != null)
-					context.wads.add(tempFileCopy(handler, wadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null));
-				else
-					context.wads.add(wadPath);
+				context.wads.add(wadResolverFunction.apply(wadPath));
 			}
 			else if (ext.equalsIgnoreCase("deh") || ext.equalsIgnoreCase("bex"))
 			{
-				// Check if we need to copy to temp - a remote file or a need to move to a mounted directory.
-				if (wadPath.isAbsolute() || context.dosboxExecutable != null)
-					context.dehs.add(tempFileCopy(handler, wadPath, tempDirectory, context.cleanup, context.dosboxExecutable != null));
-				else
-					context.dehs.add(wadPath);
+				context.dehs.add(wadResolverFunction.apply(wadPath));
 			}
 			else if (ext.equalsIgnoreCase("zip"))
 			{
@@ -299,24 +565,20 @@ public final class LauncherManager
 					UnzipSet uzs = new UnzipSet(wadPath, tempDirectory);
 					List<File> unzipped; 
 					
-					handler.outln("Extract WADs...");
+					context.handler.outln("Extract WADs...");
 					unzipped = uzs.unzipAll(WAD_ZIPFILTER);
 					for (File f : unzipped)
 					{
-						if (context.dosboxExecutable != null)
-							context.wads.add(new File(DOSBOX_TEMP_MOUNT + "\\" + f.getName()));
-						else
-							context.wads.add(f);
+						context.handler.outln("Extracted WAD: " + f.getName());
+						context.wads.add(unzippedFileDecoratorFunction.apply(f));
 					}
 					
-					handler.outln("Extract DEHs...");
+					context.handler.outln("Extract DEHs...");
 					unzipped = uzs.unzipAll(DEH_ZIPFILTER);
 					for (File f : unzipped)
 					{
-						if (context.dosboxExecutable != null)
-							context.dehs.add(new File(DOSBOX_TEMP_MOUNT + "\\" + f.getName()));
-						else
-							context.dehs.add(f);
+						context.handler.outln("Extracted DEH: " + f.getName());
+						context.dehs.add(unzippedFileDecoratorFunction.apply(f));
 					}
 					
 					context.zipSets.add(uzs);
@@ -329,12 +591,12 @@ public final class LauncherManager
 		}
 	}
 
-	private String quoteEscape(String input)
+	private static String quoteEscape(String input)
 	{
 		return input.contains(" ") ? '"' + input + '"' : input;
 	}
 	
-	private File createCommandLineFile(LaunchContext context, EngineSettings settings, File tempDirectory, String[] extraArgs) throws LaunchException
+	private static File createCommandLineFile(LaunchContext context, EngineSettings settings, File tempDirectory, String[] extraArgs, boolean isDosBox) throws LaunchException
 	{
 		File cmdlineFile = new File(tempDirectory + File.separator + CMDLINE_FILE);
 		try (PrintWriter cmdWriter = new PrintWriter(cmdlineFile))
@@ -346,13 +608,13 @@ public final class LauncherManager
 			throw new LaunchException("Could not create file " + cmdlineFile.getPath() + "!");
 		}
 		
-		if (context.dosboxExecutable != null)
-			return cmdlineFile = new File(DOSBOX_TEMP_MOUNT + "\\" + CMDLINE_FILE);
+		if (isDosBox)
+			return new File(DOSBOX_TEMP_MOUNT + "\\" + CMDLINE_FILE);
 		else
 			return cmdlineFile;
 	}
 
-	private String[] createCommandLineArray(LaunchContext context, EngineSettings settings, File tempDirectory, String[] extraArgs) throws LaunchException
+	private static String[] createCommandLineArray(LaunchContext context, EngineSettings settings, File tempDirectory, String[] extraArgs) throws LaunchException
 	{
 		List<String> stringList = new LinkedList<>();
 		if (settings.iwadSwitch != null && context.iwadFile != null)
@@ -390,9 +652,9 @@ public final class LauncherManager
 			stringList.add(context.screenshotDir.getPath());
 		}
 
-		if (settings.commandLine != null)
+		if (settings.plan.commandLine != null)
 		{
-			Deque<String> cmdl = DoomyCommon.parseInput(settings.commandLine);
+			Deque<String> cmdl = DoomyCommon.parseInput(settings.plan.commandLine);
 			while (!cmdl.isEmpty())
 				stringList.add(cmdl.pollFirst());
 		}
@@ -403,7 +665,7 @@ public final class LauncherManager
 		return stringList.toArray(new String[stringList.size()]);
 	}
 
-	private void writeCommandLine(LaunchContext context, EngineSettings settings, String[] extraArgs, PrintWriter cmdWriter)
+	private static void writeCommandLine(LaunchContext context, EngineSettings settings, String[] extraArgs, PrintWriter cmdWriter)
 	{
 		if (settings.iwadSwitch != null && context.iwadFile != null)
 			cmdWriter.append(settings.iwadSwitch).append(' ').append(quoteEscape(context.iwadFile.getPath())).print(' ');
@@ -425,9 +687,9 @@ public final class LauncherManager
 		if (context.screenshotDir != null)
 			cmdWriter.append(settings.screenshotDirectorySwitch).append(' ').append(quoteEscape(context.screenshotDir.getPath())).print(' ');
 
-		if (settings.commandLine != null)
+		if (settings.plan.commandLine != null)
 		{
-			Deque<String> cmdl = DoomyCommon.parseInput(settings.commandLine);
+			Deque<String> cmdl = DoomyCommon.parseInput(settings.plan.commandLine);
 			while (!cmdl.isEmpty())
 				cmdWriter.append(quoteEscape(cmdl.pollFirst())).print(' ');
 		}
@@ -438,49 +700,6 @@ public final class LauncherManager
 		cmdWriter.flush();
 	}
 
-	private ProcessCallable createDOSBoxProcess(LaunchContext context, EngineSettings settings, File presetDirectory, File tempDirectory, String[] extraArgs) throws LaunchException
-	{
-		File cmdlineFile = createCommandLineFile(context, settings, tempDirectory, extraArgs);
-		context.cleanup.add(cmdlineFile);
-
-		List<String> commandList = new LinkedList<>();
-		commandList.add("-c");
-			commandList.add("mount C: " + "'" + context.engineExecutable.getParentFile() + "'");
-		commandList.add("-c");
-			commandList.add("mount " + DOSBOX_PRESET_MOUNT + " " + "'" + presetDirectory.getPath() + "'");
-		commandList.add("-c");
-			commandList.add("mount " + DOSBOX_TEMP_MOUNT + " " + "'" + tempDirectory.getPath() + "'");
-		commandList.add("-c");
-			commandList.add("C:");
-		commandList.add("-c");
-			commandList.add(context.engineExecutable.getName() + " @" + cmdlineFile.getPath());
-		commandList.add("-c");
-			commandList.add("exit");
-		if (settings.dosboxCommandLine != null)
-		{
-			Deque<String> cmdl = DoomyCommon.parseInput(settings.dosboxCommandLine);
-			while (!cmdl.isEmpty())
-				commandList.add(cmdl.pollFirst());
-		}
-		
-		ProcessCallable callable = ProcessCallable.create(context.dosboxExecutable.getPath(), commandList.toArray(new String[commandList.size()]))
-			.setWorkingDirectory(context.dosboxExecutable.getParentFile());
-		
-		return callable;
-	}
-	
-	private ProcessCallable createStandardProcess(LaunchContext context, EngineSettings settings, File presetDirectory, File tempDirectory, String[] extraArgs) throws LaunchException
-	{
-		String[] cmdlineArray = createCommandLineArray(context, settings, tempDirectory, extraArgs);
-
-		ProcessCallable callable = ProcessCallable.create(context.engineExecutable.getPath());
-		callable
-			.args(cmdlineArray)
-			.setWorkingDirectory(context.workingDirectory);
-		
-		return callable;
-	}
-	
 	/**
 	 * Runs a preset.
 	 * @param handler the handler to use.
@@ -503,13 +722,15 @@ public final class LauncherManager
 	
 		File tempDirectory = checkTempDirectory();
 		File presetDirectory = checkPresetDirectory(preset);
+		settings.plan.planTypeId.checkValidity(engine, settings.plan);
 		checkPresetValidity(preset, engine, settings);
-
+	
 		LaunchContext context = new LaunchContext();
-		setExecutables(context, settings);
-		setDirectories(context, preset, settings);
+		context.handler = handler;
+		context.preset = preset;
+		
 		handler.outln("Prepare WADS...");
-		setUpWADs(handler, context, preset.iwadId, preset.wadIds, tempDirectory);
+		settings.plan.planTypeId.setupRuntimeFiles(context, preset, tempDirectory);
 		
 		int retval;
 		
@@ -517,7 +738,7 @@ public final class LauncherManager
 			for (UnzipSet uzs : context.zipSets)
 				IOUtils.close(uzs);
 
-			File engineDir = context.engineExecutable.getParentFile();
+			File engineDir = new File(settings.plan.workDir);
 			
 			// Pre-Launch (copy screenshots, demos)
 			if (settings.saveDirectorySwitch == null && settings.saveGameRegex != null)
@@ -549,18 +770,9 @@ public final class LauncherManager
 			handler.outln("Launching...");
 			InstancedFuture<Integer> process; 
 			ProcessCallable callable;
-			
-			if (context.dosboxExecutable != null)
-			{
-				callable = createDOSBoxProcess(context, settings, presetDirectory, tempDirectory, extraArgs);
-			}
-			else
-			{
-				callable = createStandardProcess(context, settings, presetDirectory, tempDirectory, extraArgs);
-			}
 
+			callable = settings.plan.planTypeId.createClientProcess(context, settings, extraArgs);
 			process = TaskManager.get().spawn(callable);
-			
 			retval = process.result();
 		
 			// Post-Launch (copy screenshots, demos)

@@ -12,6 +12,7 @@ import com.blackrook.sql.SQLRow;
 
 import net.mtrop.doomy.DoomySetupException;
 import net.mtrop.doomy.managers.EngineManager.Engine;
+import net.mtrop.doomy.managers.ExecutionPlanManager.ExecutionPlan;
 import net.mtrop.doomy.struct.SingletonProvider;
 import net.mtrop.doomy.struct.util.ObjectUtils;
 
@@ -22,17 +23,6 @@ import net.mtrop.doomy.struct.util.ObjectUtils;
 public final class EngineConfigManager
 {
 	/** Engine executable path. */
-	public static final String SETTING_EXEPATH = 			"exe.path";
-	/** [OPT] If present (and not empty), starts DOSBox, mounts temp, and calls the EXE via it. */
-	public static final String SETTING_DOSBOXPATH =			"dosbox.path";
-	/** [OPT] If present (and not empty), run DOSBox with these additional command line switches. */
-	public static final String SETTING_DOSBOXCOMMANDLINE =	"dosbox.cmdline";
-	/** [OPT] If present, "engine setup" will run this executable in the engine's parent directory. */
-	public static final String SETTING_SETUPFILENAME = 		"setup.exe.name";
-	/** [OPT] If present, "run --server" will run this executable in the engine's parent directory. */
-	public static final String SETTING_SERVERFILENAME =		"server.exe.name";
-	/** [OPT] If NOT present (or empty), set to either DOSBox dir or the EXE parent. */
-	public static final String SETTING_WORKDIRPATH = 		"work.dir";
 	/** The switch to use for loading PWAD data (might be "-merge" if Chocolate Doom). */
 	public static final String SETTING_FILESWITCH = 		"switch.file";
 	/** [OPT] If present (and not empty), this engine requires an IWAD and this is the switch for loading it. */
@@ -51,8 +41,6 @@ public final class EngineConfigManager
 	public static final String SETTING_SHOTPATTERN = 		"regex.screenshots";
 	/** [OPT] If present (and not empty), this regex pattern is used to find demo files in the Engine Dir to move to the preset folder on exit, or preset to Engine dir. */
 	public static final String SETTING_DEMOPATTERN = 		"regex.demos";
-	/** [OPT] If present (and not empty), this command line is appended (but before the as-is passed-in options). */
-	public static final String SETTING_COMMANDLINE = 		"cmdline";
 	
 	// ============================== QUERIES ================================
 	
@@ -90,15 +78,18 @@ public final class EngineConfigManager
 	/** Open database connection. */
 	private SQLConnection connection;
 	/** Engine manager. */
-	private EngineManager engineManager;
+	private final EngineManager engineManager;
+	/** Engine execution plan manager. */
+	private final ExecutionPlanManager engineExecutionPlanManager;
 	
 	private EngineConfigManager()
 	{
 		this.connection = DatabaseManager.get().getConnection();
 		this.engineManager = EngineManager.get();
+		this.engineExecutionPlanManager = ExecutionPlanManager.get();
 	}
 
-	private EngineSettings createSettings(EngineSettingEntry[] settings)
+	private EngineSettings createSettings(ExecutionPlan plan, EngineSettingEntry[] settings)
 	{
 		if (settings == null)
 			return null;
@@ -111,24 +102,6 @@ public final class EngineConfigManager
 				switch (entry.name)
 				{
 					default:
-						break;
-					case SETTING_EXEPATH:
-						out.exePath = entry.value;
-						break;
-					case SETTING_DOSBOXPATH:
-						out.dosboxPath = entry.value;
-						break;
-					case SETTING_DOSBOXCOMMANDLINE:
-						out.dosboxCommandLine = entry.value;
-						break;
-					case SETTING_SETUPFILENAME:
-						out.setupFileName = entry.value;
-						break;
-					case SETTING_SERVERFILENAME:
-						out.serverFileName = entry.value;
-						break;
-					case SETTING_WORKDIRPATH:
-						out.workingDirectoryPath = entry.value;
 						break;
 					case SETTING_IWADSWITCH:
 						out.iwadSwitch = entry.value;
@@ -157,9 +130,6 @@ public final class EngineConfigManager
 					case SETTING_DEMOPATTERN:
 						out.demoRegex = Pattern.compile(entry.value, Pattern.CASE_INSENSITIVE);
 						break;
-					case SETTING_COMMANDLINE:
-						out.commandLine = entry.value;
-						break;
 				}	
 			}
 		}
@@ -183,7 +153,10 @@ public final class EngineConfigManager
 	 */
 	public EngineSettings getEngineSettings(long id)
 	{
-		return createSettings(connection.getResult(EngineSettingEntry.class, QUERY_SETTING_LIST, id, "%"));
+		return createSettings(
+			engineExecutionPlanManager.getByEngineId(id),
+			connection.getResult(EngineSettingEntry.class, QUERY_SETTING_LIST, id, "%")
+		);
 	}
 	
 	/**
@@ -250,13 +223,10 @@ public final class EngineConfigManager
 	 */
 	public boolean setEngineSettings(String name, EngineSettings settings)
 	{
-		return setSetting(name, SETTING_EXEPATH, settings.exePath)
-			&& setSetting(name, SETTING_DOSBOXPATH, settings.dosboxPath)
-			&& setSetting(name, SETTING_DOSBOXCOMMANDLINE, settings.dosboxCommandLine)
-			&& setSetting(name, SETTING_SETUPFILENAME, settings.setupFileName)
-			&& setSetting(name, SETTING_SERVERFILENAME, settings.serverFileName)
-			&& setSetting(name, SETTING_WORKDIRPATH, settings.workingDirectoryPath)
-			&& setSetting(name, SETTING_IWADSWITCH, settings.iwadSwitch)
+		if (!engineExecutionPlanManager.updatePlan(settings.plan))
+			return false;
+		
+		return setSetting(name, SETTING_IWADSWITCH, settings.iwadSwitch)
 			&& setSetting(name, SETTING_FILESWITCH, settings.fileSwitch)
 			&& setSetting(name, SETTING_DEHSWITCH, settings.dehackedSwitch)
 			&& setSetting(name, SETTING_DEHLUMPSWITCH, settings.dehlumpSwitch)
@@ -265,7 +235,6 @@ public final class EngineConfigManager
 			&& setSetting(name, SETTING_SAVEPATTERN, settings.saveGameRegex != null ? settings.saveGameRegex.pattern() : "")
 			&& setSetting(name, SETTING_SHOTPATTERN, settings.screenshotRegex != null ? settings.screenshotRegex.pattern() : "")
 			&& setSetting(name, SETTING_DEMOPATTERN, settings.demoRegex != null ? settings.demoRegex.pattern() : "")
-			&& setSetting(name, SETTING_COMMANDLINE, settings.commandLine)
 		;
 	}
 	
@@ -334,18 +303,10 @@ public final class EngineConfigManager
 	{
 		/** Engine id. */
 		public long engineId;
-		/** EXE Path. */
-		public String exePath;
-		/** DOSBOX Path. */
-		public String dosboxPath;
-		/** DOSBOX command line. */
-		public String dosboxCommandLine;
-		/** SETUP EXE name. */
-		public String setupFileName;
-		/** Server EXE name. */
-		public String serverFileName;
-		/** Working directory override for engine. */
-		public String workingDirectoryPath;
+
+		/** Engine execution plan. */
+		public ExecutionPlan plan;
+		
 		/** IWAD switch. */
 		public String iwadSwitch;
 		/** File switch. */
@@ -364,8 +325,6 @@ public final class EngineConfigManager
 		public Pattern screenshotRegex;
 		/** RegEx for demo cleanup. */
 		public Pattern demoRegex;
-		/** Extra command line options (passed in before literal options). */
-		public String commandLine;
 
 		public EngineSettings()
 		{
@@ -374,23 +333,19 @@ public final class EngineConfigManager
 		
 		public EngineSettings(EngineSettings original)
 		{
-			this.commandLine = original.commandLine;
-			this.dehackedSwitch = original.dehackedSwitch;
-			this.dehlumpSwitch = original.dehlumpSwitch;
-			this.demoRegex = original.demoRegex;
-			this.dosboxCommandLine = original.dosboxCommandLine;
-			this.dosboxPath = original.dosboxPath;
 			this.engineId = original.engineId;
-			this.exePath = original.exePath;
+			
+			this.plan = original.plan;
+
 			this.fileSwitch = original.fileSwitch;
 			this.iwadSwitch = original.iwadSwitch;
 			this.saveDirectorySwitch = original.saveDirectorySwitch;
 			this.saveGameRegex = original.saveGameRegex;
 			this.screenshotDirectorySwitch = original.screenshotDirectorySwitch;
 			this.screenshotRegex = original.screenshotRegex;
-			this.serverFileName = original.serverFileName;
-			this.setupFileName = original.setupFileName;
-			this.workingDirectoryPath = original.workingDirectoryPath;
+			this.dehackedSwitch = original.dehackedSwitch;
+			this.dehlumpSwitch = original.dehlumpSwitch;
+			this.demoRegex = original.demoRegex;
 		}
 		
 	}

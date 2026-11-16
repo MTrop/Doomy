@@ -8,7 +8,6 @@ package net.mtrop.doomy.gui.swing;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -24,6 +23,7 @@ import net.mtrop.doomy.managers.EngineManager;
 import net.mtrop.doomy.managers.EngineManager.Engine;
 import net.mtrop.doomy.managers.GUIManager;
 import net.mtrop.doomy.managers.LanguageManager;
+import net.mtrop.doomy.managers.LauncherManager.LaunchException;
 import net.mtrop.doomy.managers.MessengerManager;
 import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.swing.ComponentFactory.ProgressBarOrientation;
@@ -113,57 +113,159 @@ public class EngineTableControlPanel extends JPanel
 			return;
 		}
 	
-		if (ObjectUtils.isEmpty(settings.exePath))
-		{
-			SwingUtils.error(this, language.getText("engine.add.error.path.blank"));
-			return;
-		}
-	
-		File path = new File(settings.exePath);
-		
-		if (!path.exists())
-		{
-			SwingUtils.error(this, language.getText("engine.add.error.path.noexist"));
-			return;
-		}
-		
-		if (path.isDirectory())
-		{
-			SwingUtils.error(this, language.getText("engine.add.error.path.dir"));
-			return;
-		}
-		
-		if (ObjectUtils.isEmpty(settings.workingDirectoryPath))
-		{
-			SwingUtils.error(this, language.getText("engine.add.error.workdir.blank"));
-			return;
-		}
-	
-		File workingDir = new File(settings.workingDirectoryPath);
-		
-		if (!workingDir.exists())
-		{
-			SwingUtils.error(this, language.getText("engine.add.error.workdir.noexist"));
-			return;
-		}
-		
-		if (!workingDir.isDirectory())
-		{
-			SwingUtils.error(this, language.getText("engine.add.error.workdir.notdir"));
-			return;
-		}
-		
 		if (ObjectUtils.isEmpty(settings.fileSwitch))
 		{
 			SwingUtils.error(this, language.getText("engine.add.error.switch.file"));
 			return;
 		}
 	
+		if (!checkPlanPaths(settings))
+			return;
+		
 		engineManager.addEngine(name);
 		if (!engineConfigManager.setEngineSettings(name, settings))
 		{
 			SwingUtils.error(this, language.getText("engine.add.error.settings.save"));
 			engineManager.removeEngine(name);
+		}
+	}
+
+	private boolean checkPlanPaths(EngineSettings settings)
+	{
+		switch (settings.plan.planTypeId)
+		{
+			default:
+			case NORMAL:
+			{
+				if (ObjectUtils.isEmpty(settings.plan.clientName))
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.path.blank"));
+					return false;
+				}
+			
+				File path = new File(settings.plan.clientName);
+				
+				if (!path.exists())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.path.noexist"));
+					return false;
+				}
+				
+				if (path.isDirectory())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.path.dir"));
+					return false;
+				}
+				
+				if (ObjectUtils.isEmpty(settings.plan.workDir))
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.workdir.blank"));
+					return false;
+				}
+			
+				File workingDir = new File(settings.plan.workDir);
+				
+				if (!workingDir.exists())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.workdir.noexist"));
+					return false;
+				}
+				
+				if (!workingDir.isDirectory())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.workdir.notdir"));
+					return false;
+				}
+				
+				return true;
+			}
+			
+			case DOSBOX:
+			{
+				if (ObjectUtils.isEmpty(settings.plan.packageName))
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.dosbox.blank"));
+					return false;
+				}
+
+				File dosboxpath = new File(settings.plan.packageName);
+			
+				if (!dosboxpath.exists())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.dosbox.noexist"));
+					return false;
+				}
+				
+				if (dosboxpath.isDirectory())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.dosbox.dir"));
+					return false;
+				}
+				
+				if (ObjectUtils.isEmpty(settings.plan.clientName))
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.path.blank"));
+					return false;
+				}
+			
+				File path = new File(settings.plan.clientName);
+				
+				if (!path.exists())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.path.noexist"));
+					return false;
+				}
+				
+				if (path.isDirectory())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.path.dir"));
+					return false;
+				}
+				
+				if (ObjectUtils.isEmpty(settings.plan.workDir))
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.workdir.blank"));
+					return false;
+				}
+			
+				File workingDir = new File(settings.plan.workDir);
+				
+				if (!workingDir.exists())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.workdir.noexist"));
+					return false;
+				}
+				
+				if (!workingDir.isDirectory())
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.workdir.notdir"));
+					return false;
+				}
+				
+				return true;
+			}
+
+			case APPIMAGE:
+			{
+				if (ObjectUtils.isEmpty(settings.plan.packageName))
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.image.blank"));
+					return false;
+				}
+				
+				return true;
+			}
+
+			case FLATPAK:
+			{
+				if (ObjectUtils.isEmpty(settings.plan.packageName))
+				{
+					SwingUtils.error(this, language.getText("engine.add.error.image.blank"));
+					return false;
+				}
+				
+				return true;
+			}
 		}
 	}
 
@@ -339,7 +441,7 @@ public class EngineTableControlPanel extends JPanel
 		
 		Engine source = selectedEngines.get(0);
 		EngineSettings settings = engineConfigManager.getEngineSettings(source.name);
-		DoomyCommon.openInSystemBrowser(new File(settings.exePath));
+		DoomyCommon.openInSystemBrowser(new File(settings.plan.clientName));
 	}
 	
 	// Called when opening an engine's folder.
@@ -352,58 +454,13 @@ public class EngineTableControlPanel extends JPanel
 		Engine source = selectedEngines.get(0);
 		EngineSettings settings = engineConfigManager.getEngineSettings(source.name);
 		
-		if (ObjectUtils.isEmpty(settings.setupFileName))
-		{
-			SwingUtils.error(this, language.getText("engine.setup.nosetup"));
-			return;
-		}
-		
-		if (ObjectUtils.isEmpty(settings.workingDirectoryPath))
-		{
-			SwingUtils.error(this, language.getText("engine.setup.noworkdir"));
-			return;
-		}
-		
-		if (!new File(settings.workingDirectoryPath).exists())
-		{
-			SwingUtils.error(this, language.getText("engine.setup.workdir.noexist"));
-			return;
-		}
-		
-		
-		ProcessCallable proc;
-		File path;
-		
-		if (settings.dosboxPath != null)
-		{
-			path = new File(settings.dosboxPath);
-			
-			List<String> commandList = new LinkedList<>();
-			commandList.add("-c");
-				commandList.add("mount C: " + "'" + settings.workingDirectoryPath + "'");
-			commandList.add("-c");
-				commandList.add("C:");
-			commandList.add("-c");
-				commandList.add(settings.setupFileName);
-			commandList.add("-c");
-				commandList.add("exit");
-			if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
-				commandList.add(s);
-			
-			proc = ProcessCallable.create(path.getPath())
-				.setWorkingDirectory(path.getParentFile())
-				.args(commandList.toArray(new String[commandList.size()]));
-		}
-		else
-		{
-			path = new File(settings.workingDirectoryPath + File.separator + settings.setupFileName);
-			proc = ProcessCallable.create(path).setWorkingDirectory(new File(settings.workingDirectoryPath));
-		}
-		
 		try {
+			ProcessCallable proc = settings.plan.planTypeId.createSetupProcess(settings.plan);
 			proc.exec();
+		} catch (LaunchException e) {
+			SwingUtils.error(this, e.getLocalizedMessage());
 		} catch (IOException e) {
-			SwingUtils.error(this, language.getText("engine.setup.ioerror", path.getAbsolutePath()));
+			SwingUtils.error(this, language.getText("engine.setup.ioerror", settings.plan.setupName));
 		}
 	}
 	

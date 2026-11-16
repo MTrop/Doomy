@@ -16,12 +16,13 @@ public class ExecutionPlanManager
 	private static final String QUERY_GET_BY_ENGINE_ID
 		= "SELECT * FROM ExecutionPlans WHERE engineId = ?"; 
 	private static final String QUERY_NEW
-		= "INSERT INTO ExecutionPlans (engineId, planTypeId, clientName) VALUES (?,0,'')"; 
+		= "INSERT INTO ExecutionPlans (engineId, planTypeId) VALUES (?,0)"; 
 	private static final String QUERY_UPDATE
 		= "UPDATE ExecutionPlans SET " +
 			"planTypeId = ?, " + 
 			"workDir = ?, " +
 			"packageName = ?, "+
+			"packageCommandLine = ?, "+
 			"clientName = ?, " + 
 			"setupName = ?, " +
 			"serverName = ?, " +
@@ -58,7 +59,7 @@ public class ExecutionPlanManager
 	 * @param engineId the engine id.
 	 * @return the corresponding execution plan, or null if no corresponding plan.
 	 */
-	public ExecutionPlan getByEngineId(int engineId)
+	public ExecutionPlan getByEngineId(long engineId)
 	{
 		return connection.getRow(ExecutionPlan.class, QUERY_GET_BY_ENGINE_ID, engineId);
 	}
@@ -68,7 +69,7 @@ public class ExecutionPlanManager
 	 * @param engineId the engine id.
 	 * @return the new plan with fields initialized, or null if it couldn't be created.
 	 */
-	public ExecutionPlan createNew(int engineId)
+	public ExecutionPlan createNew(long engineId)
 	{
 		if (connection.getUpdateResult(QUERY_NEW, engineId).getRowCount() > 0)
 			return getByEngineId(engineId);
@@ -87,6 +88,7 @@ public class ExecutionPlanManager
 			plan.planTypeId.ordinal(),
 			plan.workDir,
 			plan.packageName,
+			plan.packageCommandLine,
 			plan.clientName,
 			plan.setupName,
 			plan.serverName,
@@ -101,22 +103,14 @@ public class ExecutionPlanManager
 	public static class ExecutionPlan
 	{
 		public int engineId;
-		public PlanType planTypeId;
+		public LauncherManager.PlanType planTypeId;
 		public String workDir;
 		public String packageName;
+		public String packageCommandLine;
 		public String clientName;
 		public String setupName;
 		public String serverName;
 		public String commandLine;
-	}
-	
-	public enum PlanType
-	{
-		NORMAL,
-		DOSBOX,
-		FLATPAK,
-		APPIMAGE,
-		;
 	}
 	
 }

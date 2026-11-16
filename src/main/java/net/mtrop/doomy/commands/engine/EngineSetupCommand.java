@@ -5,10 +5,7 @@
  ******************************************************************************/
 package net.mtrop.doomy.commands.engine;
 
-import java.io.File;
 import java.util.Deque;
-import java.util.LinkedList;
-import java.util.List;
 
 import net.mtrop.doomy.DoomyCommand;
 import net.mtrop.doomy.IOHandler;
@@ -17,6 +14,7 @@ import net.mtrop.doomy.managers.TaskManager;
 import net.mtrop.doomy.struct.ProcessCallable;
 import net.mtrop.doomy.struct.InstancedFuture;
 import net.mtrop.doomy.managers.EngineConfigManager.EngineSettings;
+import net.mtrop.doomy.managers.LauncherManager.LaunchException;
 
 /**
  * A command that calls the engine setup EXE.
@@ -56,72 +54,14 @@ public class EngineSetupCommand implements DoomyCommand
 			return ERROR_NOT_FOUND;
 		}
 
-		if (settings.setupFileName == null)
-		{
-			handler.errln("ERROR: Engine '" + name + "' has no setup executable specified (" + EngineConfigManager.SETTING_SETUPFILENAME + ").");
-			return ERROR_NOT_FOUND;
-		}
-
-		if (settings.exePath == null)
-		{
-			handler.errln("ERROR: Engine '" + name + "' has no main executable specified (" + EngineConfigManager.SETTING_EXEPATH + "). This is used to find the setup exe.");
-			return ERROR_NOT_FOUND;
-		}
-
-		String engineDir = (new File(settings.exePath)).getParent();
-		
-		File exe = new File(engineDir + File.separator + settings.setupFileName);
-
-		if (!exe.exists())
-		{
-			handler.errln("ERROR: Setup EXE '" + exe.getPath() + "' not found.");
-			return ERROR_NOT_FOUND;
-		}
-
-		String workingDir = engineDir; 
-		if (settings.workingDirectoryPath != null)
-			workingDir = settings.workingDirectoryPath;
-
-		File workingDirFile = new File(workingDir);
-		
-		if (!workingDirFile.exists())
-		{
-			handler.errln("ERROR: Working directory '" + workingDirFile.getPath() + "' not found.");
-			return ERROR_NOT_FOUND;
-		}
-
 		ProcessCallable callable;
 		InstancedFuture<Integer> process;
 
-		if (settings.dosboxPath != null)
-		{
-			File dosboxFilePath = new File(settings.dosboxPath);
-			if (!dosboxFilePath.exists())
-			{
-				handler.errln("ERROR: DOSBox executable '" + dosboxFilePath.getPath() + "' not found.");
-				return ERROR_NOT_FOUND;
-			}
-			
-			List<String> commandList = new LinkedList<>();
-			commandList.add("-c");
-				commandList.add("mount C: " + "'" + workingDirFile.getAbsolutePath() + "'");
-			commandList.add("-c");
-				commandList.add("C:");
-			commandList.add("-c");
-				commandList.add(settings.setupFileName);
-			commandList.add("-c");
-				commandList.add("exit");
-			if (settings.dosboxCommandLine != null) for (String s : settings.dosboxCommandLine.split("\\s+"))
-				commandList.add(s);
-			
-			callable = ProcessCallable.create(dosboxFilePath.getPath())
-				.setWorkingDirectory(dosboxFilePath.getParentFile())
-				.args(commandList.toArray(new String[commandList.size()]));
-		}
-		else
-		{
-			callable = ProcessCallable.create(exe.getPath())
-				.setWorkingDirectory(workingDirFile);
+		try {
+			callable = settings.plan.planTypeId.createSetupProcess(settings.plan);
+		} catch (LaunchException e) {
+			handler.errln("ERROR: " + e.getLocalizedMessage());
+			return ERROR_LAUNCH_ERROR;
 		}
 		
 		process = TaskManager.get().spawn(callable);

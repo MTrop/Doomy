@@ -79,9 +79,12 @@ public final class EngineManager
 	/** Open database connection. */
 	private SQLConnection connection;
 	
+	private final ExecutionPlanManager engineExecutionPlanManager;
+	
 	private EngineManager()
 	{
 		this.connection = DatabaseManager.get().getConnection();
+		this.engineExecutionPlanManager = ExecutionPlanManager.get();
 	}
 
 	/**
@@ -140,9 +143,14 @@ public final class EngineManager
 	 */
 	public Long addEngine(String name)
 	{
+		
 		SQLResult result = connection.getUpdateResult(QUERY_ADD, name, null);
 		if (result.getRowCount() > 0)
-			return (Long)result.getId();
+		{
+			Long id = (Long)result.getId();
+			engineExecutionPlanManager.createNew(id);
+			return id;
+		}
 		else
 			return null;
 	}
